@@ -30,6 +30,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: ceph-config
+  namespace: ceph
 data:
   ceph.conf: |
     [global]
