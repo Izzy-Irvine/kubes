@@ -1,0 +1,47 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: ingress-nginx
+  namespace: ingress
+spec:
+  chart:
+    spec:
+      chart: ingress-nginx
+      sourceRef:
+        kind: HelmRepository
+        name: ingress-nginx
+  values:
+    controller:
+      service:
+        type: NodePort
+      nodePorts:
+        http: 32080
+        https: 32443
+      config:
+        enable-modsecurity: "true"
+        enable-owasp-modsecurity-crs: "true"
+        modsecurity-snippet: |
+          # By default is DetectionOnly. Can be any of: DetectionOnly,On,Off
+          SecRuleEngine On
+
+          # Avoid sending status information about ModSecurity in response header
+          SecStatusEngine Off
+
+          # Send ModSecurity audit logs to the stdout (only for rejected requests)
+          SecAuditLog /dev/stdout
+          SecAuditLogFormat JSON
+          SecAuditEngine RelevantOnly # could be On/Off/RelevantOnly
+
+          # Max request sizes in bytes (with/without files) - Note NGINX Ingress has its own parameter/annotation that should be kept in sync
+          SecRequestBodyLimit 20971520 # 20Mb (default is 12.5Mb)
+          SecRequestBodyNoFilesLimit 262144 # 250Kb (default is 128Kb)
+          SecRequestBodyLimitAction Reject # Reject if larger (we could also let it pass with ProcessPartial)
+
+          # recommended limits for regular expression recursion. See https://github.com/SpiderLabs/owasp-modsecurity-crs/issues/656#issuecomment-262780221
+          SecPcreMatchLimit 500000
+          SecPcreMatchLimitRecursion 500000 
+             
+          # Include PUT/PATCH/DELETE in the allowed methods, otherwise those verbs will be rejected by rule 911100
+          SecAction "id:900200,phase:1,nolog,pass,t:none,\
+            setvar:tx.allowed_methods=GET HEAD POST OPTIONS PUT PATCH DELETE"
+  interval: 5m0s
