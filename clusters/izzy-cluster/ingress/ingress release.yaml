@@ -14,9 +14,9 @@ spec:
     controller:
       service:
         type: NodePort
-      nodePorts:
-        http: 32080
-        https: 32443
+        nodePorts:
+          http: 32080
+          https: 32443
       config:
         enable-modsecurity: "true"
         enable-owasp-modsecurity-crs: "true"
