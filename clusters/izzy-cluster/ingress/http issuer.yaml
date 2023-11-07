@@ -1,3 +1,5 @@
+# This depends on ingress release. If deploying from scratch, remove this, deploy, add it back, deploy. 
+# I feel like Flux has a way to fix this but I don't know it
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:

@@ -1,5 +1,3 @@
-# This depends on ingress release. If deploying from scratch, remove this, deploy, add it back, deploy. 
-# I feel like Flux has a way to fix this but I don't know it
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -12,6 +10,8 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: jetstack
+  values:
+    installCRDs: true
   interval: 5m0s
   install:
     crds: CreateReplace
