@@ -15,11 +15,6 @@ spec:
       labels:
         app: saggy-mc
     spec:
-      securityContext:
-        runAsUser: 1000
-        runAsGroup: 3000
-        fsGroup: 2000
-        runAsNonRoot: true
       containers:
         - name: mc
           securityContext:
@@ -28,6 +23,10 @@ spec:
               drop: ["ALL"]
             seccompProfile:
               type: RuntimeDefault
+            runAsUser: 1000
+            runAsGroup: 3000
+            fsGroup: 2000
+            runAsNonRoot: true
           image: itzg/minecraft-server
           volumeMounts:
             - name: data
