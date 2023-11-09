@@ -32,7 +32,7 @@ spec:
             allowPrivilegeEscalation: false
           image: itzg/minecraft-server
           ports:
-            - containerPort: 80
+            - containerPort: 25565
           volumeMounts:
             # - name: data
             #   mountPath: /data
