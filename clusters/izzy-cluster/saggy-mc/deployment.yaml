@@ -44,9 +44,9 @@ spec:
             - name: RCON_HOST
               value: "localhost"
             - name: GID
-              value: 0
+              value: "0"
             - name: UID
-              value: 0
+              value: "0"
           resources:
             requests:
               cpu: 150m
