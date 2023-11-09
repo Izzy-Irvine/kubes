@@ -34,6 +34,8 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+            - name: tmp
+              mountPath: /tmp
           env:
             - name: EULA
               value: "TRUE"
@@ -71,3 +73,5 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: saggy-mc
+        - name: tmp
+          emptyDir: {}
