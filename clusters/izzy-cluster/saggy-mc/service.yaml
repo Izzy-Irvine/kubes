@@ -7,8 +7,7 @@ metadata:
     "mc-router.itzg.me/externalServerName": "saggy.izzy.kiwi,saggymc.isaacirvine.me"
 spec:
   selector:
-    matchLabels:
-      app: saggy-mc
+    app: saggy-mc
   ports:
     - protocol: TCP
       port: 25565
