@@ -3,9 +3,9 @@ kind: Service
 metadata:
   name: saggy-mc
   namespace: saggy-mc
-spec:
   annotations:
     "mc-router.itzg.me/externalServerName": "saggy.izzy.kiwi,saggymc.isaacirvine.me"
+spec:
   selector:
     matchLabels:
       app: saggy-mc
