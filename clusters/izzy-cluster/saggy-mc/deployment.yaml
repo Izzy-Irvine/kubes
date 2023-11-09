@@ -75,6 +75,6 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: saggy-mc
+            claimName: saggy-mc-2
         - name: tmp
           emptyDir: {}
