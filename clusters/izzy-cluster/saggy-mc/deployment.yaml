@@ -28,7 +28,7 @@ spec:
             capabilities:
               drop:
                 - ALL
-            readOnlyRootFilesystem: true
+            #readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
           image: itzg/minecraft-server
           volumeMounts:
@@ -36,6 +36,10 @@ spec:
               mountPath: /data
             - name: tmp
               mountPath: /tmp
+            - name: GID
+              value: 0
+            - name: UID
+              value: 0
           env:
             - name: EULA
               value: "TRUE"
