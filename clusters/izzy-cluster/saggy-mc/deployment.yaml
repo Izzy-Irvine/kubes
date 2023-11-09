@@ -31,6 +31,8 @@ spec:
             # readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
           image: itzg/minecraft-server
+          ports:
+            - containerPort: 80
           volumeMounts:
             # - name: data
             #   mountPath: /data
