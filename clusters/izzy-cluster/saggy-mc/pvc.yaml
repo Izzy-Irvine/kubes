@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: saggy-mc-2
+  name: saggy-mc
   namespace: saggy-mc
 spec:
   accessModes:
