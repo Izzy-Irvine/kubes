@@ -46,16 +46,27 @@ spec:
               cpu: 150m
               memory: 2500M
           livenessProbe:
-            exec:
-              command: ["mc-health"]
-            initialDelaySeconds: 120
-            periodSeconds: 60
+            command:
+              - mc-health
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            failureThreshold: 20
+            successThreshold: 1
+            timeoutSeconds: 1
           readinessProbe:
-            exec:
-              command: ["mc-health"]
-            initialDelaySeconds: 20
+            command:
+              - mc-health
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            failureThreshold: 20
+            successThreshold: 1
+            timeoutSeconds: 1
+          startupProbe:
+            command:
+              - mc-health
+            enabled: false
+            failureThreshold: 30
             periodSeconds: 10
-            failureThreshold: 12
       volumes:
         - name: data
           persistentVolumeClaim:
