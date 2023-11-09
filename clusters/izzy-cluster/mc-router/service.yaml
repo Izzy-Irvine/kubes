@@ -9,6 +9,6 @@ spec:
   - targetPort: proxy
     name: proxy
     port: 25565
-    nodePort: 35565
+    nodePort: 32565
   selector:
     run: mc-router
