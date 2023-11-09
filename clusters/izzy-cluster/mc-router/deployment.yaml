@@ -21,6 +21,12 @@ spec:
       - image: itzg/mc-router:latest
         name: mc-router
         args: ["--in-kube-cluster"]
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+          seccompProfile:
+            type: RuntimeDefault
         ports:
         - name: proxy
           containerPort: 25565
