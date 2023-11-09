@@ -16,10 +16,10 @@ spec:
         app: saggy-mc
     spec:
       securityContext:
-        # runAsUser: 1000
-        # runAsGroup: 3000
-        # runAsNonRoot: true
-        # fsGroup: 2000
+        runAsUser: 1000
+        runAsGroup: 3000
+        runAsNonRoot: true
+        fsGroup: 2000
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -28,12 +28,12 @@ spec:
             capabilities:
               drop:
                 - ALL
-            #readOnlyRootFilesystem: true
+            # readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
           image: itzg/minecraft-server
           volumeMounts:
-            - name: data
-              mountPath: /data
+            # - name: data
+            #   mountPath: /data
             - name: tmp
               mountPath: /tmp
           env:
@@ -43,10 +43,6 @@ spec:
               value: 2G
             - name: RCON_HOST
               value: "localhost"
-            - name: GID
-              value: "0"
-            - name: UID
-              value: "0"
           resources:
             requests:
               cpu: 150m
