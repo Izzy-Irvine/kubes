@@ -16,20 +16,20 @@ spec:
         app: saggy-mc
     spec:
       securityContext:
-        capabilities:
-          drop:
-            - ALL
-        readOnlyRootFilesystem: true
-        allowPrivilegeEscalation: false
+        runAsUser: 1000
+        runAsGroup: 3000
+        runAsNonRoot: true
+        fsGroup: 2000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: mc
           securityContext:
-            runAsUser: 1000
-            runAsGroup: 3000
-            runAsNonRoot: true
-            fsGroup: 2000
-            seccompProfile:
-              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
           image: itzg/minecraft-server
           volumeMounts:
             - name: data
