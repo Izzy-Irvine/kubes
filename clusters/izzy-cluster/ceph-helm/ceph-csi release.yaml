@@ -1,0 +1,34 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: ceph-csi
+  namespace: ceph
+spec:
+  chart:
+    spec:
+      chart: ceph-csi
+      sourceRef:
+        kind: HelmRepository
+        name: csi-charts
+  values:
+    storageClass:
+      create: true
+      annotations:
+        storageclass.kubernetes.io/is-default-class: "true"
+      clusterID: 692e3e52-c381-4054-99dd-e4c91d8ffd81
+      pool: kubernetes
+      provisionerSecret: csi-rbd-secret
+      controllerExpandSecret: csi-rbd-secret
+      nodeStageSecret: csi-rbd-secret
+    csiConfig:
+      - clusterID: 692e3e52-c381-4054-99dd-e4c91d8ffd81
+        monitors:
+          - "192.168.100.200:6789"
+          - "192.168.100.201:6789"
+    provisioner:
+      replicaCount: 1
+  interval: 5m0s
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
