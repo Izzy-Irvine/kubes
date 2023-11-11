@@ -6,7 +6,7 @@ metadata:
 spec:
   chart:
     spec:
-      chart: ceph-csi/ceph-csi-rbd
+      chart: ceph-csi-rbd
       sourceRef:
         kind: HelmRepository
         name: csi-charts
