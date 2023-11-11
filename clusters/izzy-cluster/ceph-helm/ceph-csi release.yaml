@@ -27,6 +27,7 @@ spec:
           - "192.168.100.201:6789"
     provisioner:
       replicaCount: 1
+    selinuxMount: false
   interval: 5m0s
   install:
     crds: CreateReplace
