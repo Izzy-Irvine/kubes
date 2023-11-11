@@ -30,7 +30,8 @@ spec:
                 - ALL
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
-          image: itzg/minecraft-server
+          image: ubuntu #itzg/minecraft-server
+          command: ["sleep", "100000"]
           ports:
             - containerPort: 25565
           volumeMounts:
