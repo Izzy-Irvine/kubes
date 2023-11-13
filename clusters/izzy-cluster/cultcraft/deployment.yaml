@@ -42,7 +42,7 @@ spec:
             - name: EULA
               value: "TRUE"
             - name: MEMORY
-              value: 5G
+              value: 8G
             - name: RCON_HOST
               value: "localhost"
             - name: TYPE
@@ -63,7 +63,7 @@ spec:
             - name: SPAWN_PROTECTION
               value: "0"
             - name: VIEW_DISTANCE
-              value: "8"
+              value: "10"
             - name: MODE
               value: survival
             - name: SYNC_CHUNK_WRITES
@@ -78,10 +78,10 @@ spec:
           resources:
             requests:
               cpu: 2000m
-              memory: 6000M
+              memory: 9000M
             limits:
               cpu: 12000m
-              memory: 8000M
+              memory: 11000M
           livenessProbe:
             exec:
               command:
