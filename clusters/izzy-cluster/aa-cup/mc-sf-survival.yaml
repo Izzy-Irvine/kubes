@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: minecrafty
+  namespace: aa-cup
+  labels:
+    app: minecrafty
+spec:
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: mc-sf-survival-pvc 
+  containers:
+    - name: minecrafty
+      image: itzg/minecraft-server
+      env:
+        - name: EULA
+          value: "true"
+        - name: TYPE
+          value: PAPER
+        - name: VIEW_DISTANCE
+          value: "24"
+        - name: LEVEL_TYPE
+          value: FLAT
+        - name: MOTD
+          value: "AA Cup"
+      ports:
+        - containerPort: 25565
+      volumeMounts:
+        - name: data
+          mountPath: /data
