@@ -1,0 +1,9 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: beans
+  namespace: beans
+spec:
+  type: oci
+  interval: 1m0s
+  url: oci://ghcr.io/beansplusplus/charts
