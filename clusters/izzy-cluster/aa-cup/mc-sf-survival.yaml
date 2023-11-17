@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: minecrafty
-  namespace: beans
+  namespace: aa-cup
 spec:
   replicas: 1
   strategy:
@@ -12,8 +12,6 @@ spec:
       app: minecrafty
   template:
     metadata:
-      name: minecrafty
-      namespace: aa-cup
       labels:
         app: minecrafty
     spec:
