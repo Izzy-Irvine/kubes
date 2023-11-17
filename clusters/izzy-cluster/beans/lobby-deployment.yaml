@@ -30,7 +30,8 @@ spec:
                 - ALL
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
-          image: itzg/minecraft-server
+          image: ubuntu #itzg/minecraft-server
+          command: ["sleep", "100000"]
           ports:
             - containerPort: 25565
           volumeMounts:
@@ -64,31 +65,31 @@ spec:
             limits:
               cpu: 1500m
               memory: 3000M
-          livenessProbe:
-            exec:
-              command:
-                - mc-health
-            initialDelaySeconds: 30
-            periodSeconds: 5
-            failureThreshold: 20
-            successThreshold: 1
-            timeoutSeconds: 1
-          readinessProbe:
-            exec:
-              command:
-                - mc-health
-            initialDelaySeconds: 30
-            periodSeconds: 5
-            failureThreshold: 20
-            successThreshold: 1
-            timeoutSeconds: 1
-          startupProbe:
-            exec:
-              command:
-                - mc-health
-            enabled: false
-            failureThreshold: 30
-            periodSeconds: 10
+          # livenessProbe:
+          #   exec:
+          #     command:
+          #       - mc-health
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 5
+          #   failureThreshold: 20
+          #   successThreshold: 1
+          #   timeoutSeconds: 1
+          # readinessProbe:
+          #   exec:
+          #     command:
+          #       - mc-health
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 5
+          #   failureThreshold: 20
+          #   successThreshold: 1
+          #   timeoutSeconds: 1
+          # startupProbe:
+          #   exec:
+          #     command:
+          #       - mc-health
+          #   enabled: false
+          #   failureThreshold: 30
+          #   periodSeconds: 10
       volumes:
         - name: data
           persistentVolumeClaim:
