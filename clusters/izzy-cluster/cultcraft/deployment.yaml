@@ -46,14 +46,14 @@ spec:
             - name: RCON_HOST
               value: "localhost"
             - name: TYPE
-              value: "CURSEFORGE" #"AUTO_CURSEFORGE"
+              value: "AUTO_CURSEFORGE"
             # - name: CF_API_KEY
             #   valueFrom:
             #     secretKeyRef:
             #       name: cultcraft
             #       key: curseforgeKey
-            # - name: CF_PAGE_URL
-            #   value: https://www.curseforge.com/minecraft/modpacks/all-the-mods-9
+            - name: CF_PAGE_URL
+              value: https://www.curseforge.com/minecraft/modpacks/all-the-mods-9
             - name: MOTD
               value: "\u00A7bCu\u00A7dlt\u00A7fCr\u00A7daf\u00A7bt!"
             - name: DIFFICULTY
