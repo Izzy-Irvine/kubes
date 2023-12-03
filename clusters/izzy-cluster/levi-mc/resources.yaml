@@ -30,6 +30,6 @@ spec:
       memory: 1500M
     resources:
       requests: 2Gi
-  serviceLabels:
-    "mc-router.itzg.me/externalServerName": "garlic.isaacirvine.me"
+    serviceLabels:
+      "mc-router.itzg.me/externalServerName": "garlic.isaacirvine.me"
   interval: 5m0s
