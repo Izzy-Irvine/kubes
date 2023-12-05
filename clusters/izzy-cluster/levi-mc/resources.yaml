@@ -28,7 +28,7 @@ spec:
     resources:
       requests: 
         memory: 2Gi
-    serviceLabels:
+    serviceAnnotations:
       "mc-router.itzg.me/externalServerName": "garlic.isaacirvine.me"
     persistence:
       dataDir:

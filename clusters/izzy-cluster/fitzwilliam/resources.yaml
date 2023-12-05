@@ -32,7 +32,7 @@ spec:
     resources:
       requests: 
         memory: 2Gi
-    serviceLabels:
+    serviceAnnotations:
       "mc-router.itzg.me/externalServerName": "fitzwilliam.izzy.kiwi"
     persistence:
       dataDir:
