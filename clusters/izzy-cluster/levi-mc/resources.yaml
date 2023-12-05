@@ -25,7 +25,7 @@ spec:
       eula: "TRUE"
       type: FABRIC
       difficulty: hard
-      spawnProtection: "0"
+      spawnProtection: 0
       motd: Garlic server
       memory: 1500M
     resources:
