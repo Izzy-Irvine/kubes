@@ -30,4 +30,8 @@ spec:
         memory: 2Gi
     serviceLabels:
       "mc-router.itzg.me/externalServerName": "garlic.isaacirvine.me"
+    persistence:
+      dataDir:
+        enabled: true
+        Size: 20Gi
   interval: 5m0s
