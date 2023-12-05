@@ -28,6 +28,8 @@ spec:
     provisioner:
       replicaCount: 1
     selinuxMount: false
+    topology:
+      enabled: true
   interval: 5m0s
   install:
     crds: CreateReplace
