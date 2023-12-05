@@ -18,9 +18,6 @@ spec:
         name: mc
         namespace: default
   values:
-    image:
-      repository: rancher/pause
-      tag: "3.6"
     minecraftServer:
       eula: "TRUE"
       type: FABRIC
