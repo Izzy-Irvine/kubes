@@ -30,6 +30,8 @@ spec:
     selinuxMount: false
     topology:
       enabled: true
+    readAffinity:
+      enabled: true
   interval: 5m0s
   install:
     crds: CreateReplace
