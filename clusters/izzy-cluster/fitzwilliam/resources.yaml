@@ -29,7 +29,7 @@ spec:
       spawnMonsters: false
       gameMode: creative
       levelType: FLAT
-      generatorSettings: minecraft:bedrock,59*minecraft:stone,3*minecraft:dirt,minecraft:grass_block;minecraft:plains
+      generatorSettings: minecraft\:bedrock,59*minecraft\:stone,3*minecraft\:dirt,minecraft\:grass_block;minecraft\:plains
       generateStructures: false
     resources:
       requests: 
