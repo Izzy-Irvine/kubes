@@ -29,7 +29,8 @@ spec:
       motd: Garlic server
       memory: 1500M
     resources:
-      requests: 2Gi
+      requests: 
+        memory: 2Gi
     serviceLabels:
       "mc-router.itzg.me/externalServerName": "garlic.isaacirvine.me"
   interval: 5m0s
