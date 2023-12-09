@@ -20,7 +20,7 @@ spec:
   values:
     ingress:
       enabled: true
-      hostname: izzy.kiwitls
+      hostname: izzy.kiwi
       tls: true
       annotations:
         cert-manager.io/cluster-issuer: http-issuer
