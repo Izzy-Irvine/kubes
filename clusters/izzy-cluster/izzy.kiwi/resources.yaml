@@ -21,6 +21,7 @@ spec:
     ingress:
       enabled: true
       hostname: izzy.kiwi
+      ingressClassName: nginx
       tls: true
       annotations:
         cert-manager.io/cluster-issuer: http-issuer
