@@ -1,0 +1,8 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: red-ping-api
+  namespace: red-ping
+spec:
+  image: ghcr.io/red-ping/red-ping-api-2
+  interval: 3m
