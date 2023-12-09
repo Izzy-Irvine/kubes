@@ -12,6 +12,8 @@ spec:
         name: ingress-nginx
   values:
     controller:
+      ingressClassResource:
+        default: true
       service:
         type: NodePort
         nodePorts:
