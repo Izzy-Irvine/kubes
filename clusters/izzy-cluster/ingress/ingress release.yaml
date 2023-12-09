@@ -20,6 +20,8 @@ spec:
           http: 32080
           https: 32443
       config:
+        hsts-max-age: "31536000"
+        hsts-preload: "true"
         enable-modsecurity: "true"
         enable-owasp-modsecurity-crs: "true"
         modsecurity-snippet: |
