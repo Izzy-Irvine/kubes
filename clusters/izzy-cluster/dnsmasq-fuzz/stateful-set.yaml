@@ -32,7 +32,7 @@ spec:
         resources:
           requests:
             memory: "6Gi"
-            cpu: "5000"
+            cpu: "5"
   volumeClaimTemplates:
   - metadata:
       name: output
