@@ -33,6 +33,8 @@ spec:
           requests:
             memory: "5Gi"
             cpu: "3"
+          limits:
+            cpu: "12"
   volumeClaimTemplates:
   - metadata:
       name: output
