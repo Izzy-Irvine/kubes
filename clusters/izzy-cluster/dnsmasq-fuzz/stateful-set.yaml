@@ -25,7 +25,8 @@ spec:
             topologyKey: "kubernetes.io/hostname"
       containers:
       - name: fuzzers
-        image: ghcr.io/ttrssreal/dnsmasq-fuzz:2
+        image: ghcr.io/ttrssreal/dnsmasq-fuzz:latest
+        imagePullPolicy: Always
         volumeMounts:
         - name: output
           mountPath: /fuzz/mnt
