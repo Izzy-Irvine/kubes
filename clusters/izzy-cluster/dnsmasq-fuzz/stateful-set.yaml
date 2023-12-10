@@ -7,18 +7,32 @@ spec:
   selector:
     matchLabels:
       app: fuzzers
-  replicas: 20
+  replicas: 6
   template:
     metadata:
       labels:
         app: fuzzers
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - fuzzers
+            topologyKey: "kubernetes.io/hostname"
       containers:
       - name: fuzzers
         image: ghcr.io/ttrssreal/dnsmasq-fuzz:2
         volumeMounts:
         - name: output
           mountPath: /fuzz/mnt
+        resources:
+          requests:
+            memory: "6Gi"
+            cpu: "5000"
   volumeClaimTemplates:
   - metadata:
       name: output
