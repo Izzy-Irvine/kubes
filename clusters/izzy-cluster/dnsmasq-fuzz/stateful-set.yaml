@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: fuzzy
+  namespace: dnsmasq-fuzz
+spec:
+  selector:
+    matchLabels:
+      app: fuzzers
+  replicas: 20
+  template:
+    metadata:
+      labels:
+        app: fuzzers
+    spec:
+      containers:
+      - name: fuzzers
+        image: ghcr.io/ttrssreal/dnsmasq-fuzz:2
+        volumeMounts:
+        - name: output
+          mountPath: /fuzz/mnt
+  volumeClaimTemplates:
+  - metadata:
+      name: output
+    spec:
+      accessModes:
+       - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
