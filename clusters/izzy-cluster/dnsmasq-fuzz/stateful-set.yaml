@@ -7,7 +7,7 @@ spec:
   selector:
     matchLabels:
       app: fuzzers
-  replicas: 6
+  replicas: 0
   template:
     metadata:
       labels:
