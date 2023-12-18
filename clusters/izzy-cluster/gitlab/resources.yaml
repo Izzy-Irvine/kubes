@@ -25,6 +25,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: gitlab-operator
+  interval: 5m0s
 ---
 # apiVersion: apps.gitlab.com/v1beta1
 # kind: GitLab
