@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: webhook-test
 data:
-  thing1: 1
+  thing1: "1"
