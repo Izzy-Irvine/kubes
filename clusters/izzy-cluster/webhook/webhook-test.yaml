@@ -1,6 +1,8 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: webhook-test
+  namespace: default
 data:
-  thing1: "1"
+  aa: "bb"
