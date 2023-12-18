@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: fuzzy
+  namespace: dnsmasq-fuzz
+spec:
+  selector:
+    matchLabels:
+      app: fuzzers
+  replicas: 0
+  template:
+    metadata:
+      labels:
+        app: fuzzers
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - fuzzers
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: fuzzers
+        image: ghcr.io/ttrssreal/dnsmasq-fuzz:latest
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: output
+          mountPath: /fuzz/mnt
+        resources:
+          requests:
+            memory: "5Gi"
+            cpu: "3"
+          limits:
+            cpu: "12"
+  volumeClaimTemplates:
+  - metadata:
+      name: output
+    spec:
+      accessModes:
+       - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
