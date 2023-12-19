@@ -52,7 +52,7 @@ spec:
       ingress:
         annotations:
           cert-manager.io/cluster-issuer: http-issuer
-        enabled: true
+        enabled: false # No auth so taking it offline
         hosts:
           - prometheus.izzy.kiwi
         tls:
