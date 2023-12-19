@@ -28,6 +28,8 @@ spec:
   values:
     alertmanager:
       ingress:
+        annotations:
+          cert-manager.io/cluster-issuer: http-issuer
         enabled: true
         hosts:
           - alertmanager.izzy.kiwi
@@ -37,6 +39,8 @@ spec:
               - alertmanager.izzy.kiwi
     grafana:
       ingress:
+        annotations:
+          cert-manager.io/cluster-issuer: http-issuer
         enabled: true
         hosts:
           - grafana.izzy.kiwi
@@ -46,6 +50,8 @@ spec:
               - grafana.izzy.kiwi
     prometheus:
       ingress:
+        annotations:
+          cert-manager.io/cluster-issuer: http-issuer
         enabled: true
         hosts:
           - prometheus.izzy.kiwi
