@@ -26,5 +26,31 @@ spec:
         kind: HelmRepository
         name: prometheus-community
   values:
-    
+    alertmanager:
+      ingress:
+        enabled: true
+        hosts:
+          - alertmanager.izzy.kiwi
+        tls:
+          - secretName: alertmanager-tls
+            hosts:
+              - alertmanager.izzy.kiwi
+    grafana:
+      ingress:
+        enabled: true
+        hosts:
+          - grafana.izzy.kiwi
+        tls:
+          - secretName: grafana-tls
+            hosts:
+              - grafana.izzy.kiwi
+    prometheus:
+      ingress:
+        enabled: true
+        hosts:
+          - prometheus.izzy.kiwi
+        tls:
+          - secretName: prometheus-tls
+            hosts:
+              - prometheus.izzy.kiwi
   interval: 5m0s
