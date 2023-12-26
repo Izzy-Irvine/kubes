@@ -41,13 +41,12 @@ data:
       <head>
         <title>Application to fuck izzy :3</title>
       </head>
-      <body alignitems="center">
+      <body style="background: pink;">
         <iframe 
           src="https://docs.google.com/forms/d/e/1FAIpQLSdyL8VSixaA6sEq59IxglrCHBAE7_pdsKnEMFmQIEh9GqjlOA/viewform?embedded=true" 
-          width="640" 
-          height="650" 
-          frameborder="0" 
-          marginheight="0" 
+          width="100%" 
+          frameborder="0"
+          marginheight="0"
           marginwidth="0"
         >
           Loading…
