@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minecrafty
+  namespace: ava-mc
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: minecrafty
+  template:
+    metadata:
+      labels:
+        app: minecrafty
+    spec:
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: ava-mc-pvc 
+      containers:
+        - name: minecrafty
+          image: itzg/minecraft-server
+          env:
+            - name: EULA
+              value: "true"
+            - name: TYPE
+              value: PAPER
+            - name: MOTD
+              value: "ava mc"
+          ports:
+            - containerPort: 25565
+          volumeMounts:
+            - name: data
+              mountPath: /data
