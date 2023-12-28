@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mc-sf-survival-pvc
+  name: ava-mc-pvc
   namespace: ava-mc
 spec:
   accessModes:
