@@ -25,7 +25,7 @@ spec:
       difficulty: hard
       spawnProtection: 0
       motd: ACC SMPee
-      memory: 1500M
+      memory: 2500M
       gameMode: survival
       ops: boxhead_crafter
       enableCommandBlock: false
