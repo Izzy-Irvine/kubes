@@ -4,7 +4,7 @@ metadata:
   name: palworld
   namespace: palworld
 spec:
-  replicas: 0
+  replicas: 1
   strategy:
     type: Recreate
   selector:
@@ -18,6 +18,10 @@ spec:
       containers:
         - name: palworld
           image: ich777/steamcmd:palworld
+          resources:
+            requests:
+              memory: 1600M
+              cpu: 1000m
           env:
             - name: GAME_ID
               value: "2394010"

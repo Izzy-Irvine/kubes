@@ -10,10 +10,12 @@ spec:
     port: 25575
     protocol: TCP
     targetPort: 25575
+    nodePort: 35575
   - name: palworld-udp
     port: 25575
     protocol: UDP
     targetPort: 25575
+    nodePort: 35575
   selector:
     app: palworld
   type: NodePort
