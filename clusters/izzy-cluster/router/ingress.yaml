@@ -15,7 +15,7 @@ spec:
   tls:
   - hosts:
       - router.izzy.kiwi
-    secretName: proxmox-tls
+    secretName: router-tls
   rules:
   - host: router.izzy.kiwi
     http:
