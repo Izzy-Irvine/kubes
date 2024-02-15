@@ -24,4 +24,5 @@ spec:
         backend:
           service:
             name: router
-            port: http
+            port: 
+              name: http
