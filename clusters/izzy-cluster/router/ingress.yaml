@@ -27,34 +27,34 @@ spec:
             name: router
             port: 
               name: http
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: router-redirect
-  namespace: router
-  annotations:
-    cert-manager.io/cluster-issuer: http-issuer
-    nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
-    nginx.ingress.kubernetes.io/auth-tls-secret: default/ca-secret
-    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
-    nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
-    nginx.ingress.kubernetes.io/server-snippet: |
-      return 301 $scheme://router.izzy.kiwi/cgi-bin/luci/web;
-spec:
-  ingressClassName: nginx
-  tls:
-  - hosts:
-      - router.izzy.kiwi
-    secretName: router-tls
-  rules:
-  - host: router.izzy.kiwi
-    http:
-      paths:
-      - path: /
-        pathType: Exact
-        backend:
-          service:
-            name: router
-            port: 
-              name: http
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: router-redirect
+#   namespace: router
+#   annotations:
+#     cert-manager.io/cluster-issuer: http-issuer
+#     nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
+#     nginx.ingress.kubernetes.io/auth-tls-secret: default/ca-secret
+#     nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+#     nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+#     nginx.ingress.kubernetes.io/server-snippet: |
+#       return 301 $scheme://router.izzy.kiwi/cgi-bin/luci/web;
+# spec:
+#   ingressClassName: nginx
+#   tls:
+#   - hosts:
+#       - router.izzy.kiwi
+#     secretName: router-tls
+#   rules:
+#   - host: router.izzy.kiwi
+#     http:
+#       paths:
+#       - path: /
+#         pathType: Exact
+#         backend:
+#           service:
+#             name: router
+#             port: 
+#               name: http
