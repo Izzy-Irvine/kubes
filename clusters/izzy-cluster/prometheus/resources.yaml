@@ -64,7 +64,7 @@ spec:
           nginx.ingress.kubernetes.io/auth-tls-secret: default/ca-secret
           nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
           nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
-        enabled: false # No auth so taking it offline
+        enabled: true
         hosts:
           - prometheus.izzy.kiwi
         tls:
