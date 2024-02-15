@@ -1,3 +1,4 @@
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -30,7 +31,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: router
+  name: router-redirect
   namespace: router
   annotations:
     cert-manager.io/cluster-issuer: http-issuer
@@ -39,7 +40,7 @@ metadata:
     nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
     nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
     nginx.ingress.kubernetes.io/server-snippet: |
-      return 301 $scheme://https://router.izzy.kiwi/cgi-bin/luci/web;
+      return 301 $scheme://router.izzy.kiwi/cgi-bin/luci/web;
 spec:
   ingressClassName: nginx
   tls:
