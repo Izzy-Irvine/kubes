@@ -19,7 +19,7 @@ spec:
   rules:
   - host: clowder.izzy.kiwi
     http:
-      paths:
+      pathstypo:
       - path: /
         pathType: Prefix
         backend:
