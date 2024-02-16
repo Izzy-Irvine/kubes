@@ -11,7 +11,7 @@ metadata:
     nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
     nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
 spec:
-  ingressClassNametypo: nginx
+  ingressClassName: nginx
   tls:
   - hosts:
       - router.izzy.kiwi
