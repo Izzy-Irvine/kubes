@@ -6,7 +6,6 @@ metadata:
   namespace: ingresses-lan
   annotations:
     cert-manager.io/cluster-issuer: http-issuer
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
     nginx.ingress.kubernetes.io/auth-tls-secret: default/ca-secret
     nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
@@ -27,7 +26,7 @@ spec:
           service:
             name: pihole
             port: 
-              name: https
+              name: http
 ---
 apiVersion: v1
 kind: Service
@@ -36,10 +35,10 @@ metadata:
   namespace: ingresses-lan
 spec:
   ports:
-  - name: https
+  - name: http
     protocol: TCP
-    port: 443
-    targetPort: 443
+    port: 80
+    targetPort: 80
 ---
 apiVersion: discovery.k8s.io/v1
 kind: EndpointSlice
@@ -50,10 +49,10 @@ metadata:
     kubernetes.io/service-name: pihole
 addressType: IPv4
 ports:
-  - name: https
-    appProtocol: https
+  - name: http
+    appProtocol: http
     protocol: TCP
-    port: 443
+    port: 80
 endpoints:
   - addresses:
       - "192.168.100.253"
