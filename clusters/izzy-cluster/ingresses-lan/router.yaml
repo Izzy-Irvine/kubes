@@ -3,9 +3,10 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: router
-  namespace: router
+  namespace: ingresses-lan
   annotations:
     cert-manager.io/cluster-issuer: http-issuer
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
     nginx.ingress.kubernetes.io/auth-tls-secret: default/ca-secret
     nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
@@ -26,13 +27,13 @@ spec:
           service:
             name: router
             port: 
-              name: http
+              name: https
 # ---
 # apiVersion: networking.k8s.io/v1
 # kind: Ingress
 # metadata:
 #   name: router-redirect
-#   namespace: router
+#   namespace: ingresses-lan
 #   annotations:
 #     cert-manager.io/cluster-issuer: http-issuer
 #     nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
@@ -58,3 +59,34 @@ spec:
 #             name: router
 #             port: 
 #               name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: router
+  namespace: ingresses-lan
+spec:
+  ports:
+  - name: https
+    protocol: TCP
+    port: 443
+    targetPort: 443
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: router
+  namespace: ingresses-lan
+  labels:
+    kubernetes.io/service-name: router
+addressType: IPv4
+ports:
+  - name: https
+    appProtocol: https
+    protocol: TCP
+    port: 443
+endpoints:
+  - addresses:
+      - "192.168.100.1"
+    conditions:
+      ready: true
