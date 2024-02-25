@@ -26,7 +26,7 @@ spec:
             claimName: untunred
       initContainers:
         - name: steamcmd
-          image: steamcmd/steamcmd:alpine
+          image: steamcmd/steamcmd
           command:
             - "steamcmd"
             - "+force_install_dir"
