@@ -13,9 +13,8 @@ spec:
   selector:
     matchLabels:
       app: unturned
-  replicas: 0
-  # strategy:
-  #   type: Recreate
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
