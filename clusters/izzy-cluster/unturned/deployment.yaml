@@ -40,13 +40,10 @@ spec:
       containers:
       - name: unturned
         image: steamcmd/steamcmd
-        # command:
-        #   - "./Unturned_Headless.x86_64"
-        #   - "-batchmode"
-        #   - "-nographics"
         command:
-          - "sleep"
-          - "inf"
+          - "./Unturned_Headless.x86_64"
+          - "-batchmode"
+          - "-nographics"
         workingDir: /data
         env:
           - name: LD_LIBRARY_PATH
