@@ -79,19 +79,23 @@ spec:
     app: unturned
   type: NodePort
   ports:
-  - port: 27015
+  - name: port-27015-tcp
+    port: 27015
     targetPort: 27015
     nodePort: 32015
     protocol: TCP
-  - port: 27015
+  - name: port-27015-udp
+    port: 27015
     targetPort: 27015
     nodePort: 32015
     protocol: UDP
-  - port: 27016
+  - name: port-27016-tcp
+    port: 27016
     targetPort: 27016
     nodePort: 32016
     protocol: TCP
-  - port: 27016
+  - name: port-27016-udp
+    port: 27016
     targetPort: 27016
     nodePort: 32016
     protocol: UDP
