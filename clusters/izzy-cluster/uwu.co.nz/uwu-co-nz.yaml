@@ -18,6 +18,11 @@ spec:
       tls: true
       annotations:
         cert-manager.io/cluster-issuer: http-issuer
+    cloneStaticSiteFromGit:
+      enabled: true
+      repository: https://github.com/ttrssreal/uwu-co-nz
+      branch: main
+      interval: 300
     service:
       type: ClusterIP
   interval: 5m0s
