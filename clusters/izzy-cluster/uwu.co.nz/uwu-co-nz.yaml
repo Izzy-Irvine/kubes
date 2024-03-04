@@ -1,0 +1,23 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: uwu-co-nz
+  namespace: uwu-co-nz
+spec:
+  chart:
+    spec:
+      chart: nginx
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: default
+  values:
+    ingress:
+      enabled: true
+      hostname: uwu.co.nz
+      tls: true
+      annotations:
+        cert-manager.io/cluster-issuer: http-issuer
+    service:
+      type: ClusterIP
+  interval: 5m0s
