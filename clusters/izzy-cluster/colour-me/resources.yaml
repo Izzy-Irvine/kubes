@@ -1,0 +1,48 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: colour-me
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: colour-me
+spec:
+  selector:
+    matchLabels:
+      app: colour-me
+  template:
+    metadata:
+      labels:
+        app: colour-me
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
+      containers:
+      - name: colour-me
+        image: ghcr.io/isaac-irvine/colour-me:2
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - "all"
+          privileged: false
+          readOnlyRootFilesystem: true
+        resources:
+          requests:
+            memory: "50Mi"
+            cpu: "100m"
+          limits:
+            memory: "100Mi"
+            cpu: "200m"
+        env:
+          - name: discord_token
+            valueFrom:
+              secretKeyRef:
+                name: colour-me
+                key: discord_token
