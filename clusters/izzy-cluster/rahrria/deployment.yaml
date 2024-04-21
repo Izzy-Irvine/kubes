@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rahrria-deploy
+  namespace: rahrria
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rahrria
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rahrria
+    spec:
+      containers:
+        - name: terraria
+          image: ryshe/terraria
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          env:
+            - name: WORLD_FILENAME
+              value: "rahrria.wld" # add to pvc manually
+            - name: CONFIGPATH
+              value: "/config"
+          ports:
+            - containerPort: 7777
+          volumeMounts:
+            - name: world
+              mountPath: "/root/.local/share/Terraria/Worlds"
+            - name: config-json
+              mountPath: "/config/config.json"
+              subPath: config.json
+              readOnly: true
+      volumes:
+        - name: world
+          persistentVolumeClaim:
+            claimName: rahrria-world-pvc
+        - name: config-json
+          configMap:
+            name: rahrria-config-json
