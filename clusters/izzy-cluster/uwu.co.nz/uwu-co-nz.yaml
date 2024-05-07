@@ -18,6 +18,7 @@ spec:
       tls: true
       annotations:
         cert-manager.io/cluster-issuer: http-issuer
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
     cloneStaticSiteFromGit:
       enabled: true
       repository: https://github.com/ttrssreal/uwu-co-nz
