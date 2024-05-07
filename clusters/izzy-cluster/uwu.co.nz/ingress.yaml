@@ -9,10 +9,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-      - 2.uwu.co.nz
-    secretName: 2-uwu-tls
+      - uwu.co.nz
+    secretName: uwu-tls
   rules:
-  - host: 2.uwu.co.nz
+  - host: uwu.co.nz
     http:
       paths:
       - path: /
