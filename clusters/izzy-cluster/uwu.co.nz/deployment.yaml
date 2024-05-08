@@ -22,7 +22,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: web
-          image: ghcr.io/ttrssreal/uwu-co-nz:2 # TODO: Auto update
+          image: ghcr.io/ttrssreal/uwu-co-nz:3 # TODO: Auto update
           securityContext:
             capabilities:
               drop:
