@@ -18,6 +18,8 @@ spec:
         name: mc
         namespace: default
   values:
+    image:
+      repository: itzg/minecraft-server:java21
     minecraftServer:
       eula: "TRUE"
       type: PAPER
