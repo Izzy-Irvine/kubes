@@ -23,7 +23,7 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: untunred
+            claimName: valheim
       initContainers:
         - name: steamcmd
           image: steamcmd/steamcmd
