@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fold-at-home
+  namespace: heater
+data:
+  config.xml: |
+    <config>
+
+      <!-- User Information -->
+      <user value="heater"/>         <!-- Enter your user name here -->
+      <team value="1065634"/>         <!-- Your team number -->
+
+      <power value="full"/>    <!-- Throttling this at K8s level -->
+      <gpu value="false"/>      <!-- If true, attempt to autoconfigure GPUs -->
+      <fold-anon value="false"/>
+    </config>

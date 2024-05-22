@@ -4,6 +4,7 @@ metadata:
   name: fold-at-home
   namespace: heater
 spec:
+  replica: 0
   selector:
     matchLabels:
       app: fold-at-home
@@ -29,8 +30,10 @@ spec:
           image: lscr.io/linuxserver/foldingathome:latest
           resources:
             requests:
-              cpu: 1000m
+              cpu: 2000m
               memory: 200Mi
+            limits:
+              cpu: 2000m
           env:
             - name: 
           volumeMounts:
