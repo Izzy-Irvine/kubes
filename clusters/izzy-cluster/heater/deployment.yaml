@@ -34,8 +34,6 @@ spec:
               memory: 200Mi
             limits:
               cpu: 2000m
-          env:
-            - name: 
           volumeMounts:
             - name: config
               mountPath: /config
