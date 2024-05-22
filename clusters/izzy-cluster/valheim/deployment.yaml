@@ -1,0 +1,110 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: valheim
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: valheim
+  namespace: valheim
+spec:
+  selector:
+    matchLabels:
+      app: valheim
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: valheim
+    spec:
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: untunred
+      initContainers:
+        - name: steamcmd
+          image: steamcmd/steamcmd
+          command:
+            - "steamcmd"
+            - "+force_install_dir"
+            - "/data"
+            - "+login"
+            - "anonymous"
+            - "+app_update"
+            - "892970"
+            - "+quit"
+          volumeMounts:
+            - mountPath: /data
+              name: data
+      containers:
+      - name: valheim
+        image: steamcmd/steamcmd
+        command:
+          - ./valheim_server.x86_64
+          - -name
+          - Jörmungandr
+          - -port
+          - '2456'
+          - -nographics
+          - -batchmode
+          - -world
+          - world
+          - -password
+          - SubmitToTheCult 
+          - -public 
+          - '1'
+        workingDir: /data
+        env:
+          - name: LD_LIBRARY_PATH
+            value: /data/linux64
+          - name: TERM
+            value: xterm
+        resources:
+          limits:
+            memory: "3000Mi"
+            cpu: "2000m"
+        volumeMounts:
+          - mountPath: /data
+            name: data
+        ports:
+        - containerPort: 2456
+          protocol: UDP
+        - containerPort: 2457
+          protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: valheim
+  namespace: valheim
+spec:
+  selector:
+    app: valheim
+  type: NodePort
+  ports:
+  - name: port-2456-udp
+    port: 2456
+    targetPort: 2456
+    nodePort: 32456
+    protocol: UDP
+  - name: port-2457-udp
+    port: 2457
+    targetPort: 2457
+    nodePort: 32457
+    protocol: UDP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: valheim
+  namespace: valheim
+spec:
+  resources:
+    requests:
+      storage: 20Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
