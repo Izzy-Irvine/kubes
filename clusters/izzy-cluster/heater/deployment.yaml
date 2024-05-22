@@ -23,8 +23,8 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
-            - name: configmap
-              mountPath: /configmap
+            #- name: configmap
+            #  mountPath: /configmap
       containers:
         - name: fah
           image: lscr.io/linuxserver/foldingathome:latest
