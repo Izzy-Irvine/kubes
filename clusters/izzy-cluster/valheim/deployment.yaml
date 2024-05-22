@@ -68,7 +68,7 @@ spec:
           - name: TERM
             value: xterm
           - name: SteamAppID
-            value: 892970
+            value: '892970'
         resources:
           limits:
             memory: "3000Mi"
