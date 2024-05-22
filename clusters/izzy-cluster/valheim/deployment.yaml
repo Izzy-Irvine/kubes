@@ -28,14 +28,19 @@ spec:
         - name: steamcmd
           image: steamcmd/steamcmd
           command:
-            - "steamcmd"
-            - "+force_install_dir"
-            - "/data"
-            - "+login"
-            - "anonymous"
-            - "+app_update"
-            - "892970"
-            - "+quit"
+            - steamcmd 
+            - +@sSteamCmdForcePlatformType 
+            - linux 
+            - +force_install_dir 
+            - /data 
+            - +login 
+            - anonymous 
+            - +app_update 
+            - '896660' 
+            - -beta 
+            - none 
+            - validate 
+            - +quit
           volumeMounts:
             - mountPath: /data
               name: data
@@ -62,6 +67,8 @@ spec:
             value: /data/linux64
           - name: TERM
             value: xterm
+          - name: SteamAppID
+            value: 892970
         resources:
           limits:
             memory: "3000Mi"
