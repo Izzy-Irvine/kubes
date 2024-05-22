@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fold-at-home
+  namespace: heater
+spec:
+  selector:
+    matchLabels:
+      app: fold-at-home
+  template:
+    metadata:
+      labels:
+        app: fold-at-home
+    spec:
+      initContainers:
+        - name: config
+          image: alpine:latest
+          command: 
+            - cp
+            - /configmap/config.xml
+            - /config
+          volumeMounts:
+            - name: config
+              path: /config
+            - name: configmap
+              path: /configmap
+      containers:
+        - name: fah
+          image: lscr.io/linuxserver/foldingathome:latest
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 200Mi
+          env:
+            - name: 
+          volumeMounts:
+            - name: config
+              path: /config
+      priorityClassName: background-tasks
+      volumes:
+        - name: config
+          emptyDir: {}
