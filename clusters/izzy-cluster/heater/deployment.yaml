@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: DaemonSet
+kind: Deployment
 metadata:
   name: fold-at-home
   namespace: heater
@@ -22,9 +22,9 @@ spec:
             - /config
           volumeMounts:
             - name: config
-              path: /config
+              mountPath: /config
             - name: configmap
-              path: /configmap
+              mountPath: /configmap
       containers:
         - name: fah
           image: lscr.io/linuxserver/foldingathome:latest
@@ -38,7 +38,7 @@ spec:
             - name: 
           volumeMounts:
             - name: config
-              path: /config
+              mountPath: /config
       priorityClassName: background-tasks
       volumes:
         - name: config
