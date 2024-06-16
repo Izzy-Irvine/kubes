@@ -39,4 +39,23 @@ spec:
       dataDir:
         enabled: true
         Size: 20Gi
+    extraPorts:
+    - name: map
+      containerPort: 8123
+      protocol: TCP
+      service:
+        enabled: true
+        port: 8123
+      ingress:
+        ingressClassName: nginx
+        enabled: true
+        annotations:
+          cert-manager.io/cluster-issuer: http-issuer
+        hosts:
+          - name: berrycraft.uwu.co.nz
+            path: /
+        tls:
+          - secretName: map-tls
+            hosts:
+              - berrycraft.uwu.co.nz
   interval: 5m0s
