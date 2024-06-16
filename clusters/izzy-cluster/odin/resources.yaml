@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: odin
-          image: ghcr.io/isaac-irvine/odin:2 # {"$imagepolicy": "odin:odin"}
+          image: ghcr.io/isaac-irvine/odin:6 # {"$imagepolicy": "odin:odin"}
           ports:
             - containerPort: 8080
           securityContext:

@@ -10,6 +10,7 @@ metadata:
   name: unturned
   namespace: unturned
 spec:
+  replicas: 0
   selector:
     matchLabels:
       app: unturned

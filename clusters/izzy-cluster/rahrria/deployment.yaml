@@ -4,7 +4,7 @@ metadata:
   name: rahrria-deploy
   namespace: rahrria
 spec:
-  replicas: 1
+  replicas: 0
   strategy:
     type: Recreate
   selector:
