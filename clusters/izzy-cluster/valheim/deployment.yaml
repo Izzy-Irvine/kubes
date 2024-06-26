@@ -20,6 +20,7 @@ spec:
       labels:
         app: valheim
     spec:
+      nodeName: algernon-vm
       volumes:
         - name: data
           persistentVolumeClaim:
