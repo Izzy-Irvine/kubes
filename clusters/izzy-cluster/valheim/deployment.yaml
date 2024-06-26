@@ -26,26 +26,26 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: valheim
-      initContainers:
-        - name: steamcmd
-          image: steamcmd/steamcmd
-          command:
-            - steamcmd 
-            - +@sSteamCmdForcePlatformType 
-            - linux 
-            - +force_install_dir 
-            - /data 
-            - +login 
-            - anonymous 
-            - +app_update 
-            - '896660' 
-            - -beta 
-            - none 
-            - validate 
-            - +quit
-          volumeMounts:
-            - mountPath: /data
-              name: data
+      # initContainers:
+      #   - name: steamcmd
+      #     image: steamcmd/steamcmd
+      #     command:
+      #       - steamcmd 
+      #       - +@sSteamCmdForcePlatformType 
+      #       - linux 
+      #       - +force_install_dir 
+      #       - /data 
+      #       - +login 
+      #       - anonymous 
+      #       - +app_update 
+      #       - '896660' 
+      #       - -beta 
+      #       - none 
+      #       - validate 
+      #       - +quit
+      #     volumeMounts:
+      #       - mountPath: /data
+      #         name: data
       containers:
       - name: valheim
         image: steamcmd/steamcmd
