@@ -26,6 +26,9 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: valheim
+        - name: world
+          persistentVolumeClaim:
+            claimName: valheim-world
       # initContainers:
       #   - name: steamcmd
       #     image: steamcmd/steamcmd
@@ -63,8 +66,6 @@ spec:
           - SubmitToTheCult 
           - -public 
           - '1'
-          - -worldpath
-          - /data/world
         workingDir: /data
         env:
           - name: LD_LIBRARY_PATH
@@ -83,6 +84,8 @@ spec:
         volumeMounts:
           - mountPath: /data
             name: data
+          - mountPath: /root/.config/unity3d/IronGate
+            name: world
         ports:
         - containerPort: 2456
           protocol: UDP
@@ -114,6 +117,19 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: valheim
+  namespace: valheim
+spec:
+  resources:
+    requests:
+      storage: 20Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: valheim-world
   namespace: valheim
 spec:
   resources:
