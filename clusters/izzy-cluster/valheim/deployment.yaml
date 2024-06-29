@@ -63,6 +63,8 @@ spec:
           - SubmitToTheCult 
           - -public 
           - '1'
+          - -worldpath
+          - /data/world
         workingDir: /data
         env:
           - name: LD_LIBRARY_PATH
