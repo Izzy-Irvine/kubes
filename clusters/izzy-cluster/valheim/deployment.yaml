@@ -25,30 +25,30 @@ spec:
       volumes:
         - name: data
           persistentVolumeClaim:
-            claimName: valheim
+            claimName: valheim-2
         - name: world
           persistentVolumeClaim:
             claimName: valheim-world
-      # initContainers:
-      #   - name: steamcmd
-      #     image: steamcmd/steamcmd
-      #     command:
-      #       - steamcmd 
-      #       - +@sSteamCmdForcePlatformType 
-      #       - linux 
-      #       - +force_install_dir 
-      #       - /data 
-      #       - +login 
-      #       - anonymous 
-      #       - +app_update 
-      #       - '896660' 
-      #       - -beta 
-      #       - none 
-      #       - validate 
-      #       - +quit
-      #     volumeMounts:
-      #       - mountPath: /data
-      #         name: data
+      initContainers:
+        - name: steamcmd
+          image: steamcmd/steamcmd
+          command:
+            - steamcmd 
+            - +@sSteamCmdForcePlatformType 
+            - linux 
+            - +force_install_dir 
+            - /data 
+            - +login 
+            - anonymous 
+            - +app_update 
+            - '896660' 
+            - -beta 
+            - none 
+            - validate 
+            - +quit
+          volumeMounts:
+            - mountPath: /data
+              name: data
       containers:
       - name: valheim
         image: steamcmd/steamcmd
@@ -116,7 +116,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: valheim
+  name: valheim-2
   namespace: valheim
 spec:
   resources:
