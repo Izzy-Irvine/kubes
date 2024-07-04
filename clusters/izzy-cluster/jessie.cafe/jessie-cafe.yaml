@@ -1,0 +1,34 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: jessie-cafe
+  namespace: jessie-cafe
+spec:
+  chart:
+    spec:
+      chart: nginx
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: default
+  values:
+    ingress:
+      enabled: true
+      hostname: jessie.cafe
+      tls: true
+      annotations:
+        cert-manager.io/cluster-issuer: http-issuer
+    cloneStaticSiteFromGit:
+      enabled: true
+      repository: https://github.com/ttrssreal/jessie-cafe
+      branch: main
+      interval: 300
+    service:
+      type: ClusterIP
+    serverBlock: |-
+      server {
+        listen 80;
+        root public;
+        location / {}
+      }
+  interval: 5m0s
