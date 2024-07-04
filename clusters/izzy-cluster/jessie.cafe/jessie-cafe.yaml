@@ -28,13 +28,8 @@ spec:
     serverBlock: |-
       server {
         listen 0.0.0.0:8080;
-        location / {
-          return 200 "hello!";
-        }
+
+        root public;
+        location / {}
       }
-      # server {
-      #   listen 80;
-      #   root public;
-      #   location / {}
-      # }
   interval: 5m0s
