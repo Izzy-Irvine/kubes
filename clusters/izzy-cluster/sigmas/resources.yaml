@@ -21,7 +21,7 @@ spec:
     minecraftServer:
       eula: "TRUE"
       type: vanilla
-      version: '1.21.0'
+      version: '1.21'
       difficulty: hard
       spawnProtection: 0
       motd: Sigmas
