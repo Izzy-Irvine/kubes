@@ -21,7 +21,7 @@ spec:
     minecraftServer:
       eula: "TRUE"
       type: PAPER
-      version: 1.21
+      version: '1.21.0'
       difficulty: hard
       spawnProtection: 0
       motd: Sigmas
