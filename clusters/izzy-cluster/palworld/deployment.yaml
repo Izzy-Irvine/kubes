@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: palworld
+  namespace: palworld
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: palworld
+  template:
+    metadata:
+      labels:
+        app: palworld
+    spec:
+      containers:
+        - name: palworld
+          image: ich777/steamcmd:palworld
+          resources:
+            requests:
+              memory: 1600M
+              cpu: 1000m
+          env:
+            - name: GAME_ID
+              value: "2394010"
+            - name: UPDATE_PUBLIC_IP
+              value: "false"
+            - name: GAME_PARAMS
+              value: "EpicApp=PalServer"
+            - name: GAME_PARAMS_EXTRA
+              value: "-No-useperfthreads -NoAsyncLoadingThread -UseMultithreadForDS"
+            - name: BACKUP
+              value: "true"
+            - name: BACKUP_INTERVAL
+              value: "120"
+            - name: BACKUPS_TO_KEEP
+              value: "12"
+            - name: UID
+              value: "99"
+            - name: GID
+              value: "100"
+          ports:
+            - containerPort: 27015
+              protocol: TCP
+            - containerPort: 27015
+              protocol: UDP
+          volumeMounts:
+            - name: steamcmd
+              mountPath: /serverdata/steamcmd
+            - name: palworld
+              mountPath: /serverdata/serverfiles
+      volumes:
+        - name: steamcmd
+          persistentVolumeClaim:
+            claimName: palworld-steamcmd
+        - name: palworld
+          persistentVolumeClaim:
+            claimName: palworld-palworld
