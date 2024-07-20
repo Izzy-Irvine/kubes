@@ -20,7 +20,7 @@ spec:
   values:
     minecraftServer:
       eula: "TRUE"
-      type: PAPER
+      type: vanilla
       version: '1.21.0'
       difficulty: hard
       spawnProtection: 0
