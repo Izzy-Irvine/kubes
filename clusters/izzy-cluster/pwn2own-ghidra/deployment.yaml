@@ -45,18 +45,7 @@ spec:
             - name: GHIDRA_USERS
               value: "admin ttrss smallpenisbig"
             - name: GHIDRA_PUBLIC_HOSTNAME
-<<<<<<< HEAD:clusters/izzy-cluster/pwn2own-ghidra/deployment.yaml
               value: "0.0.0.0"
-=======
-              value: "192.168.100.210"
-          ports:
-            - containerPort: 13100
-              protocol: TCP
-            - containerPort: 13101
-              protocol: TCP
-            - containerPort: 13102
-              protocol: TCP
->>>>>>> refs/remotes/origin/main:clusters/izzy-cluster/pwn2own-ghidra/stateful-set.yaml
           volumeMounts:
             - name: ghidra-repos
               mountPath: /repos
