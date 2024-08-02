@@ -11,7 +11,6 @@ spec:
       targetPort: rmi
       nodePort: 30690
       protocol: TCP
-  clusterIP: None
   type: NodePort
   selector:
     app: pwn2own-ghidra
