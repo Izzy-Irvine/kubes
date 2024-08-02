@@ -7,12 +7,10 @@ metadata:
     app: pwn2own-ghidra
 spec:
   ports:
-    - port: 80
-    name: web
-  - port: 13100
+    - port: 13100
       targetPort: rmi
       protocol: TCP
       name: rmi
   clusterIP: None
   selector:
-    app: nginx
+    app: pwn2own-ghidra
