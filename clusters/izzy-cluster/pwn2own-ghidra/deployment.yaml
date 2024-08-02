@@ -15,20 +15,39 @@ spec:
       labels:
         app: pwn2own-ghidra
     spec:
-      # initContainers:
-      #   - name: chmod-repos
-      #     image: busybox
-      #     command: ['sh', '-c', 'chown -R 999:999 /repos']
-      #     volumeMounts:
-      #       - name: ghidra-repos
-      #         mountPath: /repos
       containers:
+        - name: proxy-30690
+          image: alpine/socat:latest
+          args: 
+            - "TCP-LISTEN:30690,fork,reuseaddr"
+            - "TCP:127.0.0.1:13100"
+          ports:
+            - containerPort: 30690
+        - name: proxy-30691
+          image: alpine/socat:latest
+          args: 
+            - "TCP-LISTEN:30691,fork,reuseaddr"
+            - "TCP:127.0.0.1:13101"
+          ports:
+            - containerPort: 30691
+              protocol: TCP
+        - name: proxy-30692
+          image: alpine/socat:latest
+          args: 
+            - "TCP-LISTEN:30692,fork,reuseaddr"
+            - "TCP:127.0.0.1:13102"
+          ports:
+            - containerPort: 30692
+              protocol: TCP
         - name: pwn2own-ghidra-server
           image: "bytehow/ghidra-server"
           env:
             - name: GHIDRA_USERS
               value: "admin ttrss smallpenisbig"
             - name: GHIDRA_PUBLIC_HOSTNAME
+<<<<<<< HEAD:clusters/izzy-cluster/pwn2own-ghidra/deployment.yaml
+              value: "0.0.0.0"
+=======
               value: "192.168.100.210"
           ports:
             - containerPort: 13100
@@ -37,6 +56,7 @@ spec:
               protocol: TCP
             - containerPort: 13102
               protocol: TCP
+>>>>>>> refs/remotes/origin/main:clusters/izzy-cluster/pwn2own-ghidra/stateful-set.yaml
           volumeMounts:
             - name: ghidra-repos
               mountPath: /repos
