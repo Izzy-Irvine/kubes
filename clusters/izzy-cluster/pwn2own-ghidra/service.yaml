@@ -9,8 +9,9 @@ spec:
   ports:
     - port: 13100
       targetPort: rmi
+      nodePort: 30069
       protocol: TCP
-      name: rmi
   clusterIP: None
+  type: NodePort
   selector:
     app: pwn2own-ghidra
