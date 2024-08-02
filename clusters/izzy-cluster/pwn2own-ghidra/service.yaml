@@ -5,14 +5,17 @@ metadata:
   name: pwn2own-ghidra
 spec:
   ports:
-    - port: 13100
+    - name: port-13100
+      port: 13100
       targetPort: 13100
       nodePort: 30690
       protocol: TCP
-    - port: 13101
+    - name: port-13101
+      port: 13101
       targetPort: 13101
       nodePort: 30691
       protocol: TCP
+      name: port-13102
     - port: 13102
       targetPort: 13102
       nodePort: 30692

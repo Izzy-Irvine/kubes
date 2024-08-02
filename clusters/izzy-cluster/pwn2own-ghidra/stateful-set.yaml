@@ -31,14 +31,11 @@ spec:
             - name: GHIDRA_PUBLIC_HOSTNAME
               value: 0.0.0.0
           ports:
-            - name: port-13100
-              containerPort: 13100
+            - containerPort: 13100
               protocol: TCP
-            - name: port-13101
-              containerPort: 13101
+            - containerPort: 13101
               protocol: TCP
-            - name: port-13102
-              containerPort: 13102
+            - containerPort: 13102
               protocol: TCP
           volumeMounts:
             - name: ghidra-repos
