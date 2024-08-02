@@ -15,8 +15,8 @@ spec:
       targetPort: 13101
       nodePort: 30691
       protocol: TCP
-      name: port-13102
-    - port: 13102
+    - name: port-13102
+      port: 13102
       targetPort: 13102
       nodePort: 30692
       protocol: TCP
