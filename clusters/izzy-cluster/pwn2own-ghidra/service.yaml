@@ -8,7 +8,7 @@ metadata:
 spec:
   ports:
     - port: 13100
-      targetPort: rmi
+      targetPort: 13100
       nodePort: 30690
       protocol: TCP
   type: NodePort
