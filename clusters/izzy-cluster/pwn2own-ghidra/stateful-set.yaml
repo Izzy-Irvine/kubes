@@ -4,16 +4,16 @@ metadata:
   name: pwn2own-ghidra
   namespace: pwn2own-ghidra
   labels:
-    name: pwn2own-ghidra
+    app: pwn2own-ghidra
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: pwn2own-ghidra
+      app: pwn2own-ghidra
   template:
     metadata:
       labels:
-        name: pwn2own-ghidra
+        app: pwn2own-ghidra
     spec:
       initContainers:
         - name: chmod-repos
