@@ -9,7 +9,7 @@ spec:
   ports:
     - port: 13100
       targetPort: rmi
-      nodePort: 30069
+      nodePort: 30690
       protocol: TCP
   clusterIP: None
   type: NodePort
