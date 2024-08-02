@@ -3,13 +3,19 @@ kind: Service
 metadata:
   namespace: pwn2own-ghidra
   name: pwn2own-ghidra
-  labels:
-    app: pwn2own-ghidra
 spec:
   ports:
     - port: 13100
       targetPort: 13100
       nodePort: 30690
+      protocol: TCP
+    - port: 13101
+      targetPort: 13101
+      nodePort: 30691
+      protocol: TCP
+    - port: 13102
+      targetPort: 13102
+      nodePort: 30692
       protocol: TCP
   type: NodePort
   selector:

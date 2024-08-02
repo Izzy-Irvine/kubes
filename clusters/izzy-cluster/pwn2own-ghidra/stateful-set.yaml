@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: pwn2own-ghidra
   namespace: pwn2own-ghidra
@@ -15,31 +15,32 @@ spec:
       labels:
         app: pwn2own-ghidra
     spec:
-      initContainers:
-        - name: chmod-repos
-          image: busybox
-          command: ['sh', '-c', 'chown -R 999:999 /srv/repositories']
-          volumeMounts:
-            - name: ghidra-repos
-              mountPath: /srv/repositories
+      # initContainers:
+      #   - name: chmod-repos
+      #     image: busybox
+      #     command: ['sh', '-c', 'chown -R 999:999 /repos']
+      #     volumeMounts:
+      #       - name: ghidra-repos
+      #         mountPath: /repos
       containers:
         - name: pwn2own-ghidra-server
           image: "bytehow/ghidra-server"
           env:
             - name: GHIDRA_USERS
               value: "admin ttrss smallpenisbig"
+            - name: GHIDRA_PUBLIC_HOSTNAME
+              value: 0.0.0.0
           ports:
-            - name: rmi
-              containerPort: 13100
+            - containerPort: 13100
+              protocol: TCP
+            - containerPort: 13101
+              protocol: TCP
+            - containerPort: 13102
               protocol: TCP
           volumeMounts:
             - name: ghidra-repos
-              mountPath: /srv/repositories
-  volumeClaimTemplates:
-    - metadata:
-        name: ghidra-repos
-      spec:
-        accessModes: [ "ReadWriteOnce" ]
-        resources:
-          requests:
-            storage: 10Gi
+              mountPath: /repos
+      volumes:
+        - name: ghidra-repos
+          persistentVolumeClaim:
+            claimName: ghidra-repos
