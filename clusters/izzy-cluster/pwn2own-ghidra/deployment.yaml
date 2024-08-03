@@ -58,7 +58,7 @@ spec:
               protocol: TCP
             - containerPort: 30691
               protocol: TCP
-            - containerPort: 30691
+            - containerPort: 30692
               protocol: TCP
       volumes:
         - name: ghidra-repos
