@@ -18,35 +18,10 @@ spec:
         app: pwn2own-ghidra
     spec:
       containers:
-        # - name: proxy-30690
-        #   image: alpine/socat:latest
-        #   args: 
-        #     - "TCP-LISTEN:30690,fork,reuseaddr"
-        #     - "TCP:127.0.0.1:13100"
-        #   ports:
-        #     - containerPort: 30690
-        # - name: proxy-30691
-        #   image: alpine/socat:latest
-        #   args: 
-        #     - "TCP-LISTEN:30691,fork,reuseaddr"
-        #     - "TCP:127.0.0.1:13101"
-        #   ports:
-        #     - containerPort: 30691
-        #       protocol: TCP
-        # - name: proxy-30692
-        #   image: alpine/socat:latest
-        #   args: 
-        #     - "TCP-LISTEN:30692,fork,reuseaddr"
-        #     - "TCP:127.0.0.1:13102"
-        #   ports:
-        #     - containerPort: 30692
-        #       protocol: TCP
-        - name: pwn2own-ghidra-server
-          image: "bytehow/ghidra-server"
-          command:
-            - bash
-            - -c
-            - apt-get update; apt-get install iproute2 -y; GHIDRA_PUBLIC_HOSTNAME=$(ip a show dev eth0 | egrep -w inet | egrep -o "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" | head -1) /entrypoint.sh server
+        - name: ghidra-server
+          image: "blacktop/ghidra"
+          args:
+            - "server"
           env:
             - name: GHIDRA_USERS
               value: "admin ttrss smallpenisbig"
@@ -54,11 +29,11 @@ spec:
             - name: ghidra-repos
               mountPath: /repos
           ports:
-            - containerPort: 30690
+            - containerPort: 13100
               protocol: TCP
-            - containerPort: 30691
+            - containerPort: 13101
               protocol: TCP
-            - containerPort: 30692
+            - containerPort: 13102
               protocol: TCP
       volumes:
         - name: ghidra-repos
