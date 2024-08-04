@@ -23,5 +23,3 @@ spec:
   type: NodePort
   selector:
     app: pwn2own-ghidra
-
-
