@@ -25,6 +25,8 @@ spec:
           env:
             - name: GHIDRA_USERS
               value: "admin ttrss smallpenisbig"
+            - name: GHIDRA_PUBLIC_HOSTNAME
+              value: "192.168.100.210"
           volumeMounts:
             - name: ghidra-repos
               mountPath: /repos
