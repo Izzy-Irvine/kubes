@@ -24,7 +24,7 @@ spec:
       version: '1.21'
       difficulty: hard
       spawnProtection: 0
-      motd: :woman_shrugging:
+      motd: ':woman_shrugging:'
       memory: 2500M
       gameMode: survival
       ops: boxhead_crafter
