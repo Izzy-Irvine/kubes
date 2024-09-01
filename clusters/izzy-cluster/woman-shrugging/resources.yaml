@@ -21,7 +21,7 @@ spec:
     minecraftServer:
       eula: "TRUE"
       type: CURSEFORGE
-      version: '1.21'
+      version: '1.20.1'
       difficulty: hard
       spawnProtection: 0
       motd: ':woman_shrugging:'
