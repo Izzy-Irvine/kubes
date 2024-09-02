@@ -33,6 +33,8 @@ spec:
         apiKey:
           key: "$2a$10$dQ4QNqAiwLBWp8nijZpzIuf.kNaiofHjsNdD2EwScMetIJ9QcFETK"  # I know, I know. This is bad.
         pageUrl: https://www.curseforge.com/minecraft/modpacks/bigchadguys-plus
+    startupProbe:
+      enabled: true
     resources:
       requests: 
         memory: 3Gi
