@@ -33,6 +33,10 @@ spec:
       enabled: true
     readAffinity:
       enabled: true
+    topology:
+      domainLabels:
+        - topology.rbd.csi.ceph.com/region
+        - topology.rbd.csi.ceph.com/zone
   interval: 5m0s
   install:
     crds: CreateReplace
