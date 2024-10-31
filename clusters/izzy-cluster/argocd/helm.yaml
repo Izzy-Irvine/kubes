@@ -24,25 +24,23 @@ spec:
     global:
       domain: argocd.izzy.kiwi
     configs:
-      admin.enabled: true # TODO: Switch to Entra ID
-      # oidc.config: |
-      #   name: AzureAD
-      #   issuer: https://login.microsoftonline.com/TENANT_ID/v2.0
-      #   clientID: CLIENT_ID
-      #   clientSecret: $oidc.azuread.clientSecret
-      #   rootCA: |
-      #     -----BEGIN CERTIFICATE-----
-      #     ... encoded certificate data here ...
-      #     -----END CERTIFICATE-----
-      #   requestedIDTokenClaims:
-      #     groups:
-      #       essential: true
-      #   requestedScopes:
-      #     - openid
-      #     - profile
-      #     - email
+      admin.enabled: false
+      oidc.config: |
+        name: AzureAD
+        issuer: https://login.microsoftonline.com/0d9b6779-97c8-4804-83d4-596403a3aedf/v2.0
+        clientID: d86cdc4e-da9b-4ccd-8a6c-6acb6a3e0728
+        clientSecret: $oidc.azuread.clientSecret
+        requestedIDTokenClaims:
+          groups:
+            essential: true
+        requestedScopes:
+          - openid
+          - profile
+          - email
       params:
-         server.insecure: true
+        server.insecure: true
+      secret:
+        createSecret: false
     controller:
       metrics:
         enabled: false # TODO
