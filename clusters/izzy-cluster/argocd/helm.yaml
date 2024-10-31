@@ -1,0 +1,84 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: argo-helm
+  namespace: argo-cd
+spec:
+  type: oci
+  interval: 5m0s
+  url: https://argoproj.github.io/argo-helm
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: argo-cd
+  namespace: argo-cd
+spec:
+  chart:
+    spec:
+      chart: argo-cd
+      sourceRef:
+        kind: HelmRepository
+        name: argo-cd
+  interval: 5m0s
+  values:
+    global:
+      domain: argocd.izzy.kiwi
+    configs:
+      admin.enabled: true # TODO: Switch to Entra ID
+      # oidc.config: |
+      #   name: AzureAD
+      #   issuer: https://login.microsoftonline.com/TENANT_ID/v2.0
+      #   clientID: CLIENT_ID
+      #   clientSecret: $oidc.azuread.clientSecret
+      #   rootCA: |
+      #     -----BEGIN CERTIFICATE-----
+      #     ... encoded certificate data here ...
+      #     -----END CERTIFICATE-----
+      #   requestedIDTokenClaims:
+      #     groups:
+      #       essential: true
+      #   requestedScopes:
+      #     - openid
+      #     - profile
+      #     - email
+    controller:
+      metrics:
+        enabled: false # TODO
+    dex:
+      enabled: false
+    redis:
+      exporter:
+        enabled: false # TODO
+    server:
+      metrics:
+        enabled: false # TODO
+      ingress:
+        enabled: true
+        annotations:
+          cert-manager.io/cluster-issuer: http-issuer
+          nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
+          nginx.ingress.kubernetes.io/auth-tls-secret: default/ca-secret
+          nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+          nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+        tls: true
+    repoServer:
+      metrics:
+        enabled: false # TODO
+    applicationSet:
+      metrics:
+        enabled: false # TODO
+      ingress:
+        enabled: true
+        tls: true
+        annotations:
+          cert-manager.io/cluster-issuer: http-issuer
+    notifications:
+      ingress:
+        enabled: true
+      notifiers: {} # TODO
+      triggers: {} # TODO
+      
+        
+    
+
