@@ -41,6 +41,8 @@ spec:
       #     - openid
       #     - profile
       #     - email
+      params:
+         server.insecure: true
     controller:
       metrics:
         enabled: false # TODO
