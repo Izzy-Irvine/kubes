@@ -26,7 +26,3 @@ nodes:
     ipAddress: 192.168.100.117
     controlPlane: false
     installDisk: /dev/sda
-  - hostname: test-vm
-    ipAddress: 192.168.100.118
-    controlPlane: false
-    installDisk: /dev/sda
