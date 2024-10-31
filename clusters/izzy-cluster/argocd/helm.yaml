@@ -40,6 +40,8 @@ spec:
             - email
       params:
         server.insecure: true
+      rbac:
+        policy.default: 'role:org-admin' # If you're in my Entra ID, I trust you
       secret:
         createSecret: false
     controller:
