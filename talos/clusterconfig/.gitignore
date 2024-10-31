@@ -1,0 +1,7 @@
+talos-proxmox-cluster-k8s-control-plane-0.yaml
+talos-proxmox-cluster-alernon-vm.yaml
+talos-proxmox-cluster-rusty-vm.yaml
+talos-proxmox-cluster-nutty-vm.yaml
+talos-proxmox-cluster-truenas-k8s.yaml
+talosconfig
+talos-proxmox-cluster-test-vm.yaml

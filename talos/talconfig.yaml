@@ -1,0 +1,32 @@
+# Run 'talhelper genconfig' to turn this into talos config
+
+---
+clusterName: talos-proxmox-cluster
+talosVersion: v1.5.4
+kubernetesVersion: v1.28.2
+endpoint: https://192.168.100.210:6443
+nodes:
+  - hostname: k8s-control-plane-0
+    ipAddress: 192.168.100.210
+    controlPlane: true
+    installDisk: /dev/sda
+  - hostname: alernon-vm
+    ipAddress: 192.168.100.211
+    controlPlane: false
+    installDisk: /dev/sda
+  - hostname: rusty-vm
+    ipAddress: 192.168.100.212
+    controlPlane: false
+    installDisk: /dev/sda
+  - hostname: nutty-vm
+    ipAddress: 192.168.100.113
+    controlPlane: false
+    installDisk: /dev/sda
+  - hostname: truenas-k8s
+    ipAddress: 192.168.100.117
+    controlPlane: false
+    installDisk: /dev/sda
+  - hostname: test-vm
+    ipAddress: 192.168.100.118
+    controlPlane: false
+    installDisk: /dev/sda
