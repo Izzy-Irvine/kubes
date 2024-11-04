@@ -1,0 +1,7 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: workflow-test
+  namespace: workflow-test
+spec:
+  description: Used for testing Godot workflows

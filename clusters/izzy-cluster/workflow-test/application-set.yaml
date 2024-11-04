@@ -26,6 +26,7 @@ spec:
             app.kubernetes.io/instance: '{{.branch}}-{{.number}}'
           images:
           - 'nginx:latest'
+      project: workflow-test
       destination:
         server: https://kubernetes.default.svc
         namespace: workflow-test
