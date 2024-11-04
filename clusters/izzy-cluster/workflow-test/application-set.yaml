@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: workflow-test
+  namespace: workflow-test
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+  - pullRequest:
+      github:
+        owner: izzy-irvine
+        repo: workflow-test
+  template:
+    metadata:
+      name: 'myapp-{{.branch}}-{{.number}}'
+      namespace: workflow-test
+    spec:
+      source:
+        repoURL: 'https://github.com/ant-colony-flat/k8s.git'
+        targetRevision: '{{.head_sha}}'
+        path: argocd/workflow-test
+        kustomize:
+          nameSuffix: '{{.branch}}'
+          commonLabels:
+            app.kubernetes.io/instance: '{{.branch}}-{{.number}}'
+          images:
+          - 'nginx:latest'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: workflow-test
