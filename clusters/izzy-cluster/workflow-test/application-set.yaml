@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: workflow-test
-  namespace: workflow-test
+  namespace: argo-cd
 spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]

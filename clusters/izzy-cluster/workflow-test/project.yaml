@@ -2,6 +2,6 @@ apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: workflow-test
-  namespace: workflow-test
+  namespace: argo-cd
 spec:
   description: Used for testing Godot workflows

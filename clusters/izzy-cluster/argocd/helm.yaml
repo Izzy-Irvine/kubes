@@ -42,7 +42,7 @@ spec:
         server.insecure: true
 
         # TODO: This might be a security issue. Look into this more
-        applicationsetcontroller.namespaces: "*"
+        # applicationsetcontroller.namespaces: "*"
         application.namespaces: "*"
       rbac:
         policy.default: 'role:admin' # If you're in my Entra ID, I trust you
