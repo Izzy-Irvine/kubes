@@ -9,11 +9,9 @@ spec:
   generators:
     - list:
         elements:
-        - head_sha: fasd67dv798saf
-          branch: test-branch-1
+        - branch: test-branch-1
           number: "1"
-        - head_sha: 8bahas899v
-          branch: br-2
+        - branch: br-2
           number: "2"
   # - pullRequest:
   #     github:
@@ -26,7 +24,6 @@ spec:
     spec:
       source:
         repoURL: 'git@github.com:ant-colony-flat/k8s.git'
-        targetRevision: '{{.head_sha}}'
         path: argocd/workflow-test
         kustomize:
           nameSuffix: '{{.branch}}'
