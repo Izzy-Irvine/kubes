@@ -7,10 +7,18 @@ spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
   generators:
-  - pullRequest:
-      github:
-        owner: izzy-irvine
-        repo: workflow-test
+    - list:
+      elements:
+      - head_sha: fasd67dv798saf
+        branch: test-branch-1
+        number: "1"
+      - head_sha: 8bahas899v
+        branch: br-2
+        number: "2"
+  # - pullRequest:
+  #     github:
+  #       owner: izzy-irvine
+  #       repo: workflow-test
   template:
     metadata:
       name: 'myapp-{{.branch}}-{{.number}}'
