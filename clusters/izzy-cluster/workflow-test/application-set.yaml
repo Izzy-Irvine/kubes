@@ -25,7 +25,18 @@ spec:
           commonLabels:
             app.kubernetes.io/instance: 'pr{{.number}}'
           images:
-          - 'workflow-test=ghcr.io/izzy-irvine/workflow-test:{{.head_sha}}'  
+            - 'workflow-test=ghcr.io/izzy-irvine/workflow-test:{{.head_sha}}'  
+          patches:
+            - target:
+                kind: ingress
+                name: workflow-test
+              patch: |-
+                - op: replace
+                  path: /spec/rules/0/host
+                  value: pr{{.number}}.workflow-test.cult-flat.izzy.kiwi
+                - op: replace
+                  path: /spec/tls/0/host
+                  value: pr{{.number}}.workflow-test.cult-flat.izzy.kiwi
       project: workflow-test
       destination:
         server: https://kubernetes.default.svc

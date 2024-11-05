@@ -3,14 +3,21 @@ kind: Deployment
 metadata:
   name: workflow-test
 spec:
-  selector:
-    matchLabels:
-      app: workflow-test
   template:
-    metadata:
-      labels:
-        app: workflow-test
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: workflow-test
           image: workflow-test
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          securityContext:
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+              drop:
+                - ALL
