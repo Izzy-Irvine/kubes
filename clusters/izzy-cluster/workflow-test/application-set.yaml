@@ -25,7 +25,7 @@ spec:
           commonLabels:
             app.kubernetes.io/instance: 'pr{{.number}}'
           images:
-          - 'workflow-test=ghcr.io/izzy-irvine/workflow-test:{{head_sha}}'  
+          - 'workflow-test=ghcr.io/izzy-irvine/workflow-test:{{.head_sha}}'  
       project: workflow-test
       destination:
         server: https://kubernetes.default.svc
