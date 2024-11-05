@@ -25,10 +25,12 @@ spec:
           commonLabels:
             app.kubernetes.io/instance: 'pr{{.number}}'
           images:
-            - 'workflow-test=ghcr.io/izzy-irvine/workflow-test:{{.head_sha}}'  
+            - name: workflow-test
+              newName: ghcr.io/izzy-irvine/workflow-test
+              newTag: '{{.head_sha}}'
           patches:
             - target:
-                kind: ingress
+                kind: Ingress
               patch: |-
                 - op: replace
                   path: /spec/rules/0/host
