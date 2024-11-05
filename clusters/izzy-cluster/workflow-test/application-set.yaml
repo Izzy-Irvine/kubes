@@ -35,8 +35,11 @@ spec:
                   path: /spec/rules/0/host
                   value: pr{{.number}}.workflow-test.cult-flat.izzy.kiwi
                 - op: replace
-                  path: /spec/tls/0/host
+                  path: /spec/tls/0/hosts/0
                   value: pr{{.number}}.workflow-test.cult-flat.izzy.kiwi
+                - op: replace
+                  path: /spec/tls/0/secretName
+                  value: workflow-test-pr{{.number}}-tls
       project: workflow-test
       destination:
         server: https://kubernetes.default.svc
