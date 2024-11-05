@@ -8,6 +8,7 @@ spec:
   goTemplateOptions: ["missingkey=error"]
   generators:
   - pullRequest:
+      requeueAfterSeconds: 2700
       github:
         owner: Izzy-Irvine
         repo: workflow-test
@@ -33,4 +34,4 @@ spec:
         automated:
           prune: true
           selfHeal: true
-          
+
