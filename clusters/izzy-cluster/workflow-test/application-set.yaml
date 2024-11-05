@@ -14,18 +14,18 @@ spec:
         repo: workflow-test
   template:
     metadata:
-      name: 'myapp-{{.branch_slug}}-pr{{.number}}'
+      name: 'workflow-test-pr{{.number}}'
       namespace: workflow-test
     spec:
       source:
         repoURL: 'git@github.com:ant-colony-flat/k8s.git'
         path: argocd/workflow-test
         kustomize:
-          nameSuffix: '-{{.branch_slug}}-pr{{.number}}'
+          nameSuffix: '-pr{{.number}}'
           commonLabels:
-            app.kubernetes.io/instance: '{{.branch_slug}}-pr{{.number}}'
+            app.kubernetes.io/instance: 'pr{{.number}}'
           images:
-          - 'workflow-test=ghcr.io/izzy-irvine/workflow-test:{{ .head_short_sha }}'
+          - 'workflow-test=ghcr.io/izzy-irvine/workflow-test:{{head_sha}}'  
       project: workflow-test
       destination:
         server: https://kubernetes.default.svc
