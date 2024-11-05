@@ -25,9 +25,7 @@ spec:
           commonLabels:
             app.kubernetes.io/instance: 'pr{{.number}}'
           images:
-            - name: workflow-test
-              newName: ghcr.io/izzy-irvine/workflow-test
-              newTag: '{{.head_sha}}'
+            - 'workflow-test=ghcr.io/izzy-irvine/workflow-test:{{.head_sha}}'  
           patches:
             - target:
                 kind: Ingress
