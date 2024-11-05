@@ -29,3 +29,8 @@ spec:
       destination:
         server: https://kubernetes.default.svc
         namespace: workflow-test
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          
