@@ -13,16 +13,16 @@ spec:
         repo: workflow-test
   template:
     metadata:
-      name: 'myapp-{{.branch}}-{{.number}}'
+      name: 'myapp-{{.branch_slug}}-{{.number}}'
       namespace: workflow-test
     spec:
       source:
         repoURL: 'git@github.com:ant-colony-flat/k8s.git'
         path: argocd/workflow-test
         kustomize:
-          nameSuffix: '-{{.branch}}-{{.number}}'
+          nameSuffix: '-{{.branch_slug}}-{{.number}}'
           commonLabels:
-            app.kubernetes.io/instance: '{{.branch}}-{{.number}}'
+            app.kubernetes.io/instance: '{{.branch_slug}}-{{.number}}'
           images:
           - 'nginx:latest'
       project: workflow-test
