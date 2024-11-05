@@ -17,7 +17,7 @@ spec:
       namespace: workflow-test
     spec:
       source:
-        repoURL: 'https://github.com/ant-colony-flat/k8s.git'
+        repoURL: 'git@github.com:ant-colony-flat/k8s.git'
         targetRevision: '{{.head_sha}}'
         path: argocd/workflow-test
         kustomize:
