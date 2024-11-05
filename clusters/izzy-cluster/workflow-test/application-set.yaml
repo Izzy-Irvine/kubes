@@ -29,7 +29,7 @@ spec:
           patches:
             - target:
                 kind: ingress
-                name: workflow-test
+                name: workflow-test-pr{{.number}}
               patch: |-
                 - op: replace
                   path: /spec/rules/0/host
