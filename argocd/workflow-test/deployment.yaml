@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx
+  name: workflow-test
 spec:
   selector:
     matchLabels:
-      app: nginx
+      app: workflow-test
   template:
     metadata:
       labels:
-        app: nginx
+        app: workflow-test
     spec:
       containers:
-        - name: nginx
-          image: nginx
+        - name: workflow-test
+          image: workflow-test
