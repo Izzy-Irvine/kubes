@@ -9,7 +9,7 @@ spec:
   generators:
   - pullRequest:
       github:
-        owner: izzy-irvine
+        owner: Izzy-Irvine
         repo: workflow-test
   template:
     metadata:
