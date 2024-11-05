@@ -5,3 +5,8 @@ metadata:
   namespace: argo-cd
 spec:
   description: Used for testing Godot workflows
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: workflow-test
+    server: https://kubernetes.default.svc
