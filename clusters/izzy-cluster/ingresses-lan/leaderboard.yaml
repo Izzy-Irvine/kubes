@@ -51,6 +51,6 @@ ports:
     port: 8000
 endpoints:
   - addresses:
-      - "192.168.200.203"
+      - "192.168.200.238"
     conditions:
       ready: true
