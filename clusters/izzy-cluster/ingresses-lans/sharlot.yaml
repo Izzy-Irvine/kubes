@@ -10,10 +10,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-      - sharlot.izzy.kiwi
+      - sharlot.cult-flat.izzy.kiwi
     secretName: sharlot-tls
   rules:
-  - host: sharlot.izzy.kiwi
+  - host: sharlot.cult-flat.izzy.kiwi
     http:
       paths:
       - path: /
