@@ -10,10 +10,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-      - sharlot.cult-flat.izzy.kiwi
+      - chart.jankseason.com
     secretName: sharlot-tls
   rules:
-  - host: sharlot.cult-flat.izzy.kiwi
+  - host: chart.jankseason.com
     http:
       paths:
       - path: /
