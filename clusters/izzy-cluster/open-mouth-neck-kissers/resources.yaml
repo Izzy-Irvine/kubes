@@ -1,0 +1,39 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kissers
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: kissers
+  namespace: kissers
+spec:
+  chart:
+    spec:
+      chart: minecraft
+      sourceRef:
+        kind: HelmRepository
+        name: mc
+        namespace: default
+  values:
+    replicaCount: 1
+    minecraftServer:
+      eula: "TRUE"
+      type: FORGE
+      version: 1.21.4
+      difficulty: easy
+      spawnProtection: 0
+      motd: Open Mouth N\u00a7mi\u00a7reck Kissers
+      memory: 2000M
+    resources:
+      requests: 
+        memory: 2500Mi
+    serviceAnnotations:
+      "mc-router.itzg.me/externalServerName": "kissers.izzy.kiwi"
+    persistence:
+      dataDir:
+        enabled: true
+        Size: 20Gi
+  interval: 5m0s
