@@ -27,6 +27,7 @@ spec:
       spawnProtection: 0
       motd: Open Mouth N\u00a7mi\u00a7reck Kissers
       memory: 2000M
+      ops: boxhead_crafter
     resources:
       requests: 
         memory: 2500Mi
