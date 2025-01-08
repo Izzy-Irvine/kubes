@@ -13,7 +13,7 @@ spec:
     spec:
       initContainers:
         - name: config
-          image: TODO
+          image: ghcr.io/izzy-irvine/gha-runner
           command: ["./config-wrapper.sh"]
           # volumeMounts:
           #   - name: config
@@ -35,7 +35,7 @@ spec:
             #       name: runner-secret # create me with a secret generator
       containers:
         - name: runner
-          image: TODO
+          image: ghcr.io/izzy-irvine/gha-runner
           command: ['./run.sh']
       volumes:
         name: config
