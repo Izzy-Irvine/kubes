@@ -39,6 +39,8 @@ spec:
         excludeMods:
           - "452046" # enhanced-block-entities is client only
         forceSynchronize: true
+    extraEnv:
+      CF_OVERRIDES_EXCLUSIONS: mods/EBE*.jar
     startupProbe:
       enabled: true
     resources:
