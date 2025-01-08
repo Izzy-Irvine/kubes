@@ -1,19 +1,16 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
 namespace: global-game-jam-2025
 resources:
-  - namespace.yaml
   - ../../../bases/game-jam-runner
-# secretGenerator:
-#   - name: runner-secret
-#     envs:
-#       - runner.sops.env
-# patches:
-#   - target:
-#       kind: Deployment
-#       name: game-jam-runner
-#     patch: |
-#       - op: replace
-#         path: /spec/template/spec/initContainers/0/env/0/value
-#         value: https://github.com/Izzy-Irvine/global-game-jam-2025
+secretGenerator:
+  - name: runner-secret
+    envs:
+      - runner.sops.env
+patches:
+  - target:
+      kind: Deployment
+      name: game-jam-runner
+    patch: |
+      - op: replace
+        path: /spec/template/spec/initContainers/0/env/0/value
+        value: https://github.com/Izzy-Irvine/global-game-jam-2025
    
