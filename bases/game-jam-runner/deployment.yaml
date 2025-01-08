@@ -5,7 +5,8 @@ metadata:
 spec:
   replicas: 1
   selector:
-    app: game-jam-runner
+    matchLabels:
+      app: game-jam-runner
   template:
     metadata:
       labels:
@@ -38,6 +39,6 @@ spec:
           image: ghcr.io/izzy-irvine/gha-runner
           command: ['./run.sh']
       volumes:
-        name: config
-        persistentVolumeClaim:
-          claimName: runner-config
+        - name: config
+          persistentVolumeClaim:
+            claimName: runner-config
