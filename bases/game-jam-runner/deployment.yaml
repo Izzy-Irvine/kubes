@@ -28,11 +28,11 @@ spec:
           env:
             - name: GHA_URL
               value: ReplaceMe # Set me with a patch
-            - name: GHA_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  key: token
-                  name: runner-secret # create me with a secret generator
+            # - name: GHA_TOKEN
+            #   valueFrom:
+            #     secretKeyRef:
+            #       key: token
+            #       name: runner-secret # create me with a secret generator
       containers:
         - name: runner
           image: TODO
