@@ -38,6 +38,7 @@ spec:
         pageUrl: https://www.curseforge.com/minecraft/modpacks/gencraft-forge
         excludeMods:
           - "452046" # enhanced-block-entities is client only
+        forceSynchronize: true
     startupProbe:
       enabled: true
     resources:
