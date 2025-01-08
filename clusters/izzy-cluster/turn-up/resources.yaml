@@ -1,0 +1,48 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: turn-up
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: turn-up
+  namespace: turn-up
+spec:
+  chart:
+    spec:
+      chart: minecraft
+      sourceRef:
+        kind: HelmRepository
+        name: mc
+        namespace: default
+  values:
+    replicaCount: 1
+    minecraftServer:
+      eula: "TRUE"
+      type: AUTO_CURSEFORGE
+      version: '1.20.1'
+      difficulty: normal
+      spawnProtection: 0
+      motd: 'Get down with Turn Up!'
+      memory: 10Gi
+      gameMode: survival
+      ops: boxhead_crafter,
+      enableCommandBlock: false
+      autoCurseForge:
+        apiKey: 
+          existingSecret: turn-up-curseforge
+        pageUrl: https://www.curseforge.com/minecraft/modpacks/gencraft-forge
+    startupProbe:
+      enabled: true
+    resources:
+      requests: 
+        memory: 12Gi
+    serviceAnnotations:
+      "mc-router.itzg.me/externalServerName": "turn-up.izzy.kiwi"
+    persistence:
+      dataDir:
+        enabled: true
+        Size: 20Gi
+  interval: 5m0s
