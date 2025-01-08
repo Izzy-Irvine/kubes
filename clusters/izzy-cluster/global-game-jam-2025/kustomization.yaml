@@ -13,6 +13,6 @@ patches:
       name: game-jam-runner
     patch: |
       - op: replace
-        path: /spec/template/spec/initContainers/env/0/value
+        path: /spec/template/spec/initContainers/0/env/0/value
         value: https://github.com/Izzy-Irvine/global-game-jam-2025
    
