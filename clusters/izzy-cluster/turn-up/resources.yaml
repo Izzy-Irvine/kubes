@@ -25,7 +25,7 @@ spec:
       version: '1.20.1'
       difficulty: normal
       spawnProtection: 0
-      motd: 'Get down with Turn Up!'
+      motd: 'Get down with Turn Up'
       memory: 10Gi
       gameMode: survival
       ops: boxhead_crafter,
