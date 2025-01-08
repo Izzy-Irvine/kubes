@@ -1,10 +1,10 @@
 namespace: global-game-jam-2025
 resources:
   - ../../../bases/game-jam-runner
-secretGenerator:
-  - name: runner-secret
-    envs:
-      - runner.sops.env
+# secretGenerator:
+#   - name: runner-secret
+#     envs:
+#       - runner.sops.env
 # patches:
 #   - target:
 #       kind: Deployment
