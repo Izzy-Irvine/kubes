@@ -5,12 +5,12 @@ secretGenerator:
   - name: runner-secret
     envs:
       - runner.sops.env
-patches:
-  - target:
-      kind: Deployment
-      name: game-jam-runner
-    patch: |
-      - op: replace
-        path: /spec/template/spec/initContainers/0/env/0/value
-        value: https://github.com/Izzy-Irvine/global-game-jam-2025
+# patches:
+#   - target:
+#       kind: Deployment
+#       name: game-jam-runner
+#     patch: |
+#       - op: replace
+#         path: /spec/template/spec/initContainers/0/env/0/value
+#         value: https://github.com/Izzy-Irvine/global-game-jam-2025
    
