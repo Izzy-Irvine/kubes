@@ -7,8 +7,6 @@ secretGenerator:
       - runner.sops.env
 patches:
   - target:
-      group: apps
-      version: v1
       kind: Deployment
       name: game-jam-runner
     patch: |
