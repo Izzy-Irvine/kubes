@@ -28,7 +28,7 @@ spec:
       difficulty: normal
       spawnProtection: 0
       motd: 'Get down with Turn Up'
-      memory: 10Gi
+      memory: 10G
       gameMode: survival
       ops: boxhead_crafter,
       enableCommandBlock: false
