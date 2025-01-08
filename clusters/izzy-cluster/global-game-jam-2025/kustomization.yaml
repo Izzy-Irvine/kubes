@@ -3,7 +3,7 @@ resources:
   - ../../../bases/game-jam-runner
 secretGenerator:
   - name: runner-secret
-    env:
+    envs:
       - runner.sops.env
 patches:
   - target:
