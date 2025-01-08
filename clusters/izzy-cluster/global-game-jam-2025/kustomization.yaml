@@ -1,5 +1,6 @@
 namespace: global-game-jam-2025
 resources:
+  - namespace.yaml
   - ../../../bases/game-jam-runner
 secretGenerator:
   - name: runner-secret
