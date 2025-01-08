@@ -4,3 +4,5 @@ creation_rules:
     age: age1lyeweegkthnfzggpruszm3ru80mrm5zy6w6rnkux0r6apr42cfpssnp3p8
   - path_regex: \.sops\.yaml
     age: age1lyeweegkthnfzggpruszm3ru80mrm5zy6w6rnkux0r6apr42cfpssnp3p8
+  - path_regex: \.sops\.env
+    age: age1lyeweegkthnfzggpruszm3ru80mrm5zy6w6rnkux0r6apr42cfpssnp3p8
