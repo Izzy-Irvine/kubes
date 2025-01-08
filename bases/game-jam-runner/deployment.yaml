@@ -15,16 +15,16 @@ spec:
         - name: config
           image: TODO
           command: ["./config-wrapper.sh"]
-          volumeMounts:
-            - name: config
-              mountPath: /home/runner/.credentials
-              subPath: .credentials
-            - name: config
-              mountPath: /home/runner/.credentials_migrated
-              subPath: .credentials_migrated
-            - name: config
-              mountPath: /home/runner/.runner
-              subPath: .runner
+          # volumeMounts:
+          #   - name: config
+          #     mountPath: /home/runner/.credentials
+          #     subPath: .credentials
+          #   - name: config
+          #     mountPath: /home/runner/.credentials_migrated
+          #     subPath: .credentials_migrated
+          #   - name: config
+          #     mountPath: /home/runner/.runner
+          #     subPath: .runner
           env:
             - name: GHA_URL
               value: ReplaceMe # Set me with a patch
