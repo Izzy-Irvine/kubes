@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: global-game-jam-2025
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: game-jam-runner
+  namespace: global-game-jam-2025
+spec:
+  replicas: 1
+  selector:
+    app: game-jam-runner
+  template:
+    metadata:
+      labels:
+        app: game-jam-runner
+    spec:
+      initContainers:
+        - name: config
+          image: TODO
+          command: ["./config-wrapper.sh"]
+          volumeMounts:
+            - name: config
+              mountPath: /home/runner/.credentials
+              subPath: .credentials
+            - name: config
+              mountPath: /home/runner/.credentials_migrated
+              subPath: .credentials_migrated
+            - name: config
+              mountPath: /home/runner/.runner
+              subPath: .runner
+          env:
+            - name: GHA_URL
+              value: https://github.com/Izzy-Irvine/global-game-jam-2025
+            - name: GHA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: token
+                  name: game-jam-runner-secret
+      containers:
+        - name: runner
+          image: TODO
+          command: ['./run.sh']
+      volumes:
+        name: config
+        persistentVolumeClaim:
+          claimName: game-jam-runner-config
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: game-jam-runner-config
+  namespace: global-game-jam-2025
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi

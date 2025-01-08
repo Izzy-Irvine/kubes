@@ -1,0 +1,30 @@
+
+FROM ghcr.io/actions/actions-runner
+
+# the version of buildah in apt is to old to support heredoc 3:
+
+#RUN apt-get update && apt-get install -y git curl wget unzip && rm -rf /var/lib/apt/lists/*
+
+
+RUN mkdir -p /home/runner/.cache /home/runner/.config/godot /home/runner/.local/share/godot/export_templates/4.3.stable \
+    && chown -R runner /home/runner/.cache /home/runner/.config/ /home/runner/.local/
+
+USER root
+
+# Godot install
+RUN curl -L -O https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip \
+    && unzip Godot_v4.3-stable_linux.x86_64.zip \
+    && mv Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot \
+    && rm Godot_v4.3-stable_linux.x86_64.zip
+
+USER runner
+
+# Godot templates install
+# 1GB!! 1GB!! Do I need this???
+RUN curl -L -O https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz \
+    && unzip Godot_v4.3-stable_export_templates.tpz \
+    && mv templates/* /home/runner/.local/share/godot/export_templates/4.3.stable \ 
+    && rm Godot_v4.3-stable_export_templates.tpz \
+    && rmdir templates/ \
+    && chown -R runner /home/runner/.local/share/godot 
+
