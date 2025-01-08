@@ -27,7 +27,7 @@ spec:
               subPath: .runner
           env:
             - name: GHA_URL
-              value: # Set me with a patch
+              value: ReplaceMe # Set me with a patch
             - name: GHA_TOKEN
               valueFrom:
                 secretKeyRef:
