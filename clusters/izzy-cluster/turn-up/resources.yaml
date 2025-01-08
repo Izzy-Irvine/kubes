@@ -37,7 +37,7 @@ spec:
           existingSecret: turn-up-curseforge
         pageUrl: https://www.curseforge.com/minecraft/modpacks/gencraft-forge
         excludeMods:
-          - "enhanced-block-entities" # client only
+          - "452046" # enhanced-block-entities is client only
     startupProbe:
       enabled: true
     resources:
