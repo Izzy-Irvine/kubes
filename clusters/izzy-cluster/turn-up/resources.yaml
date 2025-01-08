@@ -30,7 +30,7 @@ spec:
       motd: 'Get down with Turn Up!'
       memory: 10G
       gameMode: survival
-      ops: boxhead_crafter,Koraguz
+      ops: boxhead_crafter
       enableCommandBlock: false
       autoCurseForge:
         apiKey: 
