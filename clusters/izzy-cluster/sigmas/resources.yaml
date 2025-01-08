@@ -30,6 +30,8 @@ spec:
       ops: boxhead_crafter,bean_grinder
       enableCommandBlock: false
       worldSaveName: Ohio
+      image:
+        tag: java21
     resources:
       requests: 
         memory: 2Gi
