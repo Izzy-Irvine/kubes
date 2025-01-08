@@ -19,6 +19,8 @@ spec:
         namespace: default
   values:
     replicaCount: 1
+    image:
+      tag: java21
     minecraftServer:
       eula: "TRUE"
       type: AUTO_CURSEFORGE
