@@ -38,6 +38,16 @@ spec:
         - name: runner
           image: ghcr.io/izzy-irvine/gha-runner
           command: ['./run.sh']
+          volumeMounts:
+            - name: config
+              mountPath: /home/runner/.credentials
+              subPath: .credentials
+            - name: config
+              mountPath: /home/runner/.credentials_migrated
+              subPath: .credentials_migrated
+            - name: config
+              mountPath: /home/runner/.runner
+              subPath: .runner
       volumes:
         - name: config
           persistentVolumeClaim:
