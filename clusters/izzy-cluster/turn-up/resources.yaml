@@ -36,6 +36,8 @@ spec:
         apiKey: 
           existingSecret: turn-up-curseforge
         pageUrl: https://www.curseforge.com/minecraft/modpacks/gencraft-forge
+        excludeMods:
+          - "enhanced-block-entities" # client only
     startupProbe:
       enabled: true
     resources:
