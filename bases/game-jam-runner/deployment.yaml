@@ -22,13 +22,11 @@ spec:
           command:
             - bash
             - -c
-            - >
-                touch /config/.credentials /config/.credentials_migrated /config/.credentials_rsaparams /config/.runner
-                && ln -s /config/.credentials .credentials
-                && ln -s /config/.credentials_migrated .credentials_migrated
-                && ln -s /config/.credentials_rsaparams .credentials_rsaparams
-                && ln -s /config/.runner .runner
-                && ./config.sh --unattended --replace --name runner --url $GHA_URL --token $GHA_TOKEN
+            - |
+                if [ ! -s /config/.credentials ]; then
+                  ./config.sh --unattended --replace --name runner --url $GHA_URL --token $GHA_TOKEN
+                  cp .credentials .credentials_migrated .credentials_rsaparams .runner /config
+                fi
           volumeMounts:
             - name: config
               mountPath: /config
@@ -51,6 +49,9 @@ spec:
             - name: config
               mountPath: /home/runner/.credentials_migrated
               subPath: .credentials_migrated
+            - name: config
+              mountPath: /home/runner/.credentials_rsaparams
+              subPath: .credentials_rsaparams
             - name: config
               mountPath: /home/runner/.runner
               subPath: .runner
