@@ -22,17 +22,16 @@ spec:
           command:
             - bash
             - -c
-            - ls -la && ./config.sh --unattended --replace --name runner --url $GHA_URL --token $GHA_TOKEN
+            - |
+            touch /config/.credentials /config/.credentials_migrated /config/.credentials_rsaparams /config/.runner
+            && ln -s /config/.credentials .credentials
+            && ln -s /config/.credentials_migrated .credentials_migrated
+            && ln -s /config/.credentials_rsaparams .credentials_rsaparams
+            && ln -s /config/.runner .runner
+            && ./config.sh --unattended --replace --name runner --url $GHA_URL --token $GHA_TOKEN
           volumeMounts:
             - name: config
-              mountPath: /home/runner/.credentials
-              subPath: .credentials
-            - name: config
-              mountPath: /home/runner/.credentials_migrated
-              subPath: .credentials_migrated
-            - name: config
-              mountPath: /home/runner/.runner
-              subPath: .runner
+              mountPath: /config
           env:
             - name: GHA_URL
               value: ReplaceMe # Set me with a patch
@@ -59,3 +58,4 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: runner-config
+            defaultMode: 
