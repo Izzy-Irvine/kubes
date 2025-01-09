@@ -65,6 +65,10 @@ spec:
           volumeMounts:
             - name: web
               mountPath: /usr/share/nginx/html
+            - name: cache
+              mountPath: /var/cache/nginx
+            - name: tmp
+              mountPath: /tmp/nginx
           ports:
             - name: http
               containerPort: 80
@@ -75,3 +79,7 @@ spec:
         - name: web
           persistentVolumeClaim:
             claimName: web
+        - name: cache
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
