@@ -16,9 +16,11 @@ spec:
         - name: config
           image: ghcr.io/izzy-irvine/gha-runner
           command:
-            - bash
-            - -c
-            - test ! -s ~/.credentials && ./config.sh --unattended --replace --name runner --url $GHA_URL --token $GHA_TOKEN
+            - echo
+            - hi
+            # - bash
+            # - -c
+            # - test ! -s ~/.credentials && ./config.sh --unattended --replace --name runner --url $GHA_URL --token $GHA_TOKEN
           volumeMounts:
             - name: config
               mountPath: /home/runner/.credentials
