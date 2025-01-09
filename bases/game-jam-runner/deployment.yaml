@@ -22,7 +22,7 @@ spec:
           command:
             - bash
             - -c
-            - |
+            - >
             touch /config/.credentials /config/.credentials_migrated /config/.credentials_rsaparams /config/.runner
             && ln -s /config/.credentials .credentials
             && ln -s /config/.credentials_migrated .credentials_migrated
