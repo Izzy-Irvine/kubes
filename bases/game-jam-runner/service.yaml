@@ -5,6 +5,7 @@ metadata:
 spec:
   ports:
   - name: http
+    port: 80
     protocol: TCP
   selector:
     app: game-jam-runner
