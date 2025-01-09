@@ -25,7 +25,7 @@ spec:
             - |
                 if [ ! -s /config/.credentials ]; then
                   ./config.sh --unattended --replace --name runner --url $GHA_URL --token $GHA_TOKEN
-                  cp .credentials .credentials_migrated .credentials_rsaparams .runner /config
+                  cp .credentials .credentials_migrated .credentials_rsaparams .runner .service /config
                 fi
           volumeMounts:
             - name: config
@@ -55,6 +55,9 @@ spec:
             - name: config
               mountPath: /home/runner/.runner
               subPath: .runner
+            - name: config
+              mountPath: /home/runner/.service
+              subPath: .service
       volumes:
         - name: config
           persistentVolumeClaim:
