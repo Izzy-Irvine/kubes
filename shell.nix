@@ -13,5 +13,6 @@ in pkgs.mkShell {
         kubernetes-helm
         talhelper
         k9s
+        fluxcd
     ];
 }

@@ -1,11 +1,6 @@
 
 FROM ghcr.io/actions/actions-runner
 
-# the version of buildah in apt is to old to support heredoc 3:
-
-#RUN apt-get update && apt-get install -y git curl wget unzip && rm -rf /var/lib/apt/lists/*
-
-
 RUN mkdir -p /home/runner/.cache /home/runner/.config/godot /home/runner/.local/share/godot/export_templates/4.3.stable \
     && chown -R runner /home/runner/.cache /home/runner/.config/ /home/runner/.local/
 
