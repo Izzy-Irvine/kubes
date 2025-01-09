@@ -20,7 +20,7 @@ spec:
   values:
     replicaCount: 1
     image:
-      tag: java21
+      tag: java17
     minecraftServer:
       eula: "TRUE"
       type: AUTO_CURSEFORGE
