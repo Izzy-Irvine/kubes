@@ -38,7 +38,7 @@ spec:
         pageUrl: https://www.curseforge.com/minecraft/modpacks/bucky-and-the-girls
         forceSynchronize: true
         includeMods:
-          - "419699" # Architectury API
+          - "architectury-api" # Architectury API
           - "1058791" # Mob Player Animator
         excludeMods:
           - "815438" # Fog
