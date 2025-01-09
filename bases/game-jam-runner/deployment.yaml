@@ -72,3 +72,6 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: runner-config
+        - name: web
+          persistentVolumeClaim:
+            claimName: web
