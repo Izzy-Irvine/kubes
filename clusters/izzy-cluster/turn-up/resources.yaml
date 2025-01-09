@@ -40,7 +40,8 @@ spec:
         includeMods:
           - "1058791" # Mob Player Animator
         excludeMods:
-          - "815438" # fog
+          - "815438" # Fog
+          - "925889" # Sounds
     startupProbe:
       enabled: true
     resources:
