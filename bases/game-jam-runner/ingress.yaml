@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: game-jam-runner
+  annotations:
+    cert-manager.io/cluster-issuer: http-issuer
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+      - patch-me.izzy.kiwi
+    secretName: game-jam-runner-tls
+  rules:
+  - host: patch-me.izzy.kiwi
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx
+            port: 
+              name: http

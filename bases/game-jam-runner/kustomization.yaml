@@ -1,3 +1,6 @@
 resources:
   - runtime-pvc.yaml
   - deployment.yaml
+  - web-pvc.yaml
+  - service.yaml
+  - ingress.yaml

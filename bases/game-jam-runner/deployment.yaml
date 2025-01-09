@@ -58,8 +58,17 @@ spec:
             - name: config
               mountPath: /home/runner/.service
               subPath: .service
+            - name: web
+              mountPath: /web
+        - name: web
+          image: nginx
+          volumeMounts:
+            - name: web
+              mountPath: /usr/share/nginx/html
+          ports:
+            - name: http
+              containerPort: 80
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: runner-config
-            defaultMode: 
