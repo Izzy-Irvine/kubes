@@ -4,3 +4,4 @@ resources:
   - web-pvc.yaml
   - service.yaml
   - ingress.yaml
+  - nginx-config.yaml
