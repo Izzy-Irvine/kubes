@@ -1,8 +1,7 @@
 { pkgs ? import <nixpkgs> {} }:
 let
-    talhelper =  pkgs.callPackage (pkgs.fetchgit {
+    talhelper =  pkgs.callPackage (builtins.fetchGit {
         url = "https://github.com/budimanjojo/talhelper";
-        hash = "sha256-VEKl7ftH3GrhmRyIRCK2hkTb59vzmaHrlHIH21U2nOM=";
     }) {};
 in pkgs.mkShell {
     packages = with pkgs; [
@@ -13,5 +12,6 @@ in pkgs.mkShell {
         kubectl
         kubernetes-helm
         talhelper
+        k9s
     ];
 }

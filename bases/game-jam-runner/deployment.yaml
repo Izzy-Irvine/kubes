@@ -33,7 +33,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: token
-                  name: runner-secret # create me with a secret generator
+                  name: runner-token # create me with a secret generator
       containers:
         - name: runner
           image: ghcr.io/izzy-irvine/gha-runner

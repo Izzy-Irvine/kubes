@@ -3,7 +3,7 @@ resources:
   - namespace.yaml
   - ../../../bases/game-jam-runner
 secretGenerator:
-  - name: runner-secret
+  - name: runner-token
     envs:
       - runner.sops.env
 patches:
