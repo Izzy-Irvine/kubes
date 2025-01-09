@@ -35,12 +35,8 @@ spec:
       autoCurseForge:
         apiKey: 
           existingSecret: turn-up-curseforge
-        pageUrl: https://www.curseforge.com/minecraft/modpacks/gencraft-forge
-        excludeMods:
-          - "452046" # enhanced-block-entities is client only
+        pageUrl: https://www.curseforge.com/minecraft/modpacks/bucky-and-the-girls
         forceSynchronize: true
-    extraEnv:
-      CF_OVERRIDES_EXCLUSIONS: mods/EBE*.jar
     startupProbe:
       enabled: true
     resources:
