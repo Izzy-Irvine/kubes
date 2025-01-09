@@ -37,6 +37,8 @@ spec:
           existingSecret: turn-up-curseforge
         pageUrl: https://www.curseforge.com/minecraft/modpacks/bucky-and-the-girls
         forceSynchronize: true
+        includeMods:
+          - "1058791" # Mob Player Animator
     startupProbe:
       enabled: true
     resources:
