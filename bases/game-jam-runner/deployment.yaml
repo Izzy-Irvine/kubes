@@ -15,6 +15,7 @@ spec:
       securityContext:
         runAsUser: 1001
         runAsGroup: 1001
+        fsGroup: 1001
       initContainers:
         - name: config
           image: ghcr.io/izzy-irvine/gha-runner
