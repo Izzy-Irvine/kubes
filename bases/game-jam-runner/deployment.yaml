@@ -12,6 +12,9 @@ spec:
       labels:
         app: game-jam-runner
     spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
       initContainers:
         - name: config
           image: ghcr.io/izzy-irvine/gha-runner
