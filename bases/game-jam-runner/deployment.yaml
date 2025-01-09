@@ -22,7 +22,7 @@ spec:
           command:
             - bash
             - -c
-            - ./config.sh --unattended --replace --name runner --url $GHA_URL --token $GHA_TOKEN
+            - ls -la && ./config.sh --unattended --replace --name runner --url $GHA_URL --token $GHA_TOKEN
           volumeMounts:
             - name: config
               mountPath: /home/runner/.credentials
