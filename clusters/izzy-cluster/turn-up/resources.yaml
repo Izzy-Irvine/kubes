@@ -39,6 +39,8 @@ spec:
         forceSynchronize: true
         includeMods:
           - "1058791" # Mob Player Animator
+        excludeMods:
+          - "815438" # fog
     startupProbe:
       enabled: true
     resources:
