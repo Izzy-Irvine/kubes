@@ -22,6 +22,6 @@ patches:
         path: /spec/tls/0/hosts/0
         value: global-jam-25.izzy.kiwi
       - op: replace
-        path: /spec/rules/host
+        path: /spec/rules/0/host
         value: global-jam-25.izzy.kiwi
    
