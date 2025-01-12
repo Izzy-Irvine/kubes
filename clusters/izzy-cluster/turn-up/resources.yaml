@@ -20,14 +20,14 @@ spec:
   values:
     replicaCount: 1
     image:
-      tag: java21-graalvm
+      tag: java21
     minecraftServer:
       eula: "TRUE"
       type: AUTO_CURSEFORGE
       version: '1.20.1'
       difficulty: normal
       spawnProtection: 0
-      motd: 'Get down with Turn Up!!'
+      motd: 'Get down with Turn Up!'
       memory: 10G
       gameMode: survival
       ops: boxhead_crafter
@@ -35,14 +35,10 @@ spec:
       autoCurseForge:
         apiKey: 
           existingSecret: turn-up-curseforge
-        pageUrl: https://www.curseforge.com/minecraft/modpacks/bucky-and-the-girls
+        pageUrl: https://www.curseforge.com/minecraft/modpacks/all-the-mods-9
         forceSynchronize: true
-        includeMods:
-          - "architectury-api" # Architectury API
-          - "1058791" # Mob Player Animator
-        excludeMods:
-          - "815438" # Fog
-          - "925889" # Sounds
+        includeMods: []
+        excludeMods: []
     startupProbe:
       enabled: true
     resources:
