@@ -41,6 +41,8 @@ spec:
         excludeMods: []
     startupProbe:
       enabled: true
+      failureThreshold: 50
+      periodSeconds: 10
     resources:
       requests: 
         memory: 12Gi
