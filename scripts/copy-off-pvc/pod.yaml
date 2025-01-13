@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: copy-data
+spec:
+  containers:
+    - name: copy-data
+      image: ubuntu
+      command: ['sleep', 'inf']
+      volumeMounts:
+        - name: data
+          mountPath: /data
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: PVC_NAME
+        readOnly: true

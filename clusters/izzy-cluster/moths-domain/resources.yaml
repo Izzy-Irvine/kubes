@@ -18,7 +18,7 @@ spec:
         name: mc
         namespace: default
   values:
-    replicaCount: 0
+    replicaCount: 1
     minecraftServer:
       eula: "TRUE"
       type: PAPER
