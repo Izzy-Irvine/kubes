@@ -10,3 +10,6 @@ secretGenerator:
     envs:
       - regcred.sops.env
     type: kubernetes.io/dockerconfigjson
+images:
+  - name: ghcr.io/tomay0/odincards
+    newTag: 2025-01-27t10-37-49
