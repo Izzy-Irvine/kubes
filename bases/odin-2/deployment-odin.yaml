@@ -23,8 +23,11 @@ spec:
         - name: odin
           image: ghcr.io/tomay0/odincards
           env:
-            # - name: RAILS_MASTER_KEY
-            #   valueFrom: 
+            - name: RAILS_MASTER_KEY
+              valueFrom: 
+                secretKeyRef:
+                  name: rails # create me with a secret generator
+                  key: RAILS_MASTER_KEY
             - name: POSTGRES_HOST
               value: 192.168.100.250
             - name: POSTGRES_USERNAME

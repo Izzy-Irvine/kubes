@@ -6,6 +6,9 @@ secretGenerator:
   - name: postgres
     envs:
       - postgres.sops.env
+  - name: ruby
+    envs:
+      - ruby.sops.env
   - name: regcred
     envs:
       - regcred.sops.env
