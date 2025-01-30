@@ -36,7 +36,7 @@ spec:
                 - ALL
             runAsNonRoot: true
             allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
+            readOnlyRootFilesystem: false # TODO
             seccompProfile:
               type: RuntimeDefault
           resources: {} # TODO
