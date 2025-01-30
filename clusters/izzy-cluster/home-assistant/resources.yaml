@@ -38,6 +38,8 @@ spec:
         - secretName: home-assistant-tls
           hosts:
             - home-assistant.cult-flat.izzy.kiwi
+      configuration:
+        enabled: true
   interval: 10m0s
 ---
 apiVersion: source.toolkit.fluxcd.io/v1beta2
