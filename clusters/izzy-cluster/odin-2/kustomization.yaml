@@ -3,12 +3,9 @@ resources:
   - namespace.yaml
   - ../../../bases/odin-2
 secretGenerator:
-  - name: postgres
+  - name: odin
     envs:
-      - postgres.sops.env
-  - name: ruby
-    envs:
-      - ruby.sops.env
+      - odin.sops.env
   - name: regcred
     envs:
       - regcred.sops.env
