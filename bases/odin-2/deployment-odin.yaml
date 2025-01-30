@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: odin
+  template:
+    metadata:
+      labels:
+        app: odin
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: odin
+          image: ghcr.io/tomay0/odincards
+          env:
+            # - name: RAILS_MASTER_KEY
+            #   valueFrom: 
+            - name: POSTGRES_HOST
+              value: 192.168.100.250
+            - name: POSTGRES_USERNAME
+              valueFrom:
+                secretKeyRef:  # create me with a secret generator
+                  key: postgres
+                  name: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:  # create me with a secret generator
+                  key: postgres
+                  name: password
+            - name: REDIS_URL
+              value: redis://redis:6379/
+          securityContext: 
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+            - name: http
+              containerPort: 3000

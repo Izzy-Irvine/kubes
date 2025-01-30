@@ -1,0 +1,7 @@
+resources:
+  - deployment-odin.yaml
+  - deployment-redis.yaml
+  - ingress.yaml
+  - pvc-redis.yaml
+  - service-odin.yaml
+  - service-redis.yaml

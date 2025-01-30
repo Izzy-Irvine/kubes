@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: odin
+  template:
+    metadata:
+      labels:
+        app: odin
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: redis
+          image: redis
+          securityContext: 
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            seccompProfile:
+              type: RuntimeDefault
+          ports:
+            - name: redis
+              containerPort: 6379
+          volumeMounts:
+            - name: redis
+              mountPath: /data
+      volumes:
+        - name: redis
+          persistentVolumeClaim:
+            claimName: redis
