@@ -1,5 +1,6 @@
 namespace: odin-2
 resources:
+  - namespace.yaml
   - ../../../bases/odin-2
 secretGenerator:
   - name: postgres
