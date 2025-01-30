@@ -46,6 +46,5 @@ metadata:
   name: pajikos
   namespace: home-assistant
 spec:
-  type: oci
   interval: 10m0s
-  url: https://pajikos.github.io/home-assistant-helm-chart
+  url: https://pajikos.github.io/home-assistant-helm-chart/
