@@ -48,4 +48,4 @@ metadata:
 spec:
   type: oci
   interval: 10m0s
-  url: http://pajikos.github.io/home-assistant-helm-chart/
+  url: https://pajikos.github.io/home-assistant-helm-chart
