@@ -88,7 +88,7 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-      - odin-cards.com
+      - old.odin-cards.com
     secretName: odin-tls
   rules:
   - host: old.odin-cards.com
