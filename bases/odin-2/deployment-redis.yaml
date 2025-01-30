@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: odin
+  name: redis
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: odin
+      app: redis
   template:
     metadata:
       labels:
-        app: odin
+        app: redis
     spec:
       automountServiceAccountToken: false
       securityContext:
