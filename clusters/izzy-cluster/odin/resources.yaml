@@ -91,7 +91,7 @@ spec:
       - odin-cards.com
     secretName: odin-tls
   rules:
-  - host: odin-cards.com
+  - host: old.odin-cards.com
     http:
       paths:
       - path: /
