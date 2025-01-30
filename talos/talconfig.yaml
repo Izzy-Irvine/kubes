@@ -1,4 +1,4 @@
-# Run 'talhelper genconfig' to turn this into talos config
+# Run 'talhelper genconfig -s secret.sops.yaml' to turn this into talos config
 
 ---
 clusterName: talos-proxmox-cluster
@@ -14,15 +14,11 @@ nodes:
     ipAddress: 192.168.100.211
     controlPlane: false
     installDisk: /dev/sda
-  - hostname: rusty-vm
-    ipAddress: 192.168.100.212
-    controlPlane: false
-    installDisk: /dev/sda
   - hostname: nutty-vm
-    ipAddress: 192.168.100.113
+    ipAddress: 192.168.100.213
     controlPlane: false
     installDisk: /dev/sda
   - hostname: truenas-k8s
-    ipAddress: 192.168.100.117
+    ipAddress: 192.168.100.217
     controlPlane: false
     installDisk: /dev/sda
