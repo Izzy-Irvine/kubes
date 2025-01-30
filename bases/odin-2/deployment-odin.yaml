@@ -30,13 +30,13 @@ spec:
             - name: POSTGRES_USERNAME
               valueFrom:
                 secretKeyRef:  # create me with a secret generator
-                  key: postgres
-                  name: username
+                  name: postgres
+                  key: username
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:  # create me with a secret generator
-                  key: postgres
-                  name: password
+                  name: postgres
+                  key: password
             - name: REDIS_URL
               value: redis://redis:6379/
           securityContext: 
