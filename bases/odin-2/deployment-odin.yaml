@@ -13,6 +13,8 @@ spec:
         app: odin
     spec:
       automountServiceAccountToken: false
+      imagePullSecrets:
+        - name: regcred # create me with a secret generator
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
