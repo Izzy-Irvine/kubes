@@ -4,7 +4,7 @@ metadata:
   name: fold-at-home
   namespace: heater
 spec:
-  replica: 0
+  replicas: 0
   selector:
     matchLabels:
       app: fold-at-home
