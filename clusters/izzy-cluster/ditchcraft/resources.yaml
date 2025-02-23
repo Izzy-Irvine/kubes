@@ -22,7 +22,7 @@ spec:
     minecraftServer:
       eula: "TRUE"
       type: FABRIC
-      version: 1.20.4
+      version: 1.21.4
       memory: 2500M
       difficulty: hard
       ops: boxhead_crafter,OscarE2903
