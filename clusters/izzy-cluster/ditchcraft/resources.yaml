@@ -26,8 +26,8 @@ spec:
       memory: 2500M
       difficulty: hard
       ops: boxhead_crafter,OscarE2903
-      enableCommandBlock: "TRUE"
-      spawnProtection: "0"
+      enableCommandBlock: true
+      spawnProtection: 0
       viewDistance: 10
       motd: "Sweat Baby Sweat!"
     resources:
