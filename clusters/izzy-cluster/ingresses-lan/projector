@@ -1,0 +1,56 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: projector
+  namespace: ingresses-lan
+  annotations:
+    cert-manager.io/cluster-issuer: http-issuer
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+      - projector.cult-flat.izzy.kiwi
+    secretName: projector-tls
+  rules:
+  - host: projector.cult-flat.izzy.kiwi
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sharlot
+            port: 
+              name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: projector
+  namespace: ingresses-lan
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 80
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: projector
+  namespace: ingresses-lan
+  labels:
+    kubernetes.io/service-name: projector
+addressType: IPv4
+ports:
+  - name: http
+    appProtocol: http
+    protocol: TCP
+    port: 80
+endpoints:
+  - addresses:
+      - "192.168.100.221"
+    conditions:
+      ready: true
