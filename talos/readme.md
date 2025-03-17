@@ -10,6 +10,7 @@ Inside the talos folder, generate the talos config using the command `talhelper 
 
 ## Add a new machine to the cluster
 `talosctl apply-config -i -f clusterconfig/talos-proxmox-cluster-XXX.yaml -n 192.168.100.XXX`
+Might need to remove '-i' if the node already exists
 
 ## Get the kubeconfig file
 `talosctl kubeconfig -e 192.168.100.210 -n 192.168.100.210 --talosconfig=./clusterconfig/talosconfig`
