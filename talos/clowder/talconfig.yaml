@@ -1,0 +1,33 @@
+# Run 'talhelper genconfig -s telsecret.sops.yaml' to turn this into talos config
+
+---
+clusterName: clowder
+talosVersion: v1.9.5
+kubernetesVersion: v1.32.3
+endpoint: https://192.168.100.200:6443
+nodes:
+  - hostname: algernon
+    ipAddress: 192.168.100.201
+    controlPlane: true
+    installDisk: /dev/sdb
+    networkInterfaces:
+      - interface: eno1
+        vip: 
+          ip: 192.168.100.200
+  - hostname: rusty
+    ipAddress: 192.168.100.202
+    controlPlane: true
+    installDisk: /dev/sda
+    networkInterfaces:
+      - interface: eno1
+        vip: 
+          ip: 192.168.100.200
+  - hostname: truenas-vm
+    ipAddress: 192.168.100.203
+    controlPlane: true
+    installDisk: /dev/sda
+    networkInterfaces:
+      - interface: eno1
+        vip: 
+          ip: 192.168.100.200
+allowSchedulingOnControlPlanes: true
