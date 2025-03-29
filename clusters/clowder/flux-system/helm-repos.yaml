@@ -13,3 +13,4 @@ metadata:
   namespace: flux-system
 spec:
   url: https://charts.bitnami.com/bitnami
+  type: oci
