@@ -10,6 +10,7 @@ nodes:
     ipAddress: 192.168.100.201
     controlPlane: true
     installDisk: /dev/sdb
+    nodeLabels: {}
     networkInterfaces:
       - interface: eno1
         vip: 
@@ -18,6 +19,7 @@ nodes:
     ipAddress: 192.168.100.202
     controlPlane: true
     installDisk: /dev/sdb
+    nodeLabels: {}
     networkInterfaces:
       - interface: eno1
         vip: 
@@ -26,6 +28,7 @@ nodes:
     ipAddress: 192.168.100.203
     controlPlane: true
     installDisk: /dev/sda
+    nodeLabels: {}
     networkInterfaces:
       - interface: eno1
         vip: 
