@@ -63,5 +63,5 @@ spec:
               name: http
   tls:
   - hosts:
-      - izzy.kwi
+      - izzy.kiwi
     secretName: website-tls
