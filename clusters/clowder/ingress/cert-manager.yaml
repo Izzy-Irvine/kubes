@@ -29,16 +29,16 @@ spec:
 ---
 # This depends on ingress release. If deploying from scratch, remove this, deploy, add it back, deploy. 
 # I feel like Flux has a way to fix this but I don't know it
-# apiVersion: cert-manager.io/v1
-# kind: ClusterIssuer
-# metadata:
-#   name: http-issuer
-# spec:
-#   acme:
-#     server: https://acme-v02.api.letsencrypt.org/directory
-#     privateKeySecretRef:
-#       name: http-issuer-account-key
-#     solvers:
-#     - http01:
-#         ingress:
-#           class: nginx
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: http-issuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: http-issuer-account-key
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
