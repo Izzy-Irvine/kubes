@@ -5,12 +5,3 @@ metadata:
   namespace: flux-system
 spec:
   url: https://itzg.github.io/minecraft-server-charts/
----
-apiVersion: source.toolkit.fluxcd.io/v1beta2
-kind: OCIRepository
-metadata:
-  name: nginx
-  namespace: flux-system
-spec:
-  url: oci://registry-1.docker.io/bitnamicharts/nginx
-  interval: 5m0s
