@@ -7,10 +7,10 @@ spec:
   url: https://itzg.github.io/minecraft-server-charts/
 ---
 apiVersion: source.toolkit.fluxcd.io/v1
-kind: HelmRepository
+kind: OCIRepository
 metadata:
-  name: bitnami
+  name: nginx
   namespace: flux-system
 spec:
-  url: oci://registry-1.docker.io/bitnamicharts
+  url: oci://registry-1.docker.io/bitnamicharts/nginx
   type: oci
