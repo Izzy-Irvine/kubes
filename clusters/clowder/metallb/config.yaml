@@ -7,3 +7,9 @@ spec:
   addresses:
   - 192.168.100.210-192.168.100.219
 # TODO: IPv6
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: example
+  namespace: metallb-system
