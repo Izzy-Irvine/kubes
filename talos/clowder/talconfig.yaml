@@ -1,4 +1,4 @@
-# Run 'talhelper genconfig -s telsecret.sops.yaml' to turn this into talos config
+# Run 'talhelper genconfig -s talsecret.sops.yaml' to turn this into talos config
 
 ---
 clusterName: clowder
@@ -17,7 +17,7 @@ nodes:
   - hostname: rusty
     ipAddress: 192.168.100.202
     controlPlane: true
-    installDisk: /dev/sda
+    installDisk: /dev/sdb
     networkInterfaces:
       - interface: eno1
         vip: 

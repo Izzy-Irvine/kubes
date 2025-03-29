@@ -16,5 +16,5 @@ Might need to remove '-i' if the node already exists
 `talosctl kubeconfig -e 192.168.100.210 -n 192.168.100.210 --talosconfig=./clusterconfig/talosconfig`
 
 ## Bootstrap/update FluxCD
-`export GITHUB_TOKEN=...`
+` export GITHUB_TOKEN=...`
 `flux bootstrap github --owner=Izzy-Irvine --repository=kubes --private=false --personal=true --path=clusters/clowder --read-write-key --interval 5m0s`
