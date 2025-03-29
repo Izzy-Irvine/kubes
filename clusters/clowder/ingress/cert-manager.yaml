@@ -21,6 +21,8 @@ spec:
         name: jetstack
   values:
     installCRDs: true
+    ingressShim:
+      defaultIssuerName: http-issuer
   interval: 5m0s
   install:
     crds: CreateReplace
