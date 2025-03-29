@@ -1,17 +1,15 @@
-apiVersion: source.toolkit.fluxcd.io/v1beta2
+apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
   name: mc
   namespace: flux-system
 spec:
-  interval: 5m0s
   url: https://itzg.github.io/minecraft-server-charts/
 ---
-apiVersion: source.toolkit.fluxcd.io/v1beta2
+apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
 metadata:
   name: bitnami
   namespace: flux-system
 spec:
-  interval: 5m0s
   url: https://charts.bitnami.com/bitnami
