@@ -13,4 +13,4 @@ metadata:
   namespace: flux-system
 spec:
   url: oci://registry-1.docker.io/bitnamicharts/nginx
-  type: oci
+  interval: 5m0s
