@@ -54,27 +54,27 @@ spec:
       protocol: TCP
       port: 80
       targetPort: 8080
----
-apiVersion: image.toolkit.fluxcd.io/v1beta2
-kind: ImageRepository
-metadata:
-  name: odin
-  namespace: odin
-spec:
-  image: ghcr.io/isaac-irvine/odin
-  interval: 3m
----
-apiVersion: image.toolkit.fluxcd.io/v1beta2
-kind: ImagePolicy
-metadata:
-  name: odin
-  namespace: odin
-spec:
-  imageRepositoryRef:
-    name: odin
-  policy:
-    numerical:
-      order: asc
+# ---
+# apiVersion: image.toolkit.fluxcd.io/v1beta2
+# kind: ImageRepository
+# metadata:
+#   name: odin
+#   namespace: odin
+# spec:
+#   image: ghcr.io/isaac-irvine/odin
+#   interval: 3m
+# ---
+# apiVersion: image.toolkit.fluxcd.io/v1beta2
+# kind: ImagePolicy
+# metadata:
+#   name: odin
+#   namespace: odin
+# spec:
+#   imageRepositoryRef:
+#     name: odin
+#   policy:
+#     numerical:
+#       order: asc
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
