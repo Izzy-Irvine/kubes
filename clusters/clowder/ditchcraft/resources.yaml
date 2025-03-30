@@ -15,14 +15,14 @@ spec:
       chart: minecraft
       sourceRef:
         kind: HelmRepository
-        name: mc
-        namespace: default
+        name: minecraft-server-charts
+        namespace: flux-system
   values:
     replicaCount: 1
     minecraftServer:
       eula: "TRUE"
       type: FABRIC
-      version: 1.21.4
+      version: 1.21.5
       memory: 2500M
       difficulty: hard
       ops: boxhead_crafter,OscarE2903

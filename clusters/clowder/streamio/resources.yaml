@@ -36,11 +36,10 @@ metadata:
   name: streamio
   namespace: streamio
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: streamio
   ports:
     - protocol: TCP
       port: 11470
       targetPort: 11470
-      nodePort: 31470
