@@ -1,3 +1,4 @@
+# Minecraft server created for Laura
 ---
 apiVersion: v1
 kind: Namespace
