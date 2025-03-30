@@ -36,9 +36,6 @@ spec:
   values:
     persistence:
       defaultClassReplicaCount: 2
-      defaultNodeSelector:
-        enable: true
-        selector: "storage-nodes"
     longhornUI:
       replicas: 1
     defaultSettings:
