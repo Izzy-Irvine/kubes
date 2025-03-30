@@ -12,7 +12,7 @@ spec:
         name: beans
   interval: 1m0s
   values:
-    gameStorageClass: csi-rbd-sc
+    gameStorageClass: longhorn
     service:
       annotations:
         "mc-router.itzg.me/externalServerName": "beans.izzy.kiwi"
