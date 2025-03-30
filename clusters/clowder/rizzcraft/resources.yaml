@@ -22,9 +22,10 @@ spec:
     minecraftServer:
       eula: "TRUE"
       type: VANILLA
+      viewDistance: 14
       version: 1.21.5
       memory: 2000M
-      ops: boxhead_crafter,HighCarbon
+      ops: boxhead_crafter,HighCarbon,ttrssreal
       motd: "RIIIIIIIIIIZZZZZZZZZZZZZZzzzzzzzzz........"
     resources:
       requests:
