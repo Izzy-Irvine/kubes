@@ -43,6 +43,7 @@ spec:
       replicas: 1
     defaultSettings:
       createDefaultDiskLabeledNodes: true
+      storageReservedPercentageForDefaultDisk: 5
     ingress:
       enabled: true
       host: longhorn.cult-flat.izzy.kiwi

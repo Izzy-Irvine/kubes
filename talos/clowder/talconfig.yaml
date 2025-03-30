@@ -9,17 +9,41 @@ nodes:
   - hostname: algernon
     ipAddress: 192.168.100.201
     controlPlane: true
+    machineDisks:
+      - device: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S4EWNM0W355680K
+        partitions:
+          - mountpoint: /var/lib/longhorn
+    nodeLabels:
+      node.longhorn.io/create-default-disk: "true"
     installDisk: /dev/sdb
   - hostname: rusty
     ipAddress: 192.168.100.202
     controlPlane: true
     installDisk: /dev/sdb
-  - hostname: truenas-vm
-    ipAddress: 192.168.100.203
-    controlPlane: true
-    installDisk: /dev/sda
+    nodeLabels:
+      node.longhorn.io/create-default-disk: "true"
+    machineDisks:
+      - device: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S4EWNM0W347804K
+        partitions:
+          - mountpoint: /var/lib/longhorn
+  # - hostname: truenas-vm
+  #   ipAddress: 192.168.100.203
+  #   controlPlane: true
+  #   installDisk: /dev/sda
 allowSchedulingOnControlPlanes: true
 controlPlane:
+  patches:
+    - |-
+      - op: add
+        path: /machine/kubelet/extraMounts
+        value:
+          - destination: /var/lib/longhorn
+            type: bind
+            source: /var/lib/longhorn
+            options:
+              - bind
+              - rshared
+              - rw
   nodeLabels: {}
   networkInterfaces:
     - interface: eno1
@@ -27,7 +51,7 @@ controlPlane:
         ip: 192.168.100.200
   schematic:
     customization:
-        systemExtensions:
-          officialExtensions:
-            - siderolabs/iscsi-tools
-            - siderolabs/util-linux-tools
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/iscsi-tools
+          - siderolabs/util-linux-tools
