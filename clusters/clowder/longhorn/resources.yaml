@@ -41,6 +41,8 @@ spec:
         selector: "storage-nodes"
     longhornUI:
       replicas: 1
+    defaultSettings:
+      createDefaultDiskLabeledNodes: true
     ingress:
       enabled: true
       host: longhorn.cult-flat.izzy.kiwi
