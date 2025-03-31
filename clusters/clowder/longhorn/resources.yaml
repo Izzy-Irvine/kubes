@@ -41,6 +41,8 @@ spec:
     defaultSettings:
       createDefaultDiskLabeledNodes: true
       storageReservedPercentageForDefaultDisk: 5
+      backupTarget: AZURE
+      backupTargetCredentialSecret: azure-cred
     ingress:
       enabled: true
       host: longhorn.cult-flat.izzy.kiwi
