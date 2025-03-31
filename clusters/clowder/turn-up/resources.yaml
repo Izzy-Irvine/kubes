@@ -18,7 +18,7 @@ spec:
         name: minecraft-server-charts
         namespace: flux-system
   values:
-    replicaCount: 0
+    replicaCount: 1
     image:
       tag: java21
     minecraftServer:
@@ -54,21 +54,3 @@ spec:
         enabled: true
         Size: 20Gi
   interval: 5m0s
-# ---
-# apiVersion: v1
-# kind: Pod
-# metadata:
-#   name: turn-up-setup
-#   namespace: turn-up
-# spec:
-#   containers:
-#   - name: turn-up-setup
-#     image: ubuntu
-#     command: ['sleep', 'inf']
-#     volumeMounts:
-#     - name: vol
-#       mountPath: /data
-#   volumes:
-#   - name: vol
-#     persistentVolumeClaim:
-#       claimName: 
