@@ -22,6 +22,8 @@ spec:
         name: ingress-nginx
   values:
     controller:
+      service:
+        externalTrafficPolicy: Local
       ingressClassResource:
         default: true
       config:
