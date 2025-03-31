@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: github-webhook-token
+    namespace: flux-system
+type: Opaque
+stringData:
+    token: ENC[AES256_GCM,data:S0U0EbeJ8nNFBNwmP+Gtr4ZhWun9W4ADuxXmjzoTjsS5xPvmCLG2sQ==,iv:Wj+ZYG8JERnco66cmdAeC+zGCJQpHoxi9JUCKgPn6uM=,tag:gxl80fjzwktfBwuDWluBRw==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age1lyeweegkthnfzggpruszm3ru80mrm5zy6w6rnkux0r6apr42cfpssnp3p8
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAzTGFaWm5senFKSDRKekM2
+            M2hIV0dwSzU2VjZmSFAwZzlmbTRzbDVOSlJnCjlZczRyYlJtUEVwTGlxMEZoWTNp
+            L3dCQzMzTHdZU0IwNmNwQ2hyNUFkUUkKLS0tIGFmOGtBK0NJQTdOMUUvOHpWL0pO
+            OVVhNVdtV3lubW9lNUdPWVBRblZSTEkKNU51bBmnx1Bdk0y53g8Qd9hxxm0D14ov
+            yARK/uI5APNeM2S9lVUTZCLuat04Jaa0XwJaXonuvBXw2LJq8vikfQ==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2025-03-31T04:22:53Z"
+    mac: ENC[AES256_GCM,data:N9or1pZdfGmVszBWGpwtOxyiTNT8ruveL9NadJzVkl9YSDZQwPxyKCkKlTlGE7ZXTkBNTljBb2ISHBTYvQF86eMpZCh2GHC4KLZHaT2OTbgjR6raSJi4jt93JMypCSvN2EINZa+Zy9msTASzgk5aYshLLQsmjHfxKLFcc39bVcA=,iv:OIpVW2lHcbZ6S5+8f58CHKakCHEcHmMgLxY/QeOpnxc=,tag:p+wkkwyCu8Iy7pTx0mGSJw==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.9.4
