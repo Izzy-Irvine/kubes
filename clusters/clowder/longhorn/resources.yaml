@@ -58,7 +58,7 @@ spec:
 apiVersion: longhorn.io/v1beta2
 kind: RecurringJob
 metadata:
-  name: daily-snapshot
+  name: daily-backup
   namespace: longhorn-system
 spec:
   concurrency: 1
@@ -66,7 +66,7 @@ spec:
   groups:
   - default
   labels: {}
-  name: daily-snapshot
+  name: daily-backup
   parameters: {}
   retain: 7
-  task: snapshot
+  task: backup
