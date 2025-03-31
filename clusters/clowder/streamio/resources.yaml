@@ -37,6 +37,7 @@ metadata:
   namespace: streamio
 spec:
   type: LoadBalancer
+  externalTrafficPolicy: Local
   selector:
     app: streamio
   ports:

@@ -29,6 +29,8 @@ spec:
     services:
       minecraft:
         type: LoadBalancer
+      extraServiceSpec:
+        externalTrafficPolicy: Local
     resources:
       limits:
         cpu: 250m
