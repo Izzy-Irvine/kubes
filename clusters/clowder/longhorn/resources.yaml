@@ -41,7 +41,7 @@ spec:
     defaultSettings:
       createDefaultDiskLabeledNodes: true
       storageReservedPercentageForDefaultDisk: 5
-      backupTarget: azblob://izzzy.blob.core.windows.net/
+      backupTarget: azblob://clowder-longhorn-backups@izzzy.blob.core.windows.net/
       backupTargetCredentialSecret: azure-cred
     ingress:
       enabled: true
