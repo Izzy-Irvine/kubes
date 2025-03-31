@@ -84,3 +84,4 @@ parameters:
   staleReplicaTimeout: "30"
   fromBackup: ""
   fsType: "ext4"
+  recurringJobSelector: '[{"name":"no-backup", "isGroup":true}]'
