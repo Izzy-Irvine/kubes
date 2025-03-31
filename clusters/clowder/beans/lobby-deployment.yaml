@@ -95,3 +95,29 @@ spec:
             claimName: lobby
         - name: tmp
           emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lobby-setup
+  namespace: beans
+spec:
+  selector:
+    matchLabels:
+      app: lobby-setup
+  template:
+    metadata:
+      labels:
+        app: lobby-setup
+    spec:
+      containers:
+      - name: lobby-setup
+        image: ubuntu
+        command: ['sleep', 'inf']
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: lobby
