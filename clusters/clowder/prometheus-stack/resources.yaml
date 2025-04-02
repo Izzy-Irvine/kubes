@@ -74,7 +74,7 @@ spec:
         additionalScrapeConfigs:
           - job_name: OpenWrt
             static_configs:
-              - targets: ['192.168.100.1:910']
+              - targets: ['192.168.100.1:9100']
       ingress:
         annotations:
           cert-manager.io/cluster-issuer: http-issuer
