@@ -87,6 +87,7 @@ spec:
               - prometheus.izzy.kiwi
   interval: 5m0s
 ---
+apiVersion: monitoring.coreos.com/v1alpha1
 kind: ScrapeConfig
 metadata:
   name: openwrt
