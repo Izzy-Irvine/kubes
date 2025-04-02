@@ -57,6 +57,16 @@ spec:
             hosts:
               - grafana.izzy.kiwi
     prometheus:
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            resources:
+              requests:
+                storage: 50Gi
+      additionalScrapeConfigs:
+        - job_name: OpenWrt
+          static_configs:
+            - targets: [192.168.100.1:9100']
       ingress:
         annotations:
           cert-manager.io/cluster-issuer: http-issuer
