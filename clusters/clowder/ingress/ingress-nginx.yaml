@@ -23,7 +23,8 @@ spec:
   values:
     controller:
       resources:
-        memory: 400Mi
+        requests:
+          memory: 400Mi
       service:
         externalTrafficPolicy: Local
       ingressClassResource:
