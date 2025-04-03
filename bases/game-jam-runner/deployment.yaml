@@ -110,7 +110,7 @@ spec:
               type: RuntimeDefault
           resources:
             requests:
-              memory: 20Mb
+              memory: 20Mi
       volumes:
         - name: runner-config
           persistentVolumeClaim:
