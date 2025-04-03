@@ -22,6 +22,8 @@ spec:
         name: ingress-nginx
   values:
     controller:
+      resources:
+        memory: 400Mi
       service:
         externalTrafficPolicy: Local
       ingressClassResource:

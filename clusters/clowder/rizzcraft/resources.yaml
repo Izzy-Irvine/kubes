@@ -29,7 +29,7 @@ spec:
       motd: "RIIIIIIIIIIZZZZZZZZZZZZZZzzzzzzzzz........"
     resources:
       requests:
-        memory: 2500Mi
+        memory: 3000Mi
     serviceAnnotations:
       "mc-router.itzg.me/externalServerName": "rizzcraft.izzy.kiwi"
     persistence:

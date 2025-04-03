@@ -32,7 +32,7 @@ spec:
       motd: "Sweat Baby Sweat!"
     resources:
       requests: 
-        memory: 2Gi
+        memory: 3Gi
     serviceAnnotations:
       "mc-router.itzg.me/externalServerName": "ditchcraft.izzy.kiwi"
     persistence:

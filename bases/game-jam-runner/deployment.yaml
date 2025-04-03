@@ -77,6 +77,9 @@ spec:
             allowPrivilegeEscalation: false
             seccompProfile:
               type: RuntimeDefault
+          resources:
+            requests:
+              memory: 300Mi
         - name: nginx
           image: nginx
           volumeMounts:
@@ -105,6 +108,9 @@ spec:
             allowPrivilegeEscalation: false
             seccompProfile:
               type: RuntimeDefault
+          resources:
+            requests:
+              memory: 20Mb
       volumes:
         - name: runner-config
           persistentVolumeClaim:

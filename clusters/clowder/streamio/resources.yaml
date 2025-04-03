@@ -29,6 +29,9 @@ spec:
           ports:
             - containerPort: 11470
               protocol: TCP
+          resources:
+            requests:
+              memory: 150Mi
 ---
 apiVersion: v1
 kind: Service
