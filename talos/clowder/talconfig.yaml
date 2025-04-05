@@ -16,23 +16,11 @@ nodes:
     nodeLabels:
       node.longhorn.io/create-default-disk: "true"
     installDisk: /dev/sdb
-  - hostname: rusty
-    ipAddress: 192.168.100.202
-    controlPlane: true
-    installDisk: /dev/sdb
-    nodeLabels:
-      node.longhorn.io/create-default-disk: "true"
-    machineDisks:
-      - device: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S4EWNM0W347804K
-        partitions:
-          - mountpoint: /var/lib/longhorn
-  # - hostname: truenas-vm
-  #   ipAddress: 192.168.100.203
-  #   controlPlane: true
-  #   installDisk: /dev/sda
-allowSchedulingOnControlPlanes: true
-controlPlane:
-  patches:
+    networkInterfaces:
+    - interface: eno1
+      vip: 
+        ip: 192.168.100.200
+    patches:
     - |-
       - op: add
         path: /machine/kubelet/extraMounts
@@ -44,11 +32,43 @@ controlPlane:
               - bind
               - rshared
               - rw
-  nodeLabels: {}
-  networkInterfaces:
+  - hostname: rusty
+    ipAddress: 192.168.100.202
+    controlPlane: true
+    installDisk: /dev/sdb
+    nodeLabels:
+      node.longhorn.io/create-default-disk: "true"
+    machineDisks:
+      - device: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S4EWNM0W347804K
+        partitions:
+          - mountpoint: /var/lib/longhorn
+    networkInterfaces:
     - interface: eno1
       vip: 
         ip: 192.168.100.200
+    patches:
+    - |-
+      - op: add
+        path: /machine/kubelet/extraMounts
+        value:
+          - destination: /var/lib/longhorn
+            type: bind
+            source: /var/lib/longhorn
+            options:
+              - bind
+              - rshared
+              - rw
+  - hostname: truenas-vm
+    ipAddress: 192.168.100.203
+    controlPlane: true
+    installDisk: /dev/vda
+    networkInterfaces:
+    - interface: ens3
+      vip: 
+        ip: 192.168.100.200
+allowSchedulingOnControlPlanes: true
+controlPlane:
+  nodeLabels: {}
   schematic:
     customization:
       systemExtensions:
