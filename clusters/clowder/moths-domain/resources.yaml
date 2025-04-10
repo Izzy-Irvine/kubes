@@ -15,8 +15,8 @@ spec:
       chart: minecraft
       sourceRef:
         kind: HelmRepository
-        name: mc
-        namespace: default
+        name: minecraft-server-charts
+        namespace: flux-system
   values:
     replicaCount: 0
     minecraftServer:
