@@ -43,6 +43,7 @@ spec:
       storageReservedPercentageForDefaultDisk: 5
       backupTarget: azblob://clowder-longhorn-backups@core.windows.net/
       backupTargetCredentialSecret: azure-cred
+      nodeDownPodDeletionPolicy: delete-deployment-pod
     ingress:
       enabled: true
       host: longhorn.cult-flat.izzy.kiwi
