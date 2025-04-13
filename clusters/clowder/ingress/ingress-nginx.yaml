@@ -27,6 +27,8 @@ spec:
           memory: 400Mi
       service:
         externalTrafficPolicy: Local
+        annotations:
+          metallb.universe.tf/loadBalancerIPs: 192.168.100.210
       ingressClassResource:
         default: true
       config:

@@ -29,6 +29,8 @@ spec:
     services:
       minecraft:
         type: LoadBalancer
+        annotations:
+          metallb.universe.tf/loadBalancerIPs: 192.168.100.211
       extraServiceSpec:
         externalTrafficPolicy: Local
     resources:
