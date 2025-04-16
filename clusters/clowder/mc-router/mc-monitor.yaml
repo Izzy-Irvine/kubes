@@ -52,7 +52,8 @@ metadata:
 spec:
   endpoints:
   - interval: 30s
-    port: metrics
+    targetPort: 8080
+    path: /metrics
   namespaceSelector:
     matchNames:
     - mc-router
