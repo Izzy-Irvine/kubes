@@ -34,6 +34,9 @@ spec:
         name: bedrock
         containerPort: 19132
         protocol: UDP
+        service:
+          enabled: true
+          embedded: false
     resources:
       requests: 
         memory: 3Gi
