@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mc-monitor
+  namespace: mc-router
+  labels:
+    app: mc-monitor
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: mc-monitor
+      labels:
+        app: mc-monitor
+    spec:
+      containers:
+        - name: main
+          image: itzg/mc-monitor
+          env:
+            - name: EXPORT_SERVERS
+              value: beans.izzy.kiwi,ditchcraft.izzy.kiwi,rizzcraft.izzy.kiwi,turn-up.izzy.kiwi
+          args:
+            - export-for-prometheus
+          containerPort:
+            - name: metrics
+              port: 8080
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: mc-monitor
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mc-monitor
+  namespace: mc-monitor
+spec:
+  endpoints:
+  - interval: 30s
+    port: metrics
+  namespaceSelector:
+    matchNames:
+    - mc-router
+  selector:
+    matchLabels:
+      app: mc-monitor
