@@ -49,6 +49,8 @@ kind: ServiceMonitor
 metadata:
   name: mc-monitor
   namespace: mc-router
+  labels:
+    release: kube-prometheus-stack
 spec:
   endpoints:
   - interval: 30s
