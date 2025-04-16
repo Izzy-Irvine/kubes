@@ -22,6 +22,11 @@ spec:
         name: ingress-nginx
   values:
     controller:
+      metrics: 
+        enabled: true
+        annotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "10254"
       resources:
         requests:
           memory: 400Mi
