@@ -65,6 +65,8 @@ spec:
               - grafana.izzy.kiwi
     prometheus:
       defaultDashboardsTimezone: Pacific/Auckland
+      podMonitorSelectorNilUsesHelmValues: false
+      serviceMonitorSelectorNilUsesHelmValues: false
       prometheusSpec:
         storageSpec:
           volumeClaimTemplate:
