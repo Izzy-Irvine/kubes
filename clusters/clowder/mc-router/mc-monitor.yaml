@@ -29,6 +29,20 @@ spec:
     matchLabels:
       app: mc-monitor
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mc-monitor
+  namespace: mc-router
+  labels:
+    app: mc-monitor
+spec:
+  selector:
+    app: mc-monitor
+  ports:
+  - port: 8080
+    targetPort: metrics
+---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:

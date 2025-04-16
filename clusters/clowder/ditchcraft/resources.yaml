@@ -52,3 +52,6 @@ spec:
         enabled: true
         Size: 20Gi
   interval: 5m0s
+
+# modrinth project slugs
+# fabric-api, better-stats, geyser, tcdcommons, carpet-bot-restriction, carpet, lithium, carpet-extra, ferrite-core, plasmo-voice, carpet-tis-addition, floodgate, sit!, fabricexporter
