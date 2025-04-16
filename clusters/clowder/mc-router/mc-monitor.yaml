@@ -40,7 +40,8 @@ spec:
   selector:
     app: mc-monitor
   ports:
-  - port: 8080
+  - name: metrics
+    port: 8080
     targetPort: metrics
 ---
 apiVersion: monitoring.coreos.com/v1
