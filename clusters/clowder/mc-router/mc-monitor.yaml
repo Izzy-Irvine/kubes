@@ -33,7 +33,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: mc-monitor
-  namespace: mc-monitor
+  namespace: mc-router
 spec:
   endpoints:
   - interval: 30s
