@@ -31,17 +31,17 @@ spec:
       viewDistance: 10
       motd: "Sweat Baby Sweat!"
       extraPorts:
-        name: bedrock
-        containerPort: 19132
-        protocol: UDP
-        service:
-          type: LoadBalancer
-          port: 19132
-          enabled: true
-          embedded: false
-          externalTrafficPolicy: Local
-          annotations:
-            metallb.universe.tf/loadBalancerIPs: 192.168.100.213
+        - name: bedrock
+          containerPort: 19132
+          protocol: UDP
+          service:
+            type: LoadBalancer
+            port: 19132
+            enabled: true
+            embedded: false
+            externalTrafficPolicy: Local
+            annotations:
+              metallb.universe.tf/loadBalancerIPs: 192.168.100.213
     resources:
       requests: 
         memory: 3Gi
