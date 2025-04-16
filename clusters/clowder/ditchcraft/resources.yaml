@@ -35,8 +35,13 @@ spec:
         containerPort: 19132
         protocol: UDP
         service:
+          type: LoadBalancer
+          port: 19132
           enabled: true
           embedded: false
+          externalTrafficPolicy: Local
+          annotations:
+            metallb.universe.tf/loadBalancerIPs: 192.168.100.213
     resources:
       requests: 
         memory: 3Gi
@@ -47,20 +52,3 @@ spec:
         enabled: true
         Size: 20Gi
   interval: 5m0s
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: ditchcraft-geyser
-  namespace: ditchcraft
-  annotations:
-    metallb.universe.tf/loadBalancerIPs: 192.168.100.213
-spec:
-  type: LoadBalancer
-  externalTrafficPolicy: Local
-  selector:
-    app: ditchcraft-minecraft
-  ports:
-  - port: 19132
-    targetPort: bedrock
-    protocol: UDP
