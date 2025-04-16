@@ -21,9 +21,9 @@ spec:
               value: beans.izzy.kiwi,ditchcraft.izzy.kiwi,rizzcraft.izzy.kiwi,turn-up.izzy.kiwi
           args:
             - export-for-prometheus
-          containerPort:
+          ports:
             - name: metrics
-              port: 8080
+              containerPort: 8080
       restartPolicy: Always
   selector:
     matchLabels:
