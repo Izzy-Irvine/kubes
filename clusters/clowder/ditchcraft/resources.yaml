@@ -30,6 +30,10 @@ spec:
       spawnProtection: 0
       viewDistance: 10
       motd: "Sweat Baby Sweat!"
+      extraPorts:
+        name: bedrock
+        containerPort: 19132
+        protocol: UDP
     resources:
       requests: 
         memory: 3Gi
@@ -40,3 +44,20 @@ spec:
         enabled: true
         Size: 20Gi
   interval: 5m0s
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ditchcraft-geyser
+  namespace: ditchcraft
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.100.213
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    app: ditchcraft-minecraft
+  ports:
+  - port: 19132
+    targetPort: bedrock
+    protocol: UDP
