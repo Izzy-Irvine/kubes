@@ -54,6 +54,11 @@ spec:
         nginx.ingress.kubernetes.io/auth-tls-secret: ingress/ca-secret
         nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
         nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1"
+    metrics:
+      serviceMonitor:
+        enabled: true
+        additionalLabels:
+          release: kube-prometheus-stack
   interval: 1m0s
 ---
 apiVersion: longhorn.io/v1beta2
