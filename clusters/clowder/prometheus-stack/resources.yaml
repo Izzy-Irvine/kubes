@@ -34,6 +34,8 @@ spec:
         name: prometheus-community
   values:
     alertmanager:
+      alertmanagerSpec:
+        resources: {} # TODO
       ingress:
         annotations:
           cert-manager.io/cluster-issuer: http-issuer
@@ -49,6 +51,10 @@ spec:
             hosts:
               - alertmanager.izzy.kiwi
     grafana:
+      persistence:
+        enabled: true
+        size: 5Gi
+      resources: {} # TODO
       ingress:
         annotations:
           cert-manager.io/cluster-issuer: http-issuer
@@ -78,6 +84,9 @@ spec:
           - job_name: OpenWrt
             static_configs:
               - targets: ['192.168.100.1:9100']
+        retention: 30d
+        retentionSize: 45GB
+        resources: {} # TODO
       ingress:
         annotations:
           cert-manager.io/cluster-issuer: http-issuer
