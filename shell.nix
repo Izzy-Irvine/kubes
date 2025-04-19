@@ -14,5 +14,6 @@ in pkgs.mkShell {
         talhelper
         k9s
         fluxcd
+        prometheus.cli
     ];
 }
