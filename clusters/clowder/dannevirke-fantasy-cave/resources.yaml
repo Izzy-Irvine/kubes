@@ -10,8 +10,9 @@ metadata:
   name: bitnami
   namespace: fantasy-cave
 spec:
-  interval: 5m0s
-  url: https://charts.bitnami.com/bitnami
+  interval: 12h
+  type: oci
+  url: oci://registry-1.docker.io/bitnamicharts
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
@@ -35,7 +36,7 @@ spec:
     service:
       type: ClusterIP
     staticSiteConfigmap: www
-  interval: 5m0s
+  interval: 12h
 ---
 apiVersion: v1
 kind: ConfigMap
