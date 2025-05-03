@@ -1,0 +1,71 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: fantasy-cave
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: bitnami
+  namespace: fantasy-cave
+spec:
+  interval: 5m0s
+  url: https://charts.bitnami.com/bitnami
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: website
+  namespace: fantasy-cave
+spec:
+  chart:
+    spec:
+      chart: nginx
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+  values:
+    ingress:
+      enabled: true
+      hostname: dannevirke-fantasy-cave.is-the-bomb.com
+      tls: true
+      annotations:
+        cert-manager.io/cluster-issuer: http-issuer
+    service:
+      type: ClusterIP
+    staticSiteConfigmap: www
+  interval: 5m0s
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: www
+  namespace: fantasy-cave
+data:
+  index.html: |
+    <html>
+    <head>
+    <title>dannevirke fantasy cave is-the-bomb.com</title>
+    </head>
+    <style>
+    body {
+        background-image: url(https://img1.picmix.com/output/stamp/normal/4/6/2/4/2354264_59fd3.gif), url(https://dynamic-media-cdn.tripadvisor.com/media/photo-o/11/72/ff/92/entrance.jpg);
+        background-size: cover;
+        cursor:  url(http://www.rw-designer.com/cursor-extern.php?id=28950);
+        margin: 0;
+    }
+    #hearts {
+        position: absolute;
+        height: 100vh;
+        width: 100%;
+    }
+    #babygirl {
+        position: absolute;
+    }
+    </style>
+    <body>
+    <img src="https://cdn.edu.buncee.com/rackspace/bnc-assets/animations/238/1453728648-Young_animation_holiday012516_04.gif" id="hearts">
+    <img src="https://img1.picmix.com/output/stamp/normal/6/9/6/3/2673696_3d34f.gif" id="babygirl">
+    </body>
+    </html>
