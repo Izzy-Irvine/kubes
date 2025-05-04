@@ -17,7 +17,7 @@ data:
         enabled: true
         routes:
           - host: '*'
-            backend: minehut.gg
+            backend: 6543f57f9ba2420ba367012d98c4d9f1.pacloudflare.com
             modifyVirtualHost: true
 ---
 apiVersion: v1
