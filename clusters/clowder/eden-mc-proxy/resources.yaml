@@ -17,7 +17,7 @@ data:
         enabled: true
         routes:
           - host: '*'
-            backend: gedum.minehut.gg
+            backend: minehut.net
             modifyVirtualHost: true
 ---
 apiVersion: v1
