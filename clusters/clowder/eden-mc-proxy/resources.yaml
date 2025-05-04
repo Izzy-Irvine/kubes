@@ -17,7 +17,7 @@ data:
         enabled: true
         routes:
           - host: '*'
-            backend: minehut.net
+            backend: minehut.gg
             modifyVirtualHost: true
 ---
 apiVersion: v1
