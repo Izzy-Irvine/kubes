@@ -22,7 +22,7 @@ spec:
     minecraftServer:
       eula: "TRUE"
       type: FABRIC
-      version: 1.21.5
+      version: 1.21.4
       memory: 2500M
       difficulty: hard
       ops: boxhead_crafter,OscarE2903
@@ -31,7 +31,7 @@ spec:
       viewDistance: 10
       motd: "Sweat Baby Sweat!"
       modrinth:
-        projects: [fabric-api, better-stats, geyser, tcdcommons, carpet-bot-restriction, carpet, lithium, carpet-extra, ferrite-core, plasmo-voice, carpet-tis-addition, floodgate, sit!]
+        projects: [fabric-api, better-stats, geyser, tcdcommons, lithium, ferrite-core, plasmo-voice, carpet-tis-addition, floodgate, sit!, carpet-bot-restriction, carpet, carpet-extra]
         allowedVersionType: beta
       extraPorts:
         - name: bedrock
