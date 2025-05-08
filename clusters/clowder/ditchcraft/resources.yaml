@@ -22,7 +22,7 @@ spec:
     minecraftServer:
       eula: "TRUE"
       type: FABRIC
-      version: 1.21.4
+      version: 1.21.5
       memory: 2500M
       difficulty: hard
       ops: boxhead_crafter,OscarE2903
@@ -30,6 +30,8 @@ spec:
       spawnProtection: 0
       viewDistance: 10
       motd: "Sweat Baby Sweat!"
+      modrinth:
+        projects: [fabric-api, better-stats, geyser, tcdcommons, carpet-bot-restriction, carpet, lithium, carpet-extra, ferrite-core, plasmo-voice, carpet-tis-addition, floodgate, sit!]
       extraPorts:
         - name: bedrock
           containerPort: 19132
@@ -52,6 +54,3 @@ spec:
         enabled: true
         Size: 20Gi
   interval: 5m0s
-
-# modrinth project slugs
-# fabric-api, better-stats, geyser, tcdcommons, carpet-bot-restriction, carpet, lithium, carpet-extra, ferrite-core, plasmo-voice, carpet-tis-addition, floodgate, sit!, fabricexporter
