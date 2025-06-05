@@ -34,7 +34,7 @@ spec:
         - https://github.com/gnembon/fabric-carpet/releases/download/1.4.169/fabric-carpet-1.21.5-1.4.169+v250325.jar
         - https://github.com/gnembon/carpet-extra/releases/download/1.4.169/carpet-extra-1.21.5-1.4.169.jar
       modrinth:
-        projects: [fabric-api, better-stats, geyser, tcdcommons, lithium, ferrite-core, plasmo-voice, carpet-tis-addition, floodgate, sit!] # carpet-bot-restriction, carpet and carpet-extra have been installed manually
+        projects: [otterlib, fabric-api, better-stats, geyser, tcdcommons, lithium, ferrite-core, plasmo-voice, carpet-tis-addition, floodgate, sit!] # carpet-bot-restriction, carpet and carpet-extra have been installed manually
         allowedVersionType: beta
       extraPorts:
         - name: bedrock
