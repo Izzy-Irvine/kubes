@@ -62,6 +62,7 @@ spec:
             hosts:
               - name: ditchcraft.izzy.kiwi
                 path: /
+                pathType: Prefix
             tls:
               - secretName: map-tls
                 hosts:
