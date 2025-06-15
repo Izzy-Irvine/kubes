@@ -56,7 +56,7 @@ spec:
             embedded: false
             port: 80
           ingress:
-            enabled: false
+            enabled: true
             annotations:
               cert-manager.io/cluster-issuer: http-issuer
             hosts:
