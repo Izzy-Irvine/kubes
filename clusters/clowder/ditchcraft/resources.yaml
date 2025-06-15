@@ -48,6 +48,24 @@ spec:
             externalTrafficPolicy: Local
             annotations:
               metallb.universe.tf/loadBalancerIPs: 192.168.100.213
+        - name: dynmap
+          containerPort: 8123
+          protocol: TCP
+          service:
+            enabled: true
+            embedded: false
+            port: 80
+          ingress:
+            enabled: true
+            annotations:
+              cert-manager.io/cluster-issuer: http-issuer
+            hosts:
+              - name: ditchcraft.izzy.kiwi
+                path: /
+            tls:
+              - secretName: map-tls
+                hosts:
+                  - ditchcraft.izzy.kiwi
     resources:
       requests: 
         memory: 3Gi
@@ -60,7 +78,7 @@ spec:
     extraVolumes:
       - volumeMounts:
         - name: dynmap
-          mountPath: /dynmap
+          mountPath: /data/dynmap/renderdata/
         volumes:
           - name: dynmap
             persistantVolumeClaim:
