@@ -44,6 +44,8 @@ spec:
       backupTarget: azblob://clowder-longhorn-backups@core.windows.net/
       backupTargetCredentialSecret: azure-cred
       nodeDownPodDeletionPolicy: delete-deployment-pod
+    defaultBackupStore:
+      pollInterval: 0
     ingress:
       enabled: true
       host: longhorn.cult-flat.izzy.kiwi
