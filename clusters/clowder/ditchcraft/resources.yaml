@@ -79,10 +79,10 @@ spec:
     extraVolumes:
       - volumeMounts:
         - name: dynmap
-          mountPath: /data/dynmap/renderdata/
+          mountPath: /data/dynmap/web/tiles-new/
         volumes:
           - name: dynmap
-            persistantVolumeClaim:
+            persistentVolumeClaim:
               claimName: dynmap
   interval: 5m0s
 ---
