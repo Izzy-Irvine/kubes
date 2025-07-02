@@ -66,15 +66,15 @@ spec:
 apiVersion: longhorn.io/v1beta2
 kind: RecurringJob
 metadata:
-  name: daily-backup
+  name: weekly-backup
   namespace: longhorn-system
 spec:
   concurrency: 1
-  cron: 0 16 * * * # Time is in UTC. This is roughly 4am NST
+  cron: 0 16 * * 0 # Time is in UTC. This is roughly 4am NST
   groups:
   - default
   labels: {}
-  name: daily-backup
+  name: weekly-backup
   parameters: {}
   retain: 7
   task: backup
