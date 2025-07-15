@@ -18,19 +18,36 @@ spec:
         name: minecraft-server-charts
         namespace: flux-system
   values:
-    replicaCount: 0
+    replicaCount: 1
     minecraftServer:
       eula: "TRUE"
       type: PAPER
-      version: 1.20.4
+      version: 1.21.7
       memory: 2500M
     resources:
       requests: 
         memory: 2Gi
     serviceAnnotations:
-      "mc-router.itzg.me/externalServerName": "moths-domain.izzy.kiwi"
+      "mc-router.itzg.me/externalServerName": "hollowmere.izzy.kiwi"
     persistence:
       dataDir:
         enabled: true
         Size: 20Gi
   interval: 5m0s
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: moths-domain-old-domain
+  namespace: moths-domain
+  annotations:
+    mc-router.itzg.me/externalServerName: moths-domain.izzy.kiwi
+spec:
+  ports:
+    - name: mc
+      protocol: TCP
+      port: 25565
+      targetPort: 25565
+  selector:
+    app.kubernetes.io/instance: beans
+    app.kubernetes.io/name: beans
