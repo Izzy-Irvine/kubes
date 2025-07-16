@@ -49,5 +49,5 @@ spec:
       port: 25565
       targetPort: 25565
   selector:
-    app.kubernetes.io/instance: hollowmere
-    app.kubernetes.io/name: hollowmere
+    app.kubernetes.io/instance: hollowmere-minecraft
+    app.kubernetes.io/name: minecraft
