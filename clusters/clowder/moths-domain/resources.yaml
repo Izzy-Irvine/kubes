@@ -24,6 +24,7 @@ spec:
       type: FABRIC
       version: 1.21.7
       memory: 2500M
+      motd: "Enter the hollow - a creative realm for mages and makers"
       modrinth:
         projects: [worldedit, axiom, fabric-api]
         allowedVersionType: beta
