@@ -25,7 +25,7 @@ spec:
       version: 1.21.7
       memory: 2500M
       modrinth:
-        projects: [worldedit, axiom]
+        projects: [worldedit, axiom, fabric-api]
         allowedVersionType: beta
     resources:
       requests: 
