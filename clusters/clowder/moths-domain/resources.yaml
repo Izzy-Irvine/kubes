@@ -21,9 +21,12 @@ spec:
     replicaCount: 1
     minecraftServer:
       eula: "TRUE"
-      type: PAPER
+      type: FABRIC
       version: 1.21.7
       memory: 2500M
+      modrinth:
+        projects: [worldedit, axiom]
+        allowedVersionType: beta
     resources:
       requests: 
         memory: 2Gi
