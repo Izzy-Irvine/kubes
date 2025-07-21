@@ -1,0 +1,58 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: public-certs
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: bitnami
+  namespace: public-certs
+spec:
+  interval: 12h
+  type: oci
+  url: oci://registry-1.docker.io/bitnamicharts
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: website
+  namespace: public-certs
+spec:
+  chart:
+    spec:
+      chart: nginx
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+  values:
+    ingress:
+      enabled: true
+      hostname: public-certs.cult-flat.izzy.kiwi
+      tls: true
+      annotations:
+        cert-manager.io/cluster-issuer: http-issuer
+    service:
+      type: ClusterIP
+    staticSiteConfigmap: www
+  interval: 12h
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: www
+  namespace: public-certs
+data:
+  index.html: |
+    <html>
+    <head>
+    <title>Izzy's public certs</title>
+    </head>
+    <body>
+    <h1>SSH CA public key</h1>
+    <p>
+    ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQD7+Xt8wW+8GpU0CGYmxCovli1e4d9YRbj1EIGMV8iePg4ASSW6mPtuP38YuQlEj65IcGCp/9kMUOSRwgvMURx3xyNq/pO9TZRMhhhhNJMSOnqwY3k6pzREOrtoSFjYFIfEu5vBpVus6ASlQa7moeW7dhvCA7/J87h8GoSWNiaLzN5vRO5RE3Ki2ZXkr84R44zpoVTBQcZWxFCKH80GMS2yDLW/a5/qssF/X6w8qT3TlpcxMVKg06QJTsPtFdp4hZ/Hn8tjKbii3niCCNIeXF7Uws5K/L+ZXrS/tY9w4kidbbgG/xVgRtSgNw4DukZQg6EiLu/JEW581W6aR5aWI5SU5DXrl9iHWCNxQfpB8x8oG4uXbe+/W0ub6034po7EkAVNrfVTfOkwBcxUo3px/z/Q1cvcVmZl9PNcujK4dlttUT8m4J5NqkYp5fK3nlVCiyuL0Zxu4AW6j52juIJNWc+cFMy/NL/Z1N3iUZFLpWogh2pO8Xtmy64BLmcbU0jBMG8= izzy@izzy-laptop
+    </p>
+    </body>
+    </html>
