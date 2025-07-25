@@ -71,6 +71,8 @@ nodes:
         systemExtensions:
           officialExtensions:
             - siderolabs/zfs
+            - siderolabs/iscsi-tools
+            - siderolabs/util-linux-tools
 allowSchedulingOnControlPlanes: true
 controlPlane:
   nodeLabels: {}

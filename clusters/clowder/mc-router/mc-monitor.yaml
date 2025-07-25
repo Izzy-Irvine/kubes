@@ -18,7 +18,7 @@ spec:
           image: itzg/mc-monitor
           env:
             - name: EXPORT_SERVERS
-              value: beans.izzy.kiwi,ditchcraft.izzy.kiwi,rizzcraft.izzy.kiwi,turn-up.izzy.kiwi
+              value: beans.izzy.kiwi,ditchcraft.izzy.kiwi,turn-up.izzy.kiwi,hollowmere.izzy.kiwi
           args:
             - export-for-prometheus
           ports:
