@@ -58,14 +58,19 @@ nodes:
               - bind
               - rshared
               - rw
-  - hostname: truenas-vm
+  - hostname: leo
     ipAddress: 192.168.100.203
     controlPlane: true
-    installDisk: /dev/vda
+    installDisk: /dev/sdb
     networkInterfaces:
-    - interface: ens3
+    - interface: eno1
       vip: 
         ip: 192.168.100.200
+    schematic:
+      customization:
+        systemExtensions:
+          officialExtensions:
+            - siderolabs/zfs
 allowSchedulingOnControlPlanes: true
 controlPlane:
   nodeLabels: {}
