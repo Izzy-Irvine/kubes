@@ -1,16 +1,24 @@
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: shell
   namespace: zfs
 spec:
-  nodeName: leo
-  containers:
-  - image: ubuntu
-    command:
-      - sleep
-      - inf
-    name: shell
-    resources: {}
-    securityContext:
-      privileged: true
+  selector:
+    matchLabels:
+      app: shell
+  template:
+    metadata:
+      labels:
+        app: shell
+    spec:
+      nodeName: leo
+      containers:
+      - image: ubuntu
+        command:
+          - sleep
+          - inf
+        name: shell
+        resources: {}
+        securityContext:
+          privileged: true
