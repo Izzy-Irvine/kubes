@@ -66,13 +66,8 @@ nodes:
     - interface: eno1
       vip: 
         ip: 192.168.100.200
-    schematic:
-      customization:
-        systemExtensions:
-          officialExtensions:
-            - siderolabs/zfs
-            - siderolabs/iscsi-tools
-            - siderolabs/util-linux-tools
+    kernelModules:
+      - name: zfs
 allowSchedulingOnControlPlanes: true
 controlPlane:
   nodeLabels: {}
@@ -82,3 +77,4 @@ controlPlane:
         officialExtensions:
           - siderolabs/iscsi-tools
           - siderolabs/util-linux-tools
+          - siderolabs/zfs
