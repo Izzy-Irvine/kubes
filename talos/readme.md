@@ -13,7 +13,7 @@ Inside the talos folder, generate the talos config using the command `talhelper 
 Might need to remove '-i' if the node already exists
 
 ## Set talos config file location
-`export TALOSCONFIG=$(PWD)/clusterconfig/talosconfig`
+`export TALOSCONFIG=$(pwd)/clusterconfig/talosconfig`
 
 ## Get the kubeconfig file
 `talosctl kubeconfig -e 192.168.100.210 -n 192.168.100.210`
