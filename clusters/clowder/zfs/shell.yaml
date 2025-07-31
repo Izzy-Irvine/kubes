@@ -12,6 +12,9 @@ spec:
       labels:
         app: shell
     spec:
+      hostIPC: true
+      hostNetwork: true
+      hostPID: true
       nodeName: leo
       containers:
       - image: ubuntu
