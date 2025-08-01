@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: samba
+  namespace: zfs
+spec:
+  selector:
+    matchLabels:
+      app: samba
+  template:
+    metadata:
+      labels:
+        app: samba
+    spec:
+      nodeName: leo
+      containers:
+      - image: ubuntu
+        command:
+          - sleep
+          - inf
+        name: samba
+        resources: {}
+        volumeMounts:
+          - name: general-storage
+            mountPath: /general-storage
+      volumes:
+        - name: general-storage
+          hostPath:
+            path: /var/HDDs-2025/general-storage
+            type: Directory
