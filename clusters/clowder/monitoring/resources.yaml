@@ -72,6 +72,9 @@ spec:
           - job_name: OpenWrt
             static_configs:
               - targets: ['192.168.100.1:9100']
+          - job_name: PiBackup
+            static_configs:
+              - targets: ['192.168.50.4:9100']
         retention: 30d
         retentionSize: 45GB
         resources: {} # TODO
