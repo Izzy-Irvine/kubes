@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Job
+metadata:
+  name: init-copy
+  namespace: zfs
+spec:
+  template:
+    spec:
+      hostIPC: true
+      hostNetwork: true
+      hostPID: true
+      nodeName: leo
+      containers:
+      - image: ubuntu
+        command:
+        - /bin/bash
+        - -c
+        - |
+          apt update
+          apt install -y ssh
+          nsenter --mount=/proc/1/ns/mnt -- zfs send HDDs-2025/general-storage@init | ssh izzy@192.168.50.4 "sudo zfs recv -F pool2025/general-storage-clone"
+        name: init-copy
+        resources: {}
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - name: ssh-key
+            mountPath: /root/.ssh
+      volumes:
+      - name: ssh-key
+        secret:
+          secretName: ssh-key
+          defaultMode: 0600
