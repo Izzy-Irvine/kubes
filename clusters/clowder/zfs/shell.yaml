@@ -32,8 +32,8 @@ spec:
         volumeMounts:
           - name: ssh-key
             mountPath: /root/.ssh
-            mode: 0600
       volumes:
       - name: ssh-key
         secret:
           secretName: ssh-key
+          defaultMode: 0600
