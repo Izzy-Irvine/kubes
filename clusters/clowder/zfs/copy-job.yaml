@@ -26,7 +26,7 @@ spec:
         volumeMounts:
           - name: ssh-key
             mountPath: /root/.ssh
-        restartPolicy: OnFailure
+      restartPolicy: OnFailure
       volumes:
       - name: ssh-key
         secret:
