@@ -19,9 +19,21 @@ spec:
       containers:
       - image: ubuntu
         command:
-          - sleep
-          - inf
+        - /bin/bash
+        - -c
+        - |
+          apt update
+          apt install -y ssh
+          sleep inf
         name: shell
         resources: {}
         securityContext:
           privileged: true
+        volumemounts:
+          - name: ssh-key
+            mountPath: /root/.ssh
+            readOnly: true
+      volumes:
+      - name: ssh-key
+        secret:
+          secretName: ssh-key
