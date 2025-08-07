@@ -29,7 +29,7 @@ spec:
         resources: {}
         securityContext:
           privileged: true
-        volumemounts:
+        volumeMounts:
           - name: ssh-key
             mountPath: /root/.ssh
             readOnly: true
