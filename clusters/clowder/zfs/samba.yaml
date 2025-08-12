@@ -4,6 +4,7 @@ metadata:
   name: samba
   namespace: zfs
 spec:
+  replicas: 0
   selector:
     matchLabels:
       app: samba
