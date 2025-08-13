@@ -42,6 +42,8 @@ spec:
       resources: {} # TODO
       operator:
         dashboardsConfigMapRefEnabled: true
+        matchLabel:
+          grafana_dashboard: "1"
       ingress:
         annotations:
           cert-manager.io/cluster-issuer: http-issuer
