@@ -40,6 +40,8 @@ spec:
               - alertmanager.izzy.kiwi
     grafana:
       resources: {} # TODO
+      operator:
+        dashboardsConfigMapRefEnabled: true
       ingress:
         annotations:
           cert-manager.io/cluster-issuer: http-issuer
