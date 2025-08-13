@@ -68,6 +68,18 @@ nodes:
         ip: 192.168.100.200
     kernelModules:
       - name: zfs
+    patches:
+    - |-
+      - op: add
+        path: /machine/kubelet/extraMounts
+        value:
+          - destination: /var/HDDs-2025
+            type: bind
+            source: /var/HDDs-2025
+            options:
+              - bind
+              - rshared
+              - rw
 allowSchedulingOnControlPlanes: true
 controlPlane:
   nodeLabels: {}
