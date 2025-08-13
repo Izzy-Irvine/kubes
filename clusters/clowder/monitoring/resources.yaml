@@ -43,7 +43,8 @@ spec:
       operator:
         dashboardsConfigMapRefEnabled: true
         matchLabel:
-          grafana_dashboard: "1"
+          app: grafana
+          category: dashboard
       ingress:
         annotations:
           cert-manager.io/cluster-issuer: http-issuer

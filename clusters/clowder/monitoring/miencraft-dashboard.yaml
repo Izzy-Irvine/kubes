@@ -4,7 +4,8 @@ metadata:
   name: minecraft-dashboard
   namespace: prometheus
   labels:
-    grafana_dashboard: "1"
+    app: grafana
+    category: dashboard
 data:
   minecraft: >
     {
