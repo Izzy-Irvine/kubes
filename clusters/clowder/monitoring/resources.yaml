@@ -39,9 +39,6 @@ spec:
             hosts:
               - alertmanager.izzy.kiwi
     grafana:
-      persistence:
-        enabled: true
-        size: 5Gi
       resources: {} # TODO
       ingress:
         annotations:
