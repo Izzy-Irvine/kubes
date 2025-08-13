@@ -4,8 +4,7 @@ metadata:
   name: minecraft-dashboard
   namespace: monitoring
   labels:
-    app: grafana
-    category: dashboard
+    grafana_dashboard: "1"
 data:
   minecraft: >
     {
