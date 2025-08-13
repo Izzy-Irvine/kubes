@@ -5,10 +5,8 @@ metadata:
   namespace: monitoring
   labels:
     grafana_dashboard: "1"
-    release: kube-prometheus-stack
-    app: kube-prometheus-stack-grafana
 data:
-  minecraft: >
+  minecraft.json: >
     {
       "__inputs": [
         {
