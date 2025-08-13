@@ -3,7 +3,7 @@ apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
   name: grafana
-  namespace: prometheus
+  namespace: monitoring
 spec:
   interval: 5m0s
   url: https://grafana.github.io/helm-charts
@@ -12,7 +12,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: loki
-  namespace: prometheus
+  namespace: monitoring
 spec:
   chart:
     spec:

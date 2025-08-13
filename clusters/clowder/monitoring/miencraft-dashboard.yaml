@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: minecraft-dashboard
-  namespace: prometheus
+  namespace: monitoring
   labels:
     app: grafana
     category: dashboard
