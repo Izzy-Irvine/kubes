@@ -42,7 +42,7 @@ spec:
       resources: {} # TODO
       operator:
         dashboardsConfigMapRefEnabled: true
-        matchLabel:
+        matchLabels:
           app: grafana
           category: dashboard
       ingress:
