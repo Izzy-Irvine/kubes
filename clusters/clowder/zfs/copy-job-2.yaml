@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-copy-2
+  namespace: zfs
+spec:
+  template:
+    spec:
+      hostIPC: true
+      hostNetwork: true
+      hostPID: true
+      nodeName: leo
+      containers:
+      - image: ubuntu
+        command:
+        - /bin/bash
+        - -c
+        - |
+          apt update
+          apt install -y ssh
+          ssh izzy@192.168.50.4 "sudo zfs send --raw pool2025/general-storage-backup" | nsenter --mount=/proc/1/ns/mnt -- zfs recv -F HDDs-2025/general-storage
+        name: init-copy-2
+        resources: {}
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - name: ssh-key
+            mountPath: /root/.ssh
+      restartPolicy: OnFailure
+      volumes:
+      - name: ssh-key
+        secret:
+          secretName: ssh-key
+          defaultMode: 0600
