@@ -1,9 +1,5 @@
 { pkgs ? import <nixpkgs> {} }:
-let
-    talhelper =  pkgs.callPackage (builtins.fetchGit {
-        url = "https://github.com/budimanjojo/talhelper";
-    }) {};
-in pkgs.mkShell {
+pkgs.mkShell {
     packages = with pkgs; [
         talosctl
         argocd
@@ -15,5 +11,6 @@ in pkgs.mkShell {
         k9s
         fluxcd
         prometheus.cli
+        apko
     ];
 }

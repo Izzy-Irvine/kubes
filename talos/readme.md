@@ -3,6 +3,7 @@
 ## Setup
 Install Nix-shell and run `nix-shell` to get an environment where all the needed tools are installed.
 Or install them manually.
+If you want to be able to generate talos config or edit secrets, set `export SOPS_AGE_KEY_FILE=~/age-key.txt` or have the key already somewhere that SOPS will look
 
 ## Generate Talos config
 Make sure you're got the Sops Age private key. 
