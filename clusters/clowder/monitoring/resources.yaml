@@ -22,6 +22,14 @@ spec:
         name: prometheus-community
   values:
     alertmanager:
+      config:
+        receivers:
+          - name: 'webhook'
+            webhookConfigs:
+            - urlSecret:
+                name: discord-webhook-token
+                key: address
+              sendResolved: true
       alertmanagerSpec:
         resources: {} # TODO
       ingress:
