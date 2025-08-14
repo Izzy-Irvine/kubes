@@ -25,9 +25,8 @@ spec:
       config:
         receivers:
           - name: 'webhook'
-            webhookConfigs:
-            - url: https://discord.com/api/webhooks/1405413694711529474/SYo8tnWhX2rmWssE1b6LFI_WcWOF4SOxnjPHK-pvhDf84gY7x7TcR03JJ-skUKueKvyI # temparary. Will delete soon and replace with a secret
-              sendResolved: true
+            discord_configs:
+              webhook_url: https://discord.com/api/webhooks/1405413694711529474/SYo8tnWhX2rmWssE1b6LFI_WcWOF4SOxnjPHK-pvhDf84gY7x7TcR03JJ-skUKueKvyI # temparary. Will delete soon and replace with a secret
       alertmanagerSpec:
         resources: {} # TODO
       ingress:
