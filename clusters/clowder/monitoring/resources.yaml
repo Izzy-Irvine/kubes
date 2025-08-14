@@ -26,9 +26,7 @@ spec:
         receivers:
           - name: 'webhook'
             webhookConfigs:
-            - urlSecret:
-                name: discord-webhook-token
-                key: address
+            - url: https://discord.com/api/webhooks/1405413694711529474/SYo8tnWhX2rmWssE1b6LFI_WcWOF4SOxnjPHK-pvhDf84gY7x7TcR03JJ-skUKueKvyI # temparary. Will delete soon and replace with a secret
               sendResolved: true
       alertmanagerSpec:
         resources: {} # TODO
