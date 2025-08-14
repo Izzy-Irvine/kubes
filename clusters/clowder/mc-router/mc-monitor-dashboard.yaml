@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: minecraft-dashboard
-  namespace: monitoring
+  namespace: mc-router
   labels:
     grafana_dashboard: "1"
 data:
