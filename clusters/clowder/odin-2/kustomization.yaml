@@ -13,3 +13,11 @@ secretGenerator:
 images:
   - name: ghcr.io/tomay0/odincards
     newTag: 2025-01-27t10-37-49
+patches:
+  - target:
+      kind: Deployment
+      name: odin
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 0
