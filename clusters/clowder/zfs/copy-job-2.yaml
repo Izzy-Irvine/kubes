@@ -18,7 +18,7 @@ spec:
         - |
           apt update
           apt install -y ssh
-          ssh izzy@192.168.50.4 "sudo zfs send --raw pool2025/general-storage-backup" | nsenter --mount=/proc/1/ns/mnt -- zfs recv -F HDDs-2025/general-storage
+          ssh izzy@192.168.50.4 "sudo zfs send pool2025/general-storage-backup" | nsenter --mount=/proc/1/ns/mnt -- zfs recv -F HDDs-2025/general-storage
         name: init-copy-2
         resources: {}
         securityContext:
