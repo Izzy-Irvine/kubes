@@ -91,7 +91,7 @@ spec:
             external:
               url: https://prometheus-prod-41-prod-au-southeast-1.grafana.net./api/prom
       kepler:
-        enabled: true
+        enabled: false
     prometheusOperatorObjects:
       enabled: true
     clusterEvents:
