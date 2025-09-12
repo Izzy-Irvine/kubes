@@ -81,7 +81,7 @@ spec:
     clusterMetrics:
       enabled: true
       opencost:
-        enabled: true
+        enabled: false
         metricsSource: grafana-cloud-metrics
         opencost:
           exporter:
