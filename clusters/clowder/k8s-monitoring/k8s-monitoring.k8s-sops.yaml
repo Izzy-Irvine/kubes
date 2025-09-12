@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: k8s-monitoring
+    namespace: k8s-monitoring
+type: Opaque
+stringData:
+    access-token: ENC[AES256_GCM,data:up6W3/c5AuJOpWsZ5OvcgdQM3D0YjCFx01GhQV4UcVwMZSucBCs6uB6WYZ1oeAx4d4lsxRMdEFvVGMzbm0w/ZYqDTTdqWRF0ay3TvmQwv4C914g+MYBQ5BLhFv9Ja3KBvATh/jYGuYrw6qT5KfIHiG/tSa+/gjd66drIO61do6dzU4xKr+doZZ3JMeSZ50IMkY/LdfYG14VhP6NZnRs1BqBnujx/zpeX5I4nbg==,iv:YF50KcmOInvzJTVSTKEAzENjYF7lyXzXmKE18h2nHpU=,tag:HNuWyMYiQwpOOXellSNY5w==,type:str]
+sops:
+    age:
+        - recipient: age1lyeweegkthnfzggpruszm3ru80mrm5zy6w6rnkux0r6apr42cfpssnp3p8
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBqQW41czZlWmRLTlV0RU9k
+            SUNIRFV5UVFwa2laWlpoc2ZHb3BPNkdUV1hVCi9PSnFxTkZkRnpaTmVNT3FGczA4
+            dTZPa25RclhhOTBaTXd1Q2ZsWkVPNDAKLS0tIGE0UC82VzBSbkdSZTN4bnZqLzR5
+            eEVQc1hraTJBWG5PeitQYlN3a0RTWVEKNGSBhJ6BlIG/kWLOTWDB+t7qQEgC6dpI
+            cSO7RikIjN++IJ+m/diwaYeEmuahumWiquZxAwWxYe3JRFrFJ+FGBw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2025-09-12T07:19:01Z"
+    mac: ENC[AES256_GCM,data:qmDEv1uuCVfthX7aMJLhsruQRSyFQno7mdFcQh5NWZF8mLXIt5At2MQe1R+k/ZMAgiE1TuIxdOTzXkasys/DfQyRBCh8Tj2lAzwOgoVWrVtD8HsZBP0Sx5GMF+XHqhXEu6KuXllbWnVSCP2UrbVqq58whQTL8k2CmGajmBhpqHo=,iv:7pLOz5Q/jtq3Mwwn43L6FsBYur0Usv4iA+X6i9sHRYk=,tag:3eOJhiLwrKhcfD++hGv3mQ==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.10.2
