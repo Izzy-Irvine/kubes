@@ -44,6 +44,7 @@ spec:
         auth:
           type: basic
           username: "2673599"
+          password: "fake"
         secret:
           create: true
           name: k8s-monitoring-prom
@@ -53,6 +54,7 @@ spec:
         auth:
           type: basic
           username: "1332476"
+          password: "fake"
         secret:
           create: true
           name: k8s-monitoring2-loki
