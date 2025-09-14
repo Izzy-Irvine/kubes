@@ -43,21 +43,17 @@ spec:
         url: https://prometheus-prod-41-prod-au-southeast-1.grafana.net./api/prom/push
         auth:
           type: basic
-          username: "2673599"
-          password: "fake"
         secret:
-          create: true
-          name: k8s-monitoring-prom
+          create: false
+          name: prom
       - name: grafana-cloud-logs
         type: loki
         url: https://logs-prod-026.grafana.net./loki/api/v1/push
         auth:
           type: basic
-          username: "1332476"
-          password: "fake"
         secret:
-          create: true
-          name: k8s-monitoring2-loki
+          create: false
+          name: loki
     clusterMetrics:
       enabled: true
     prometheusOperatorObjects:
