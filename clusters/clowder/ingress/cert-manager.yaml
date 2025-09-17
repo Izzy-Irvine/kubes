@@ -16,7 +16,7 @@ spec:
   chart:
     spec:
       chart: cert-manager
-      version: '1.17.2' # v1.18 has an issue with ingress-nginx: https://github.com/cert-manager/cert-manager/issues/7791
+      version: '1.18.2'
       sourceRef:
         kind: HelmRepository
         name: jetstack
