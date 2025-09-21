@@ -12,7 +12,7 @@ spec:
       nodeName: leo
       containers:
       - image: ubuntu
-        command:
+        command: # TODO: Setup incremental snapshots and retention policy
         - /bin/bash
         - -c
         - |
