@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: daily-sync
+  namespace: zfs
+spec:
+  template:
+    spec:
+      hostIPC: true
+      hostNetwork: true
+      hostPID: true
+      nodeName: leo
+      containers:
+      - image: ubuntu
+        command:
+        - /bin/bash
+        - -c
+        - |
+          apt update
+          apt install -y ssh
+          snapshot_name=$(date +%Y-%m-%d)
+          nsenter --mount=/proc/1/ns/mnt -- zfs snapshot HDDs-2025/general-storage@$snapshot_name
+          nsenter --mount=/proc/1/ns/mnt -- zfs send --raw HDDs-2025/general-storage@$snapshot_name | ssh izzy@192.168.50.4 "sudo zfs recv -F pool2025/general-storage-backup"
+        name: init-copy
+        resources: {}
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - name: ssh-key
+            mountPath: /root/.ssh
+      restartPolicy: OnFailure
+      volumes:
+      - name: ssh-key
+        secret:
+          secretName: ssh-key
+          defaultMode: 0600
