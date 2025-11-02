@@ -7,7 +7,7 @@ metadata:
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: flatcraft
+  name: flatcraft2
   namespace: flatcraft
 spec:
   chart:
@@ -25,6 +25,7 @@ spec:
       version: 1.21.7
       memory: 2500M
       motd: flatcraft
+      levelType: FLAT
       modrinth:
         projects: [worldedit, axiom, fabric-api]
         allowedVersionType: beta
