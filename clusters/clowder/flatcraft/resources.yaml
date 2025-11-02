@@ -32,7 +32,7 @@ spec:
       requests: 
         memory: 2Gi
     serviceAnnotations:
-      "mc-router.itzg.me/externalServerName": "flatcraft.izzy.kiwi"
+      "mc-router.itzg.me/externalServerName": "flatcraft.cult-flat.izzy.kiwi"
     persistence:
       dataDir:
         enabled: true
