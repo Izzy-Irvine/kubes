@@ -30,6 +30,7 @@ spec:
         projects: [worldedit, axiom, fabric-api]
         allowedVersionType: beta
       ops: boxhead_crafter,OscarE2903,pickettpastries
+      gameMode: creative
     resources:
       requests: 
         memory: 2Gi
