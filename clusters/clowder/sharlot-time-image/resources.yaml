@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: time-image
-          image: docker pull ghcr.io/sticks-stuff/time-image:1
+          image: ghcr.io/sticks-stuff/time-image:1
           ports:
             - containerPort: 3000
           securityContext:

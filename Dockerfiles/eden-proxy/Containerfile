@@ -1,0 +1,11 @@
+FROM ghcr.io/minekube/gate:latest
+
+COPY <<EOF /config.yml
+config:
+  lite:
+    enabled: true
+    routes:
+    - host: '*'
+      backend: mc.minehut.com:25565
+      modifyVirtualHost: true
+EOF
