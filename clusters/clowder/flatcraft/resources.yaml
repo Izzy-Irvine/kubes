@@ -22,7 +22,7 @@ spec:
     minecraftServer:
       eula: "TRUE"
       type: FABRIC
-      version: 1.21.7
+      version: 1.21.10
       memory: 2500M
       motd: flatcraft
       levelType: FLAT
