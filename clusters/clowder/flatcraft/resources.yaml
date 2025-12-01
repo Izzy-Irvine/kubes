@@ -29,6 +29,7 @@ spec:
       modrinth:
         projects: [worldedit, axiom, fabric-api]
         allowedVersionType: beta
+      ops: boxhead_crafter,OscarE2903,pickettpastries
     resources:
       requests: 
         memory: 2Gi
