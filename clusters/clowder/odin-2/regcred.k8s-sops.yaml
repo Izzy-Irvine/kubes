@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: regcred
+    namespace: odin-2
+type: kubernetes.io/dockerconfigjson
+stringData:
+    .dockerconfigjson: ENC[AES256_GCM,data:B3/tBeY12abhYez9Qz7kicLZMOy5OJnXV9zmoWCi5L8XTKEeBg3h2Tm+z0LpZLaFKCaoQC6ra9FSOg9cWjL00QZxLTcpaOS5oV5bTn8DGnnzBy45ZmFDVQhNt/XIJmZ5Y6ragQvfDFH3QJA=,iv:KGuW4bUsphS23Fp4ilfDsghmimYdPOHI9FjI8WpAqvg=,tag:2mPgbgvomiY98Znt8MyzFg==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBKbndrTE5LeEJPN0tXdE1y
+            b2ZtN3daZytNcVVadGhTU0cvQlV2VFJLeVNrCnd5dWdZWmdHQnlmWklWWXgzSzFF
+            cWRTYWF3cjBTSnEzQjlncCsvSzZqMGsKLS0tIDdGNnIrY1R2K2Z0azFycFVFYlpt
+            TkdVQTdUeTBVR1hlZlN4c3Q2NG9iV0kK54QuEBYHNLlUUWMFtXLGaFWXYcpzA5KT
+            x6WWtueqYEB0DfgoXPRjq83b4lK17KXNthb7bvc7/1g8gGsd2urdAg==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1lyeweegkthnfzggpruszm3ru80mrm5zy6w6rnkux0r6apr42cfpssnp3p8
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-07-16T14:05:04Z"
+    mac: ENC[AES256_GCM,data:SswXXBY2wVrD0BSzOrtLvHCQVBiM5CN/j2O3FwQJYdSzxCV1Mzz3hRfFxwduDBumJYrsl9Aw33VGKivK+yjPJOkJgKfW1f5TN/DfkX+oo7wQEU8RTs3XxylSjBt8NC6lwZhznYKI643ZKNo3mcZAMtANFaCKlwvkHMQ28yAENJI=,iv:5g/x+a/yCqWStEhuZMprEJEnqmRhN40sNheOWABgB3c=,tag:A/alRSAkZxPloEupE7Yz8A==,type:str]
+    version: 3.13.1
