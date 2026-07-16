@@ -81,7 +81,11 @@ nodes:
               - rshared
               - rw
 allowSchedulingOnControlPlanes: true
+cniConfig:
+  name: none # Calium will be installed later
 controlPlane:
+  nameservers:
+    - 192.168.100.1
   nodeLabels: {}
   schematic:
     customization:
@@ -104,3 +108,8 @@ patches:
       path: /cluster/scheduler/extraArgs
       value: 
         bind-address: 0.0.0.0
+  - |- # Needed for Cilium
+    - op: add
+      path: /cluster/proxy
+      value:
+        disabled: true

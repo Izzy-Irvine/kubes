@@ -12,6 +12,6 @@ pkgs.mkShell {
         fluxcd
         prometheus.cli
         apko
-        grafana-loki.logcli
+        grafana-loki
     ];
 }
