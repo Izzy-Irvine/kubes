@@ -96,14 +96,9 @@ spec:
               value: "true"
             - name: UPDATE_ON_BOOT
               value: "true"
+            # Longhorn's weekly-backup recurring job covers this volume
             - name: BACKUP_ENABLED
-              value: "true"
-            - name: BACKUP_CRON_EXPRESSION
-              value: "0 * * * *"
-            - name: DELETE_OLD_BACKUPS
-              value: "true"
-            - name: OLD_BACKUP_DAYS
-              value: "7"
+              value: "false"
           ports:
             - name: game
               containerPort: 8211
