@@ -99,6 +99,16 @@ spec:
             # Longhorn's weekly-backup recurring job covers this volume
             - name: BACKUP_ENABLED
               value: "false"
+            - name: SERVER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: palworld-passwords
+                  key: server-password
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: palworld-passwords
+                  key: admin-password
           ports:
             - name: game
               containerPort: 8211
