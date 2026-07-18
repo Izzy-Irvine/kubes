@@ -31,8 +31,8 @@ spec:
         type: LoadBalancer
         annotations:
           lbipam.cilium.io/ips: "192.168.100.211"
-      extraServiceSpec:
-        externalTrafficPolicy: Local
+      # externalTrafficPolicy stays Cluster: Cilium L2 may announce from a
+      # node without a local backend, which blackholes Local-policy traffic
     resources:
       limits:
         cpu: 250m
