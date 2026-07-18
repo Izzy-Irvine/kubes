@@ -41,11 +41,13 @@ spec:
     defaultSettings:
       createDefaultDiskLabeledNodes: true
       storageReservedPercentageForDefaultDisk: 5
-      backupTarget: azblob://clowder-longhorn-backups@core.windows.net/
-      backupTargetCredentialSecret: azure-cred
+      # Backups disabled: the izzzy storage account no longer exists.
+      # To be replaced with a new backup target at some point.
+      # backupTarget: azblob://clowder-longhorn-backups@core.windows.net/
+      # backupTargetCredentialSecret: azure-cred
       nodeDownPodDeletionPolicy: delete-deployment-pod
-    defaultBackupStore:
-      pollInterval: 0
+    # defaultBackupStore:
+    #   pollInterval: 0
     ingress:
       enabled: false
     metrics:
@@ -72,21 +74,22 @@ spec:
     - hosts:
         - longhorn
 ---
-apiVersion: longhorn.io/v1beta2
-kind: RecurringJob
-metadata:
-  name: weekly-backup
-  namespace: longhorn-system
-spec:
-  concurrency: 1
-  cron: 0 16 * * 0 # Time is in UTC. This is roughly 4am NST
-  groups:
-  - default
-  labels: {}
-  name: weekly-backup
-  parameters: {}
-  retain: 7
-  task: backup
+# Backups disabled until a replacement backup target exists
+# apiVersion: longhorn.io/v1beta2
+# kind: RecurringJob
+# metadata:
+#   name: weekly-backup
+#   namespace: longhorn-system
+# spec:
+#   concurrency: 1
+#   cron: 0 16 * * 0 # Time is in UTC. This is roughly 4am NST
+#   groups:
+#   - default
+#   labels: {}
+#   name: weekly-backup
+#   parameters: {}
+#   retain: 7
+#   task: backup
 ---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
