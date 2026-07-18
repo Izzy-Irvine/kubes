@@ -3,5 +3,5 @@ resources:
   - deployment.yaml
   - web-pvc.yaml
   - service.yaml
-  - ingress.yaml
+  - httproute.yaml
   - nginx-config.yaml

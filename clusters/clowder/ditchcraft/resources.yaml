@@ -54,18 +54,6 @@ spec:
             enabled: true
             embedded: false
             port: 80
-          ingress:
-            enabled: true
-            annotations:
-              cert-manager.io/cluster-issuer: http-issuer
-            hosts:
-              - name: ditchcraft.izzy.kiwi
-                path: /
-                pathType: Prefix
-            tls:
-              - secretName: map-tls
-                hosts:
-                  - ditchcraft.izzy.kiwi
     resources:
       requests: 
         memory: 3Gi
@@ -84,6 +72,22 @@ spec:
             persistentVolumeClaim:
               claimName: dynmap
   interval: 5m0s
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: dynmap
+  namespace: ditchcraft
+spec:
+  parentRefs:
+    - name: public
+      namespace: ingress
+  hostnames:
+    - ditchcraft.izzy.kiwi
+  rules:
+    - backendRefs:
+        - name: ditchcraft-minecraft-dynmap
+          port: 80
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

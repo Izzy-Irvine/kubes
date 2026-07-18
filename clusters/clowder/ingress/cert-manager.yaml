@@ -22,16 +22,20 @@ spec:
         name: jetstack
   values:
     installCRDs: true
-    ingressShim:
-      defaultIssuerName: http-issuer
+    config:
+      apiVersion: controller.config.cert-manager.io/v1alpha1
+      kind: ControllerConfiguration
+      enableGatewayAPI: true
   interval: 5m0s
   install:
     crds: CreateReplace
   upgrade:
     crds: CreateReplace
 ---
-# This depends on ingress release. If deploying from scratch, remove this, deploy, add it back, deploy. 
+# This depends on the cert-manager release. If deploying from scratch, remove this, deploy, add it back, deploy.
 # I feel like Flux has a way to fix this but I don't know it
+# Only used for odin-cards.com (DNS not ours, so no DNS-01). Requires port 80
+# forwarded to the public gateway and the domain pointing at our WAN IP.
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
@@ -43,5 +47,31 @@ spec:
       name: http-issuer-account-key
     solvers:
     - http01:
-        ingress:
-          class: nginx
+        gatewayHTTPRoute:
+          parentRefs:
+            - kind: Gateway
+              name: public
+              namespace: ingress
+---
+# DNS-01 for the Route 53 zones we own (izzy.kiwi, isaacirvine.me).
+# Credentials: route53-credentials.k8s-sops.yaml (IAM user cert-manager,
+# limited to _acme-challenge records).
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: dns-issuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: dns-issuer-account-key
+    solvers:
+    - dns01:
+        route53:
+          region: us-east-1
+          accessKeyIDSecretRef:
+            name: route53-credentials
+            key: access-key-id
+          secretAccessKeySecretRef:
+            name: route53-credentials
+            key: secret-access-key

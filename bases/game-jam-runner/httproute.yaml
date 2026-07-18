@@ -1,0 +1,14 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: game-jam-runner
+spec:
+  parentRefs:
+    - name: public
+      namespace: ingress
+  hostnames:
+    - patch-me.izzy.kiwi
+  rules:
+    - backendRefs:
+        - name: nginx
+          port: 80

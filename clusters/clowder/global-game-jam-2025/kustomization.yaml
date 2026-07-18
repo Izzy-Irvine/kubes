@@ -15,13 +15,10 @@ patches:
         path: /spec/template/spec/initContainers/0/env/0/value
         value: https://github.com/Izzy-Irvine/global-game-jam-2025
   - target:
-      kind: Ingress
+      kind: HTTPRoute
       name: game-jam-runner
     patch: |
       - op: replace
-        path: /spec/tls/0/hosts/0
-        value: global-jam-25.izzy.kiwi
-      - op: replace
-        path: /spec/rules/0/host
+        path: /spec/hostnames/0
         value: global-jam-25.izzy.kiwi
    

@@ -1,0 +1,203 @@
+# The single public entry point. Replaces ingress-nginx.
+# The router forwards 443 (and 80 for ACME challenges) to 192.168.100.210.
+# Port 80 exists only for Let's Encrypt HTTP-01 challenges (odin-cards.com,
+# which we don't own the DNS for) and the https redirect.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: public
+  namespace: ingress
+spec:
+  gatewayClassName: cilium
+  infrastructure:
+    annotations:
+      lbipam.cilium.io/ips: "192.168.100.210"
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same
+    - name: https-izzy-kiwi
+      protocol: HTTPS
+      port: 443
+      hostname: izzy.kiwi
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: izzy-kiwi-tls
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-odin-cards
+      protocol: HTTPS
+      port: 443
+      hostname: odin-cards.com
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: odin-cards-tls
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-old-odin-cards
+      protocol: HTTPS
+      port: 443
+      hostname: old.odin-cards.com
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: old-odin-cards-tls
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-global-jam-25
+      protocol: HTTPS
+      port: 443
+      hostname: global-jam-25.izzy.kiwi
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: global-jam-25-tls
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-flux-webhook
+      protocol: HTTPS
+      port: 443
+      hostname: flux-webhook.cult-flat.izzy.kiwi
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: flux-webhook-tls
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-ditchcraft
+      protocol: HTTPS
+      port: 443
+      hostname: ditchcraft.izzy.kiwi
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: ditchcraft-tls
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: https-public-certs
+      protocol: HTTPS
+      port: 443
+      hostname: public-certs.cult-flat.izzy.kiwi
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: public-certs-tls
+      allowedRoutes:
+        namespaces:
+          from: All
+---
+# Redirect http -> https. ACME solver HTTPRoutes match a more specific path
+# and take precedence over this catch-all.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-to-https
+  namespace: ingress
+spec:
+  parentRefs:
+    - name: public
+      sectionName: http
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
+---
+# Certificates are declared explicitly (not via gateway-shim annotation)
+# because the gateway mixes two issuers: DNS-01 for zones we own,
+# HTTP-01 for odin-cards.com which someone else's DNS points at us.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: izzy-kiwi-tls
+  namespace: ingress
+spec:
+  secretName: izzy-kiwi-tls
+  dnsNames: [izzy.kiwi]
+  issuerRef:
+    kind: ClusterIssuer
+    name: dns-issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: global-jam-25-tls
+  namespace: ingress
+spec:
+  secretName: global-jam-25-tls
+  dnsNames: [global-jam-25.izzy.kiwi]
+  issuerRef:
+    kind: ClusterIssuer
+    name: dns-issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: flux-webhook-tls
+  namespace: ingress
+spec:
+  secretName: flux-webhook-tls
+  dnsNames: [flux-webhook.cult-flat.izzy.kiwi]
+  issuerRef:
+    kind: ClusterIssuer
+    name: dns-issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ditchcraft-tls
+  namespace: ingress
+spec:
+  secretName: ditchcraft-tls
+  dnsNames: [ditchcraft.izzy.kiwi]
+  issuerRef:
+    kind: ClusterIssuer
+    name: dns-issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: public-certs-tls
+  namespace: ingress
+spec:
+  secretName: public-certs-tls
+  dnsNames: [public-certs.cult-flat.izzy.kiwi]
+  issuerRef:
+    kind: ClusterIssuer
+    name: dns-issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: odin-cards-tls
+  namespace: ingress
+spec:
+  secretName: odin-cards-tls
+  dnsNames: [odin-cards.com]
+  issuerRef:
+    kind: ClusterIssuer
+    name: http-issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: old-odin-cards-tls
+  namespace: ingress
+spec:
+  secretName: old-odin-cards-tls
+  dnsNames: [old.odin-cards.com]
+  issuerRef:
+    kind: ClusterIssuer
+    name: http-issuer

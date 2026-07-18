@@ -15,26 +15,18 @@ spec:
     - kind: GitRepository
       name: flux-system
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
   name: webhook-receiver
   namespace: flux-system
-  annotations:
-    cert-manager.io/cluster-issuer: http-issuer
 spec:
-  tls:
-  - hosts:
-      - flux-webhook.cult-flat.izzy.kiwi
-    secretName: flux-webhook-tls
+  parentRefs:
+    - name: public
+      namespace: ingress
+  hostnames:
+    - flux-webhook.cult-flat.izzy.kiwi
   rules:
-  - host: flux-webhook.cult-flat.izzy.kiwi
-    http:
-      paths:
-      - pathType: Prefix
-        path: /
-        backend:
-          service:
-            name: webhook-receiver
-            port:
-              number: 80
+    - backendRefs:
+        - name: webhook-receiver
+          port: 80

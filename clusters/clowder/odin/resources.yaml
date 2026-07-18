@@ -76,28 +76,18 @@ spec:
 #     numerical:
 #       order: asc
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
 metadata:
   name: odin
   namespace: odin
-  annotations:
-    cert-manager.io/cluster-issuer: http-issuer
-    nginx.ingress.kubernetes.io/enable-modsecurity: "false"
 spec:
-  ingressClassName: nginx
-  tls:
-  - hosts:
-      - old.odin-cards.com
-    secretName: odin-tls
+  parentRefs:
+    - name: public
+      namespace: ingress
+  hostnames:
+    - old.odin-cards.com
   rules:
-  - host: old.odin-cards.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: odin
-            port:
-              name: http
+    - backendRefs:
+        - name: odin
+          port: 80
