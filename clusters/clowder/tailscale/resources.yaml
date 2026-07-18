@@ -38,6 +38,12 @@ spec:
       version: 1.98.9
   # OAuth credentials come from the operator-oauth secret
   # (operator-oauth.k8s-sops.yaml), not from chart values
+  values:
+    # kubectl over tailscale: needs a tailscale.com/cap/kubernetes
+    # impersonation grant in the tailnet ACL, then
+    # `tailscale configure kubeconfig <operator hostname>` on clients
+    apiServerProxyConfig:
+      mode: "true"
   interval: 5m0s
 ---
 # Exit node: route device traffic through home. Needs "autoApprovers":
@@ -49,3 +55,8 @@ metadata:
 spec:
   hostnamePrefix: exit-home
   exitNode: true
+  # Whole home LAN: Talos/kube APIs on the nodes, router UI, gateway
+  # VIPs, etc. Needs an autoApprovers routes entry in the tailnet ACL.
+  subnetRouter:
+    advertiseRoutes:
+      - 192.168.100.0/24
