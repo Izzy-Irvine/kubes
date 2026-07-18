@@ -39,3 +39,13 @@ spec:
   # OAuth credentials come from the operator-oauth secret
   # (operator-oauth.k8s-sops.yaml), not from chart values
   interval: 5m0s
+---
+# Exit node: route device traffic through home. Needs "autoApprovers":
+# {"exitNode": ["tag:k8s"]} in the tailnet ACL (or one-off approval).
+apiVersion: tailscale.com/v1alpha1
+kind: Connector
+metadata:
+  name: exit-node
+spec:
+  hostnamePrefix: exit-home
+  exitNode: true
