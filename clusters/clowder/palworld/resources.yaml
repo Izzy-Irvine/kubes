@@ -89,7 +89,7 @@ spec:
             - name: PLAYERS
               value: "16"
             - name: SERVER_NAME
-              value: "izzy's palworld"
+              value: "Bea's palworld"
             - name: COMMUNITY
               value: "false"
             - name: MULTITHREADING
