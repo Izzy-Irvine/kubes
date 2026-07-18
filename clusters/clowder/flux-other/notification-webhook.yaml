@@ -15,6 +15,22 @@ spec:
     - kind: GitRepository
       name: flux-system
 ---
+# Flux's default NetworkPolicies only allow ingress from pods, but Cilium
+# Gateway traffic arrives from Envoy with the reserved "ingress" identity,
+# so we have to allow it explicitly.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-gateway-to-webhook
+  namespace: flux-system
+spec:
+  endpointSelector:
+    matchLabels:
+      app: notification-controller
+  ingress:
+    - fromEntities:
+        - ingress
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
