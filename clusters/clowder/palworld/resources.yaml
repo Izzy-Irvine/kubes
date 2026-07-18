@@ -1,0 +1,91 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: palworld
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: palworld-data
+  namespace: palworld
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: palworld
+  namespace: palworld
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: palworld
+  template:
+    metadata:
+      labels:
+        app: palworld
+    spec:
+      containers:
+        - name: palworld
+          image: thijsvanloef/palworld-server-docker:latest
+          resources:
+            requests:
+              memory: 4Gi
+              cpu: 1000m
+          env:
+            - name: PORT
+              value: "8211"
+            - name: PLAYERS
+              value: "16"
+            - name: SERVER_NAME
+              value: "izzy's palworld"
+            - name: COMMUNITY
+              value: "false"
+            - name: MULTITHREADING
+              value: "true"
+            - name: UPDATE_ON_BOOT
+              value: "true"
+            - name: BACKUP_ENABLED
+              value: "true"
+            - name: BACKUP_CRON_EXPRESSION
+              value: "0 * * * *"
+            - name: DELETE_OLD_BACKUPS
+              value: "true"
+            - name: OLD_BACKUP_DAYS
+              value: "7"
+          ports:
+            - name: game
+              containerPort: 8211
+              protocol: UDP
+          volumeMounts:
+            - name: data
+              mountPath: /palworld
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: palworld-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: palworld
+  namespace: palworld
+  annotations:
+    lbipam.cilium.io/ips: "192.168.100.214"
+spec:
+  type: LoadBalancer
+  selector:
+    app: palworld
+  ports:
+    - name: game
+      port: 8211
+      targetPort: 8211
+      protocol: UDP
