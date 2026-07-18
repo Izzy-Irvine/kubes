@@ -4,8 +4,6 @@ kind: Namespace
 metadata:
   name: ddns
 ---
-# Internet-only egress: the updater may reach public endpoints (Route 53 API,
-# WAN IP checkers) and cluster DNS, but nothing on the LAN or in the cluster.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

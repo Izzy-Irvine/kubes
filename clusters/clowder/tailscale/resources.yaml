@@ -3,8 +3,6 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: tailscale
-  # The proxy pods for Service-type (L3) exposure need a privileged
-  # init container to set sysctls
   labels:
     pod-security.kubernetes.io/enforce: privileged
     pod-security.kubernetes.io/enforce-version: latest
@@ -36,18 +34,11 @@ spec:
         kind: HelmRepository
         name: tailscale
       version: 1.98.9
-  # OAuth credentials come from the operator-oauth secret
-  # (operator-oauth.k8s-sops.yaml), not from chart values
   values:
-    # kubectl over tailscale: needs a tailscale.com/cap/kubernetes
-    # impersonation grant in the tailnet ACL, then
-    # `tailscale configure kubeconfig <operator hostname>` on clients
     apiServerProxyConfig:
       mode: "true"
   interval: 5m0s
 ---
-# Exit node: route device traffic through home. Needs "autoApprovers":
-# {"exitNode": ["tag:k8s"]} in the tailnet ACL (or one-off approval).
 apiVersion: tailscale.com/v1alpha1
 kind: Connector
 metadata:
@@ -55,8 +46,6 @@ metadata:
 spec:
   hostnamePrefix: exit-home
   exitNode: true
-  # Whole home LAN: Talos/kube APIs on the nodes, router UI, gateway
-  # VIPs, etc. Needs an autoApprovers routes entry in the tailnet ACL.
   subnetRouter:
     advertiseRoutes:
       - 192.168.100.0/24

@@ -1,6 +1,3 @@
-# Replaces MetalLB: Cilium LB-IPAM assigns LoadBalancer IPs from this pool,
-# and the L2 policy answers ARP for them on the LAN.
-# Services pin a specific IP with the annotation lbipam.cilium.io/ips.
 apiVersion: cilium.io/v2
 kind: CiliumLoadBalancerIPPool
 metadata:
@@ -9,7 +6,6 @@ spec:
   blocks:
     - start: 192.168.100.210
       stop: 192.168.100.219
-# TODO: IPv6
 ---
 apiVersion: cilium.io/v2alpha1
 kind: CiliumL2AnnouncementPolicy

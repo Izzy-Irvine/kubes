@@ -1,7 +1,3 @@
-# The single public entry point. Replaces ingress-nginx.
-# The router forwards 443 (and 80 for ACME challenges) to 192.168.100.210.
-# Port 80 exists only for Let's Encrypt HTTP-01 challenges (odin-cards.com,
-# which we don't own the DNS for) and the https redirect.
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
@@ -97,8 +93,6 @@ spec:
         namespaces:
           from: All
 ---
-# Redirect http -> https. ACME solver HTTPRoutes match a more specific path
-# and take precedence over this catch-all.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -115,9 +109,6 @@ spec:
             scheme: https
             statusCode: 301
 ---
-# Certificates are declared explicitly (not via gateway-shim annotation)
-# because the gateway mixes two issuers: DNS-01 for zones we own,
-# HTTP-01 for odin-cards.com which someone else's DNS points at us.
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
