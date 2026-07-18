@@ -75,7 +75,7 @@ spec:
     persistence:
       dataDir:
         enabled: true
-        Size: 20Gi
+        Size: 40Gi # Must match the live PVC capacity, helm can't shrink it
     extraVolumes:
       - volumeMounts:
         - name: dynmap

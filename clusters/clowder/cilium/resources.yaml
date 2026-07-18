@@ -53,4 +53,10 @@ spec:
       enabled: true
       enableAlpn: true
       enableAppProtocol: true
+    l2announcements:
+      enabled: true
+    # L2 announcement leases put extra load on the API server
+    k8sClientRateLimit:
+      qps: 50
+      burst: 100
   interval: 1m0s
