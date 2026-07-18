@@ -1,0 +1,106 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ddns
+---
+# Internet-only egress: the updater may reach public endpoints (Route 53 API,
+# WAN IP checkers) and cluster DNS, but nothing on the LAN or in the cluster.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: internet-only
+  namespace: ddns
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 169.254.0.0/16
+      ports:
+        - port: 443
+          protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ddns-route53
+  namespace: ddns
+  labels:
+    app: ddns-route53
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ddns-route53
+  template:
+    metadata:
+      labels:
+        app: ddns-route53
+    spec:
+      containers:
+        - name: ddns-route53
+          image: crazymax/ddns-route53:2.15.0
+          env:
+            - name: TZ
+              value: Pacific/Auckland
+            - name: SCHEDULE
+              value: "*/5 * * * *"
+            - name: LOG_LEVEL
+              value: info
+            - name: LOG_JSON
+              value: "false"
+            - name: DDNSR53_CREDENTIALS_ACCESSKEYID
+              valueFrom:
+                secretKeyRef:
+                  name: ddns-aws
+                  key: access-key-id
+            - name: DDNSR53_CREDENTIALS_SECRETACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: ddns-aws
+                  key: secret-access-key
+            - name: DDNSR53_ROUTE53_HOSTEDZONEID
+              value: Z1048351MSCC6VEP9WZR
+            - name: DDNSR53_ROUTE53_RECORDSSET_0_NAME
+              value: home.izzy.kiwi.
+            - name: DDNSR53_ROUTE53_RECORDSSET_0_TYPE
+              value: A
+            - name: DDNSR53_ROUTE53_RECORDSSET_0_TTL
+              value: "60"
+            - name: DDNSR53_WANIP_PROVIDERS_IPV4
+              value: https://checkip.amazonaws.com,https://api.ipify.org
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi
