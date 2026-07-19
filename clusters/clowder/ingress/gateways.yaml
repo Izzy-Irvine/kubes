@@ -26,14 +26,14 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
-    - name: https-odin-cards
+    - name: https-new-odin-cards
       protocol: HTTPS
       port: 443
-      hostname: odin-cards.com
+      hostname: new.odin-cards.com
       tls:
         mode: Terminate
         certificateRefs:
-          - name: odin-cards-tls
+          - name: new-odin-cards-tls
       allowedRoutes:
         namespaces:
           from: All
@@ -156,11 +156,11 @@ spec:
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: odin-cards-tls
+  name: new-odin-cards-tls
   namespace: ingress
 spec:
-  secretName: odin-cards-tls
-  dnsNames: [odin-cards.com]
+  secretName: new-odin-cards-tls
+  dnsNames: [new.odin-cards.com]
   issuerRef:
     kind: ClusterIssuer
     name: http-issuer

@@ -7,7 +7,7 @@ spec:
     - name: public
       namespace: ingress
   hostnames:
-    - odin-cards.com
+    - new.odin-cards.com
   rules:
     - backendRefs:
         - name: odin
