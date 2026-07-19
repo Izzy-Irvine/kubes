@@ -9,12 +9,6 @@ spec:
     annotations:
       lbipam.cilium.io/ips: "192.168.100.210"
   listeners:
-    - name: http
-      protocol: HTTP
-      port: 80
-      allowedRoutes:
-        namespaces:
-          from: Same
     - name: https-izzy-kiwi
       protocol: HTTPS
       port: 443
@@ -163,7 +157,7 @@ spec:
   dnsNames: [new.odin-cards.com]
   issuerRef:
     kind: ClusterIssuer
-    name: http-issuer
+    name: dns-issuer
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -175,4 +169,4 @@ spec:
   dnsNames: [old.odin-cards.com]
   issuerRef:
     kind: ClusterIssuer
-    name: http-issuer
+    name: dns-issuer
