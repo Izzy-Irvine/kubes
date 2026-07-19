@@ -76,6 +76,37 @@ spec:
 #     numerical:
 #       order: asc
 ---
+# Cilium policy (not a vanilla NetworkPolicy) because gateway traffic
+# arrives from Envoy's reserved "ingress" identity, which namespace/pod
+# selectors can't match
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: odin
+  namespace: odin
+spec:
+  endpointSelector:
+    matchLabels:
+      app: odin
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
