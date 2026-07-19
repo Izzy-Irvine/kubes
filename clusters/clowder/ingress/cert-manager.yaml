@@ -52,6 +52,9 @@ spec:
             - kind: Gateway
               name: public
               namespace: ingress
+              # Pin to the port-80 listener: without this cilium attaches
+              # the solver routes to the 443 listeners, breaking HTTP-01
+              sectionName: http
 ---
 # DNS-01 for the Route 53 zones we own (izzy.kiwi, isaacirvine.me).
 # Credentials: route53-credentials.k8s-sops.yaml (IAM user cert-manager,
