@@ -29,9 +29,7 @@ spec:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-              # nginx's entrypoint chowns its runtime dirs then drops
-              # privilege to the worker user - needs these even though
-              # the master starts as root to bind port 80
+              # nginx needs these to chown its runtime dirs and drop privilege to the worker user
               add: ["CHOWN", "SETUID", "SETGID", "NET_BIND_SERVICE"]
             seccompProfile:
               type: RuntimeDefault
@@ -69,9 +67,7 @@ spec:
         - name: wellington-panorama
           port: 80
 ---
-# Cilium policy (not vanilla NetworkPolicy): gateway traffic arrives from
-# Envoy's reserved "ingress" identity, which namespace/pod selectors can't
-# match. No egress at all - the app doesn't need to talk to anything.
+# Cilium policy: gateway traffic is Envoy's reserved "ingress" identity, which vanilla NetworkPolicy can't match
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -89,11 +85,7 @@ spec:
             - port: "80"
               protocol: TCP
 ---
-# CiliumNetworkPolicy's own egress:[] does NOT enable default-deny
-# (verified empirically - it's treated as no rules present, same as
-# omitting the key entirely). A vanilla NetworkPolicy with
-# policyTypes: [Egress] and no rules does correctly deny all egress,
-# and Cilium enforces both kinds together.
+# CiliumNetworkPolicy's egress:[] doesn't enable default-deny (verified empirically); this vanilla one does
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
