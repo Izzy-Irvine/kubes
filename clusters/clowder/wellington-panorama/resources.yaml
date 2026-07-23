@@ -88,7 +88,20 @@ spec:
         - ports:
             - port: "80"
               protocol: TCP
-  # Explicit empty list, not omitted: Cilium only default-denies a
-  # direction whose key is present. Omitting egress entirely leaves
-  # it allow-all rather than deny-all.
-  egress: []
+---
+# CiliumNetworkPolicy's own egress:[] does NOT enable default-deny
+# (verified empirically - it's treated as no rules present, same as
+# omitting the key entirely). A vanilla NetworkPolicy with
+# policyTypes: [Egress] and no rules does correctly deny all egress,
+# and Cilium enforces both kinds together.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: wellington-panorama-no-egress
+  namespace: wellington-panorama
+spec:
+  podSelector:
+    matchLabels:
+      app: wellington-panorama
+  policyTypes:
+    - Egress
