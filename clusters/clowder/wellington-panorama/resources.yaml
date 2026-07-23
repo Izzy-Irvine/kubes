@@ -88,3 +88,7 @@ spec:
         - ports:
             - port: "80"
               protocol: TCP
+  # Explicit empty list, not omitted: Cilium only default-denies a
+  # direction whose key is present. Omitting egress entirely leaves
+  # it allow-all rather than deny-all.
+  egress: []
