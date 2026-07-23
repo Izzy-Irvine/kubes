@@ -1,0 +1,86 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wellington-panorama
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wellington-panorama
+  namespace: wellington-panorama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wellington-panorama
+  template:
+    metadata:
+      labels:
+        app: wellington-panorama
+    spec:
+      containers:
+        - name: wellington-panorama
+          image: ghcr.io/izzy-irvine/wellington-panorama:latest
+          ports:
+            - name: http
+              containerPort: 80
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wellington-panorama
+  namespace: wellington-panorama
+spec:
+  selector:
+    app: wellington-panorama
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: wellington-panorama
+  namespace: wellington-panorama
+spec:
+  parentRefs:
+    - name: public
+      namespace: ingress
+  hostnames:
+    - wellington-panorama.izzy.kiwi
+  rules:
+    - backendRefs:
+        - name: wellington-panorama
+          port: 80
+---
+# Cilium policy (not vanilla NetworkPolicy): gateway traffic arrives from
+# Envoy's reserved "ingress" identity, which namespace/pod selectors can't
+# match. No egress at all - the app doesn't need to talk to anything.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: wellington-panorama
+  namespace: wellington-panorama
+spec:
+  endpointSelector:
+    matchLabels:
+      app: wellington-panorama
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
