@@ -99,6 +99,8 @@ spec:
             # Longhorn's weekly-backup recurring job covers this volume
             - name: BACKUP_ENABLED
               value: "false"
+            - name: USEAUTH
+              value: "false"
             - name: SERVER_PASSWORD
               valueFrom:
                 secretKeyRef:
