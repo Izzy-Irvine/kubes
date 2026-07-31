@@ -1,0 +1,97 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wellington-panorama-2
+  namespace: wellington-panorama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wellington-panorama-2
+  template:
+    metadata:
+      labels:
+        app: wellington-panorama-2
+    spec:
+      containers:
+        - name: wellington-panorama-2
+          image: ghcr.io/izzy-irvine/pano_viewer_2:latest
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            - name: SERVER_PORT
+              value: "8080"
+            - name: SERVER_LOG_LEVEL
+              value: "info"
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wellington-panorama-2
+  namespace: wellington-panorama
+spec:
+  selector:
+    app: wellington-panorama-2
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: wellington-panorama-2
+  namespace: wellington-panorama
+spec:
+  parentRefs:
+    - name: public
+      namespace: ingress
+  hostnames:
+    - wellington-panorama-2.izzy.kiwi
+  rules:
+    - backendRefs:
+        - name: wellington-panorama-2
+          port: 8080
+---
+# Cilium policy: gateway traffic is Envoy's reserved "ingress" identity, which vanilla NetworkPolicy can't match
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: wellington-panorama-2
+  namespace: wellington-panorama
+spec:
+  endpointSelector:
+    matchLabels:
+      app: wellington-panorama-2
+  ingress:
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+---
+# CiliumNetworkPolicy's egress:[] doesn't enable default-deny (verified empirically); this vanilla one does
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: wellington-panorama-2-no-egress
+  namespace: wellington-panorama
+spec:
+  podSelector:
+    matchLabels:
+      app: wellington-panorama-2
+  policyTypes:
+    - Egress
