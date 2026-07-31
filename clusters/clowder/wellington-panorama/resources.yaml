@@ -21,18 +21,19 @@ spec:
     spec:
       containers:
         - name: wellington-panorama
-          image: ghcr.io/izzy-irvine/wellington-panorama:latest
+          image: ghcr.io/izzy-irvine/pano_viewer_2:latest
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
-              # nginx needs these to chown its runtime dirs and drop privilege to the worker user
-              add: ["CHOWN", "SETUID", "SETGID", "NET_BIND_SERVICE"]
             seccompProfile:
               type: RuntimeDefault
+          env:
+            - name: SERVER_PORT
+              value: "8080"
           resources:
             requests:
               cpu: 10m
