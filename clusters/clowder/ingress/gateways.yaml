@@ -97,6 +97,17 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-wellington-panorama-2
+      protocol: HTTPS
+      port: 443
+      hostname: wellington-panorama-2.izzy.kiwi
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: wellington-panorama-2-tls
+      allowedRoutes:
+        namespaces:
+          from: All
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -190,6 +201,18 @@ metadata:
 spec:
   secretName: old-odin-cards-tls
   dnsNames: [old.odin-cards.com]
+  issuerRef:
+    kind: ClusterIssuer
+    name: dns-issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wellington-panorama-2-tls
+  namespace: ingress
+spec:
+  secretName: wellington-panorama-2-tls
+  dnsNames: [wellington-panorama-2.izzy.kiwi]
   issuerRef:
     kind: ClusterIssuer
     name: dns-issuer
