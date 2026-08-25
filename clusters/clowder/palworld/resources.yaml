@@ -139,3 +139,66 @@ spec:
       port: 8211
       targetPort: 8211
       protocol: UDP
+
+---
+# ServiceAccount and RBAC for the CronJob that restarts the palworld Deployment
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: palworld-restart
+  namespace: palworld
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: palworld-restart
+  namespace: palworld
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "patch", "update"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: palworld-restart
+  namespace: palworld
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: palworld-restart
+subjects:
+  - kind: ServiceAccount
+    name: palworld-restart
+    namespace: palworld
+
+---
+# CronJob: restart the palworld deployment at 04:00 Pacific/Auckland nightly
+# Uses `timeZone` so the job runs at NZ local time. If your cluster API
+# doesn't support `timeZone`, the CronJob may need a UTC schedule instead.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: palworld-restart
+  namespace: palworld
+spec:
+  schedule: "0 04 * * *"
+  timeZone: "Pacific/Auckland"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: palworld-restart
+          restartPolicy: OnFailure
+          containers:
+            - name: kubectl
+              image: bitnami/kubectl:1.29.0
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - kubectl rollout restart deployment palworld -n palworld
