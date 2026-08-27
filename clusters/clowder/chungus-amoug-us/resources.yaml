@@ -1,0 +1,55 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chungus-amoug-us
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: chungus-amoug-us
+  namespace: chungus-amoug-us
+spec:
+  chart:
+    spec:
+      chart: minecraft
+      sourceRef:
+        kind: HelmRepository
+        name: minecraft-server-charts
+        namespace: flux-system
+  values:
+    replicaCount: 1
+    image:
+      tag: java21
+    minecraftServer:
+      eula: "TRUE"
+      type: AUTO_CURSEFORGE
+      version: '1.20.1'
+      difficulty: normal
+      spawnProtection: 0
+      motd: 'Chungus Amoug Us ඞ'
+      memory: 10G
+      gameMode: survival
+      ops: boxhead_crafter
+      enableCommandBlock: false
+      autoCurseForge:
+        apiKey: 
+          existingSecret: curseforge
+        pageUrl: https://www.curseforge.com/minecraft/modpacks/whispers-in-the-void
+        forceSynchronize: true
+        includeMods: []
+        excludeMods: []
+    startupProbe:
+      enabled: true
+      failureThreshold: 50
+      periodSeconds: 10
+    resources:
+      requests: 
+        memory: 12Gi
+    serviceAnnotations:
+      "mc-router.itzg.me/externalServerName": "chungus-amoug-us.izzy.kiwi"
+    persistence:
+      dataDir:
+        enabled: true
+        Size: 20Gi
+  interval: 5m0s
