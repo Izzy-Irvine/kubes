@@ -20,8 +20,7 @@ spec:
   values:
     replicaCount: 1
     image:
-      repository: ubuntu
-      #tag: java21
+      tag: java21
     minecraftServer:
       eula: "TRUE"
       type: FORGE
