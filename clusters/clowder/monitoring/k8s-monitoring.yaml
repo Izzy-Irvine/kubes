@@ -35,6 +35,11 @@ spec:
       collector: alloy-metrics
       linuxHosts:
         enabled: true
+        # The minimal default allow list omits node_uname_info (and others),
+        # which node dashboards use to populate their instance/nodename
+        # variables. Use the full Node Exporter integration allow list.
+        metricsTuning:
+          useIntegrationAllowList: true
       windowsHosts:
         enabled: false
     prometheusOperatorObjects:
