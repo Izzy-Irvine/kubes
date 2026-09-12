@@ -73,6 +73,17 @@ spec:
     telemetryServices:
       kube-state-metrics:
         deploy: true
+        # KSM only emits the kube_<resource>_labels metrics for resources in
+        # this allow list; the dashboards' "Kubernetes Resource Count" panel
+        # uses them. The node entries preserve the chart default.
+        metricLabelsAllowlist:
+          - nodes=[agentpool,alpha.eksctl.io/cluster-name,alpha.eksctl.io/nodegroup-name,beta.kubernetes.io/instance-type,cloud.google.com/gke-nodepool,cluster-name,ec2.amazonaws.com/Name,ec2.amazonaws.com/aws-autoscaling-groupName,ec2.amazonaws.com/aws-autoscaling-group-name,ec2.amazonaws.com/name,eks.amazonaws.com/nodegroup,k8s.io/cloud-provider-aws,karpenter.sh/nodepool,kubernetes.azure.com/cluster,kubernetes.io/arch,kubernetes.io/hostname,kubernetes.io/os,node.kubernetes.io/instance-type,topology.kubernetes.io/region,topology.kubernetes.io/zone]
+          - daemonsets=[app.kubernetes.io/name]
+          - deployments=[app.kubernetes.io/name]
+          - horizontalpodautoscalers=[app.kubernetes.io/name]
+          - namespaces=[app.kubernetes.io/name]
+          - networkpolicies=[app.kubernetes.io/name]
+          - statefulsets=[app.kubernetes.io/name]
       node-exporter:
         deploy: true
       windows-exporter:
