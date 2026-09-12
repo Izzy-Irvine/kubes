@@ -86,6 +86,13 @@ spec:
           - statefulsets=[app.kubernetes.io/name]
       node-exporter:
         deploy: true
+        # Enable opt-in collectors used by the Node Exporter Full dashboard.
+        # The filesystem exclude preserves the chart default.
+        extraArgs:
+          - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|erofs|sysfs|tracefs|tmpfs|ramfs)$
+          - --collector.processes
+          - --collector.interrupts
+          - --collector.tcpstat
       windows-exporter:
         deploy: false
     selfReporting:
