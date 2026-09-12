@@ -30,6 +30,18 @@ spec:
     clusterMetrics:
       enabled: true
       collector: alloy-metrics
+      # The API server scrape is off by default; enable it for apiserver_*.
+      apiServer:
+        enabled: true
+      # Forward the full cAdvisor and kube-state-metrics metric sets. The
+      # minimal default allow lists omit throttling/OOM/network-error and
+      # many kube_* metrics used by the Kubernetes dashboards.
+      cadvisor:
+        metricsTuning:
+          useDefaultAllowList: false
+      kube-state-metrics:
+        metricsTuning:
+          useDefaultAllowList: false
     hostMetrics:
       enabled: true
       collector: alloy-metrics
