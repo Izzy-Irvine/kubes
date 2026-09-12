@@ -1,0 +1,84 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: prometheus
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+      version: 29.28.1
+  values:
+    server:
+      replicaCount: 1
+      retention: 30d
+      persistentVolume:
+        enabled: true
+        size: 50Gi
+        storageClass: longhorn
+      # Accept metrics from the Alloy collectors (and, later, from other
+      # tailnet producers) via remote write.
+      extraFlags:
+        - web.enable-lifecycle
+        - web.enable-remote-write-receiver
+      alertmanagers:
+        - static_configs:
+            - targets:
+                - prometheus-alertmanager:9093
+      resources:
+        requests:
+          cpu: 250m
+          memory: 1Gi
+        limits:
+          cpu: "2"
+          memory: 4Gi
+    # Alerts are evaluated and routed to a null receiver until a real receiver
+    # is configured.
+    alertmanager:
+      enabled: true
+      persistence:
+        enabled: true
+        size: 2Gi
+        storageClass: longhorn
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+    # kube-state-metrics and node-exporter are deployed by the k8s-monitoring
+    # chart; Alloy is the only scraper, so disable the bundled ones and the
+    # default Kubernetes discovery scrape jobs.
+    kube-state-metrics:
+      enabled: false
+    prometheus-node-exporter:
+      enabled: false
+    prometheus-pushgateway:
+      enabled: false
+    scrapeConfigs:
+      prometheus:
+        enabled: true
+      kubernetes-api-servers:
+        enabled: false
+      kubernetes-nodes:
+        enabled: false
+      kubernetes-nodes-cadvisor:
+        enabled: false
+      kubernetes-service-endpoints:
+        enabled: false
+      kubernetes-service-endpoints-slow:
+        enabled: false
+      prometheus-pushgateway:
+        enabled: false
+      kubernetes-services:
+        enabled: false
+      kubernetes-pods:
+        enabled: false
+      kubernetes-pods-slow:
+        enabled: false

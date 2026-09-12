@@ -1,0 +1,63 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: k8s-monitoring
+  namespace: monitoring
+spec:
+  interval: 10m
+  dependsOn:
+    - name: prometheus
+    - name: loki
+  chart:
+    spec:
+      chart: k8s-monitoring
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+      version: 4.5.2
+  values:
+    cluster:
+      name: clowder
+    destinations:
+      localPrometheus:
+        type: prometheus
+        url: http://prometheus-server.monitoring.svc.cluster.local:80/api/v1/write
+      localLoki:
+        type: loki
+        url: http://loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+    clusterMetrics:
+      enabled: true
+      collector: alloy-metrics
+    hostMetrics:
+      enabled: true
+      collector: alloy-metrics
+      linuxHosts:
+        enabled: true
+      windowsHosts:
+        enabled: false
+    prometheusOperatorObjects:
+      enabled: true
+      collector: alloy-metrics
+    clusterEvents:
+      enabled: true
+      collector: alloy-singleton
+    podLogsViaLoki:
+      enabled: true
+      collector: alloy-logs
+    collectors:
+      alloy-metrics:
+        presets: [medium, clustered, statefulset]
+      alloy-logs:
+        presets: [small, filesystem-log-reader, daemonset]
+      alloy-singleton:
+        presets: [small, deployment]
+    telemetryServices:
+      kube-state-metrics:
+        deploy: true
+      node-exporter:
+        deploy: true
+      windows-exporter:
+        deploy: false
+    selfReporting:
+      enabled: false

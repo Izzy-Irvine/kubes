@@ -1,0 +1,103 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: grafana
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-community
+      version: 13.2.3
+  values:
+    persistence:
+      enabled: true
+      size: 5Gi
+      storageClassName: longhorn
+    # Access is controlled by the tailnet; no Grafana login required.
+    grafana.ini:
+      auth:
+        disable_login_form: true
+      auth.anonymous:
+        enabled: true
+        org_name: Main Org.
+        org_role: Admin
+      server:
+        root_url: https://grafana.tail797fc.ts.net
+    datasources:
+      datasources.yaml:
+        apiVersion: 1
+        datasources:
+          - name: Prometheus
+            type: prometheus
+            url: http://prometheus-server
+            access: proxy
+            isDefault: true
+          - name: Loki
+            type: loki
+            url: http://loki:3100
+            access: proxy
+    # Dashboards are pulled from grafana.com by ID and pinned by revision.
+    # Dashboard provisioning via ConfigMaps / git sync is intentionally not
+    # enabled here.
+    dashboards:
+      default:
+        node-exporter-full:
+          gnetId: 1860
+          revision: 45
+          datasource: Prometheus
+        k8s-views-global:
+          gnetId: 15757
+          revision: 43
+          datasource: Prometheus
+        k8s-views-namespaces:
+          gnetId: 15758
+          revision: 46
+          datasource: Prometheus
+        k8s-views-nodes:
+          gnetId: 15759
+          revision: 40
+          datasource: Prometheus
+        k8s-views-pods:
+          gnetId: 15760
+          revision: 39
+          datasource: Prometheus
+        k8s-system-api-server:
+          gnetId: 15761
+          revision: 21
+          datasource: Prometheus
+        loki-logs-app:
+          gnetId: 13639
+          revision: 2
+          datasource: Loki
+    sidecar:
+      dashboards:
+        enabled: false
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+---
+# Tailnet-only access to Grafana: https://grafana.<tailnet>.ts.net
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana
+  namespace: monitoring
+spec:
+  ingressClassName: tailscale
+  defaultBackend:
+    service:
+      name: grafana
+      port:
+        number: 80
+  tls:
+    - hosts:
+        - grafana
