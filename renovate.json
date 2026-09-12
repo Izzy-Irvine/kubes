@@ -1,0 +1,36 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "Pacific/Auckland",
+  "schedule": ["* 18-23 * * 5"],
+  "minimumReleaseAge": "7 days",
+  "minimumReleaseAgeBehaviour": "timestamp-optional",
+  "internalChecksFilter": "strict",
+  "dependencyDashboard": true,
+  "labels": ["renovate"],
+  "ignorePaths": ["**/*.sops.yaml", "**/*.k8s-sops.yaml", "**/*.sops.env"],
+  "flux": {
+    "managerFilePatterns": ["/clusters/.+\\.ya?ml$/", "/bases/.+\\.ya?ml$/"]
+  },
+  "dockerfile": {
+    "enabled": false
+  },
+  "packageRules": [
+    {
+      "description": "Don't touch Flux bootstrap-generated manifests",
+      "matchFileNames": ["clusters/clowder/flux-system/**"],
+      "enabled": false
+    },
+    {
+      "description": "Group Helm chart bumps",
+      "matchManagers": ["flux", "helmv3", "helm-values"],
+      "matchDatasources": ["helm"],
+      "groupName": "helm charts"
+    },
+    {
+      "description": "Group container image bumps",
+      "matchDatasources": ["docker"],
+      "groupName": "container images"
+    }
+  ]
+}
