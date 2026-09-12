@@ -1,0 +1,15 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: prometheus-operator-crds
+  namespace: monitoring
+spec:
+  interval: 10m
+  chart:
+    spec:
+      chart: prometheus-operator-crds
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+      version: 32.0.0

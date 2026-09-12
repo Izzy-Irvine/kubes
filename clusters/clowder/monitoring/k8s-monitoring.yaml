@@ -9,6 +9,7 @@ spec:
   dependsOn:
     - name: prometheus
     - name: loki
+    - name: prometheus-operator-crds
   chart:
     spec:
       chart: k8s-monitoring

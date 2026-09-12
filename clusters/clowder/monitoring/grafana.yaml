@@ -46,6 +46,11 @@ spec:
     # Dashboards are pulled from grafana.com by ID and pinned by revision.
     # Dashboard provisioning via ConfigMaps / git sync is intentionally not
     # enabled here.
+    #
+    # Downloads are best-effort (no `-e`) so a grafana.com outage can't stop
+    # Grafana from starting, and TLS verification stays on (no `-k`).
+    defaultShellOptions: "ufo pipefail"
+    defaultCurlOptions: "-sf"
     dashboardProviders:
       dashboardproviders.yaml:
         apiVersion: 1
