@@ -32,6 +32,8 @@ spec:
               period: 24h
       limits_config:
         retention_period: 720h
+      pattern_ingester:
+        enabled: true
       compactor:
         retention_enabled: true
         delete_request_store: filesystem

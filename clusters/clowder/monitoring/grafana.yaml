@@ -28,6 +28,8 @@ spec:
         org_role: Admin
       server:
         root_url: https://grafana.tail797fc.ts.net
+      date_formats:
+        default_timezone: Pacific/Auckland
     datasources:
       datasources.yaml:
         apiVersion: 1
@@ -81,6 +83,10 @@ spec:
         k8s-system-api-server:
           gnetId: 15761
           revision: 21
+          datasource: Prometheus
+        longhorn:
+          gnetId: 16888
+          revision: 14
           datasource: Prometheus
         loki-logs-app:
           gnetId: 13639

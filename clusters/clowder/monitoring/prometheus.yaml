@@ -17,6 +17,8 @@ spec:
     server:
       replicaCount: 1
       retention: 30d
+      # Hard cap so the PVC can't fill up (50Gi volume).
+      retentionSize: 45GB
       persistentVolume:
         enabled: true
         size: 50Gi
