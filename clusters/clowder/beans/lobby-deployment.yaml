@@ -86,7 +86,6 @@ spec:
             exec:
               command:
                 - mc-health
-            enabled: false
             failureThreshold: 30
             periodSeconds: 10
       volumes:
