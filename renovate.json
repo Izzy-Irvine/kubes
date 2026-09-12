@@ -22,6 +22,11 @@
       "enabled": false
     },
     {
+      "description": "Ignore third-party odincards image that GHCR won't resolve",
+      "matchPackageNames": ["ghcr.io/tomay0/odincards"],
+      "enabled": false
+    },
+    {
       "description": "Group Helm chart bumps",
       "matchManagers": ["flux", "helmv3", "helm-values"],
       "matchDatasources": ["helm"],
