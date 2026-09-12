@@ -5,7 +5,8 @@ metadata:
   name: palworld
 ---
 # Game port open to everyone; REST (8212) and RCON (25575) unreachable
-# from outside the pod. Egress only to DNS and Steam/Epic (80/443).
+# from outside the pod. Egress only to DNS, Steam/Epic (80/443), and the
+# API server (for the restart CronJob below).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -46,6 +47,23 @@ spec:
           protocol: TCP
         - port: 80
           protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: palworld-restart-apiserver-egress
+  namespace: palworld
+spec:
+  endpointSelector:
+    matchLabels:
+      app: palworld-restart
+  egress:
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -191,14 +209,21 @@ spec:
   jobTemplate:
     spec:
       template:
+        metadata:
+          labels:
+            app: palworld-restart
         spec:
           serviceAccountName: palworld-restart
           restartPolicy: OnFailure
           containers:
             - name: kubectl
-              image: bitnami/kubectl:1.29.0
+              image: registry.k8s.io/kubectl:v1.32.3
               imagePullPolicy: IfNotPresent
               command:
-                - /bin/sh
-                - -c
-                - kubectl rollout restart deployment palworld -n palworld
+                - kubectl
+                - rollout
+                - restart
+                - deployment
+                - palworld
+                - -n
+                - palworld
