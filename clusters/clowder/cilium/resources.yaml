@@ -20,8 +20,18 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: cilium
-      version: 1.18.12
+      version: 1.18.13
   values:
+    # Minimize datapath disruption during the 1.18 -> 1.20 upgrade
+    upgradeCompatibility: "1.18"
+    # Roll one node at a time (3-node cluster)
+    updateStrategy:
+      rollingUpdate:
+        maxUnavailable: 1
+    envoy:
+      updateStrategy:
+        rollingUpdate:
+          maxUnavailable: 1
     ipam:
       mode: kubernetes
     kubeProxyReplacement: true
