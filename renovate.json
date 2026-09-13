@@ -32,6 +32,11 @@
       "enabled": false
     },
     {
+      "description": "Cilium upgrades on hold; must step one minor at a time",
+      "matchPackageNames": ["cilium"],
+      "enabled": false
+    },
+    {
       "description": "Group Helm chart bumps",
       "matchManagers": ["flux", "helmv3", "helm-values"],
       "matchDatasources": ["helm"],
