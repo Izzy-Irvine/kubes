@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: streamio
-          image: stremio/server
+          image: stremio/server:v4.21.1
           env:
             - name: NO_CORS
               value: "1"

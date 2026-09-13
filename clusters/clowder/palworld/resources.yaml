@@ -96,7 +96,7 @@ spec:
     spec:
       containers:
         - name: palworld
-          image: thijsvanloef/palworld-server-docker:latest
+          image: thijsvanloef/palworld-server-docker:v2.7.3
           resources:
             requests:
               memory: 4Gi

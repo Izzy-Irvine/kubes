@@ -15,9 +15,10 @@ with `kubectl` / `flux`.
   and `talosconfig` are generated and gitignored. Setup/bootstrap steps live in
   `talos/readme.md`.
 - `bases/<app>/` — shared kustomize base manifests.
-- `clusters/clowder/<app>/` — per-app namespace. Each `kustomization.yaml` pulls in
-  `../../../bases/<app>` and patches image tags, replicas, and hostnames. Add new
-  apps as a new directory here.
+- `clusters/clowder/<app>/` — per-app namespace. Flux recursively auto-generates
+  the kustomize build; app dirs that overlay a base add their own `kustomization.yaml`
+  pulling in `../../../bases/<app>` and patching image tags, replicas, and hostnames.
+  Add new apps as a new directory here.
 - `Dockerfiles/` — Containerfiles for images used by manifests; built outside this repo.
 - `scripts/` — helpers, e.g. `scripts/copy-off-pvc/run.sh` to pull PVC contents locally.
 
@@ -34,7 +35,7 @@ with `kubectl` / `flux`.
 ## Commands
 
 - `nix-shell` — provides talosctl, kubectl, sops, age, helm, talhelper, flux, etc.
-- Regenerate Talos config (from `talos/`): `talhelper genconfig -s talsecret.sops.yaml`,
+- Regenerate Talos config (from `talos/clowder/`): `talhelper genconfig -s talsecret.sops.yaml`,
   then `export TALOSCONFIG=$(pwd)/clusterconfig/talosconfig`.
 
 ## Cluster conventions

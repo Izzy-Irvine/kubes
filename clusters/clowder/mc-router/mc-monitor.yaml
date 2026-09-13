@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: main
-          image: itzg/mc-monitor
+          image: itzg/mc-monitor:0.17.1
           env:
             - name: EXPORT_SERVERS
               value: beans.izzy.kiwi,ditchcraft.izzy.kiwi,turn-up.izzy.kiwi,hollowmere.izzy.kiwi

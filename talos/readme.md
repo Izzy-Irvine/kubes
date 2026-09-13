@@ -7,17 +7,17 @@ If you want to be able to generate talos config or edit secrets, set `export SOP
 
 ## Generate Talos config
 Make sure you're got the Sops Age private key. 
-Inside the talos folder, generate the talos config using the command `talhelper genconfig -s talsecret.sops.yaml`
+Inside the `talos/clowder` folder, generate the talos config using the command `talhelper genconfig -s talsecret.sops.yaml`
 
 ## Add a new machine to the cluster
-`talosctl apply-config -i -f clusterconfig/talos-proxmox-cluster-XXX.yaml -n 192.168.100.XXX`
+`talosctl apply-config -i -f clusterconfig/clowder-XXX.yaml -n 192.168.100.XXX` (XXX is the node hostname)
 Might need to remove '-i' if the node already exists
 
 ## Set talos config file location
 `export TALOSCONFIG=$(pwd)/clusterconfig/talosconfig`
 
 ## Get the kubeconfig file
-`talosctl kubeconfig -e 192.168.100.210 -n 192.168.100.210`
+`talosctl kubeconfig -e 192.168.100.200 -n 192.168.100.200`
 
 ## Bootstrap/update FluxCD
 ` export GITHUB_TOKEN=...`

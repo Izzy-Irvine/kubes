@@ -30,7 +30,7 @@ spec:
                 - ALL
             readOnlyRootFilesystem: true
             allowPrivilegeEscalation: false
-          image: itzg/minecraft-server
+          image: itzg/minecraft-server:2026.9.1
           ports:
             - containerPort: 25565
           volumeMounts:

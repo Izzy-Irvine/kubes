@@ -1,5 +1,2 @@
-clowder-algernon.yaml
-clowder-rusty.yaml
-clowder-truenas-vm.yaml
-talosconfig
-clowder-leo.yaml
+*
+!.gitignore
