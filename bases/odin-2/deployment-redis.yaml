@@ -6,6 +6,9 @@ spec:
   replicas: 1
   strategy:
     type: Recreate
+    # Explicit null clears the API-defaulted rollingUpdate when switching
+    # from RollingUpdate, otherwise server-side apply rejects the object.
+    rollingUpdate: null
   selector:
     matchLabels:
       app: redis
