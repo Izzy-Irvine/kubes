@@ -27,6 +27,11 @@
       "enabled": false
     },
     {
+      "description": "Longhorn upgrades on hold",
+      "matchPackageNames": ["longhorn"],
+      "enabled": false
+    },
+    {
       "description": "Group Helm chart bumps",
       "matchManagers": ["flux", "helmv3", "helm-values"],
       "matchDatasources": ["helm"],
