@@ -38,6 +38,12 @@
       "enabled": false
     },
     {
+      "description": "Omada controller upgrades are migration-sensitive",
+      "matchPackageNames": ["mbentley/omada-controller"],
+      "matchUpdateTypes": ["minor", "major"],
+      "enabled": false
+    },
+    {
       "description": "Group Helm chart bumps",
       "matchManagers": ["flux", "helmv3", "helm-values"],
       "matchDatasources": ["helm"],

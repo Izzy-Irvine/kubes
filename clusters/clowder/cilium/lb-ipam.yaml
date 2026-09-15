@@ -6,6 +6,10 @@ spec:
   blocks:
     - start: 192.168.100.210
       stop: 192.168.100.219
+    # Omada controller's pre-migration address, pinned so adopted devices
+    # (which still inform to it) reconnect without reconfiguration.
+    - start: 192.168.100.10
+      stop: 192.168.100.10
 ---
 apiVersion: cilium.io/v2alpha1
 kind: CiliumL2AnnouncementPolicy
