@@ -30,15 +30,13 @@ spec:
 # Migrated from omada/docker-compose.yml. Rootless mode per the upstream k8s
 # manifest so no privileged entrypoint is needed.
 #
-# Keep replicas at 0 until the omada-data PVC has been seeded from
-# omada/volumes/omada-data, otherwise the controller initialises a fresh DB.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: omada-controller
   namespace: omada
 spec:
-  replicas: 0
+  replicas: 1
   strategy:
     type: Recreate
   selector:
