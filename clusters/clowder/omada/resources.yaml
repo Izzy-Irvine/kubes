@@ -188,7 +188,9 @@ spec:
       port: 8088
       targetPort: 8088
       protocol: TCP
-    - name: manage-https
+    # Named "https" so the tailscale Ingress proxies to it over HTTPS
+    # (https+insecure); the controller redirects plain HTTP to 8043.
+    - name: https
       port: 8043
       targetPort: 8043
       protocol: TCP
@@ -238,7 +240,6 @@ spec:
       protocol: TCP
 ---
 # Tailnet-only access to the controller: https://omada.<tailnet>.ts.net
-# Plain HTTP backend avoids the controller's self-signed certificate.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -250,7 +251,7 @@ spec:
     service:
       name: omada
       port:
-        number: 8088
+        name: https
   tls:
     - hosts:
         - omada
