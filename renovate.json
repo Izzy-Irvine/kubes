@@ -32,9 +32,9 @@
       "enabled": false
     },
     {
-      "description": "Cilium: patch updates only; minors need manual stepwise upgrades",
+      "description": "Cilium: patch updates only; major updates need manual stepwise upgrades",
       "matchPackageNames": ["cilium"],
-      "matchUpdateTypes": ["minor", "major"],
+      "matchUpdateTypes": ["major"],
       "enabled": false
     },
     {
