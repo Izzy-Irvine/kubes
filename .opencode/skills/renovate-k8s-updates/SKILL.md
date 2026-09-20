@@ -88,8 +88,28 @@ entries for the range being upgraded. Sources, in order:
 4. Upstream issues/PRs for anything that looks breaking.
 
 Look specifically for: major version bumps, removed/renamed config keys, CRD or API
-version changes, changed default values, database/state migrations, and changes to
-how state or storage is handled.
+version changes, changed default values, behavior changes, database/state migrations,
+and changes to how state or storage is handled.
+
+When a changelog flags a breaking or behavior change, **do not treat the label as
+applicable to this cluster by default**. First check whether the cluster actually
+uses the affected feature, then judge. Investigate each flagged item against the
+running config:
+
+- Find what the component is configured to do here — CRs in use, chart `values`,
+  enabled features, integrations (e.g. `kubectl get <cr> -A`, the HelmRelease
+  `values`, the relevant manifests under `clusters/clowder/`).
+- Does the breaking change touch any of that? If the feature is not enabled or the
+  affected code path is not exercised, it does not affect this cluster — record why
+  and downgrade the risk.
+- Only escalate changes that genuinely apply here. Example: a cert-manager release
+  that makes the validating webhook deny malformed `AdmissionReview` requests is a
+  non-issue if this cluster has no webhook-based issuers; a default-value or CRD
+  change to an issuer type that *is* used here is a real risk.
+
+State this mapping explicitly in your notes: "changelog says X breaks Y; this cluster
+does/doesn't use Y because ..., so risk is Z." The user should never have to explain
+that an upstream breaking change doesn't apply to them.
 
 **Cache every changelog location you find in `changelogs.md`** (same directory as
 this skill). Add a row so future runs do not need to search again:
@@ -123,19 +143,27 @@ briefly unavailable.
 Monitoring-stack data is explicitly **not** sensitive: Grafana, Prometheus, Loki,
 and Alertmanager PVCs may be lost. Do not block on those.
 
-**HIGH — stop and ask the user first:**
+**HIGH — stop and ask the user first, but only after investigating impact:**
 
-- Major version bumps, or breaking config/CRD/API/schema changes.
+- Major version bumps, or breaking config/CRD/API/schema changes **that apply to this
+  cluster** (see step 3 — verify the affected feature is actually in use here before
+  escalating).
 - `cert-manager` (public TLS), `cilium` (networking/CNI), `tailscale`,
-  `omada` (migration-sensitive), `prometheus-operator-crds`.
-- Anything where the changelog is unclear about breaking behavior.
+  `omada` (migration-sensitive), `prometheus-operator-crds` — but for these too, dig
+  into the specific change. A patch release with no applicable behavior change is not
+  automatically high risk just because of the component name.
+- Anything where the changelog is genuinely unclear about breaking behavior *after*
+  you have tried to resolve it against the running config.
 
 **LOW / MEDIUM — proceed autonomously:**
 
-- Patch and minor bumps with no breaking changes.
+- Patch and minor bumps with no breaking changes. This includes releases whose only
+  breaking/behavior changes touch features this cluster does not use.
 - Stateless workloads. Small amounts of downtime are acceptable.
 
-When in doubt, escalate to the user. A pause is cheap; lost data is not.
+When in doubt, escalate to the user. A pause is cheap; lost data is not. But do the
+investigation first — escalate with a determination ("this change is/isn't used
+here"), not just the upstream warning.
 
 ### 5. Prepare fixes
 
