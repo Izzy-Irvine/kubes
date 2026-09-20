@@ -42,6 +42,12 @@ nodes:
       - device: /dev/disk/by-id/nvme-Samsung_SSD_970_EVO_Plus_1TB_S4EWNM0W347804K
         partitions:
           - mountpoint: /var/lib/longhorn
+    # ZigBee coordinator (CH340/CH341 USB serial, 1a86:7523) is plugged in here.
+    # The module usually auto-loads on hotplug, but pin it so a boot with the
+    # stick already attached (or a future Talos version without kmod autoload)
+    # still gets a tty.
+    kernelModules:
+      - name: ch341
     networkInterfaces:
     - interface: eno1
       vip: 
@@ -58,6 +64,14 @@ nodes:
               - bind
               - rshared
               - rw
+    # Stable name for the CH341, which the kernel always presents as ttyUSB0
+    # only because nothing else is attached. Match the chip (no serial number is
+    # exposed) so Home Assistant can reference /dev/zigbee.
+    - |-
+      machine:
+        udev:
+          rules:
+            - 'SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", SYMLINK+="zigbee"'
   - hostname: leo
     ipAddress: 192.168.100.203
     controlPlane: true
