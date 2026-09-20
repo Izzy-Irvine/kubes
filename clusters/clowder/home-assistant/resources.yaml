@@ -1,0 +1,121 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: home-assistant
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: home-assistant-config
+  namespace: home-assistant
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+# Pinned to rusty: the ZigBee coordinator (CH340/CH341, 1a86:7523) is plugged
+# into that node and passed through below. The udev rule in
+# talos/clowder/talconfig.yaml gives it the stable name /dev/zigbee.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-assistant
+  namespace: home-assistant
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: home-assistant
+  template:
+    metadata:
+      labels:
+        app: home-assistant
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: rusty
+      containers:
+        - name: home-assistant
+          image: ghcr.io/home-assistant/home-assistant:2026.9.3
+          env:
+            - name: TZ
+              value: Pacific/Auckland
+          ports:
+            - name: http
+              containerPort: 8123
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              memory: 2Gi
+          # The official image's s6-overlay init needs root at startup and
+          # drops privileges itself, so no runAsNonRoot here.
+          #
+          # privileged is for the ZigBee stick, not HA: a hostPath char device
+          # is visible inside the container but the device cgroup denies open()
+          # without it, which surfaces as ZHA failing to set up rather than as a
+          # permissions error.
+          securityContext:
+            privileged: true
+          startupProbe:
+            tcpSocket:
+              port: 8123
+            failureThreshold: 30
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8123
+            periodSeconds: 30
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            # Mounted as /dev/ttyUSB0 (not /dev/zigbee) because ZHA's port
+            # picker only lists tty* and by-id paths.
+            - name: zigbee
+              mountPath: /dev/ttyUSB0
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: home-assistant-config
+        - name: zigbee
+          hostPath:
+            path: /dev/zigbee
+            type: CharDevice
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: home-assistant
+  namespace: home-assistant
+spec:
+  selector:
+    app: home-assistant
+  ports:
+    - name: http
+      port: 8123
+      targetPort: http
+      protocol: TCP
+---
+# Tailnet-only access: https://home-assistant.<tailnet>.ts.net
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: home-assistant
+  namespace: home-assistant
+spec:
+  ingressClassName: tailscale
+  defaultBackend:
+    service:
+      name: home-assistant
+      port:
+        number: 8123
+  tls:
+    - hosts:
+        - home-assistant
