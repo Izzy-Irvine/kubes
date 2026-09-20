@@ -12,7 +12,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: grafana-community
-      version: 13.2.3
+      version: 13.2.4
   values:
     persistence:
       enabled: true
