@@ -3,6 +3,16 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: home-assistant
+  labels:
+    # The cluster enforces the baseline Pod Security Standard by default, which
+    # forbids both privileged containers and hostPath volumes -- exactly what
+    # the ZigBee stick needs. Same escape hatch as tailscale/monitoring/zfs.
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/audit-version: latest
+    pod-security.kubernetes.io/warn: privileged
+    pod-security.kubernetes.io/warn-version: latest
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
