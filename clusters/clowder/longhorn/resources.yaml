@@ -41,6 +41,10 @@ spec:
     defaultSettings:
       createDefaultDiskLabeledNodes: true
       storageReservedPercentageForDefaultDisk: 5
+      # The 1TB data disks now carry the Immich library (2 replicas) plus the
+      # existing volumes, so the sum of requested replica sizes exceeds raw disk
+      # size. Allow thin over-commit; actual usage stays well under the disks.
+      storageOverProvisioningPercentage: 200
       # Backups disabled: the izzzy storage account no longer exists.
       # To be replaced with a new backup target at some point.
       # backupTarget: azblob://clowder-longhorn-backups@core.windows.net/
