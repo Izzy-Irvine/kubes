@@ -1,0 +1,200 @@
+# Cilium/Gateway note: Cilium Gateway traffic reaches backends with Envoy's
+# reserved "ingress" identity, which vanilla NetworkPolicy cannot match, so the
+# server ingress rules live in a CiliumNetworkPolicy.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: immich-server
+  namespace: immich
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: server
+      app.kubernetes.io/instance: immich
+  ingress:
+    # Public traffic via the Gateway.
+    - fromEntities:
+        - ingress
+      toPorts:
+        - ports:
+            - port: "2283"
+              protocol: TCP
+    # Metrics scraping by the k8s-monitoring Alloy collector.
+    - fromEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: monitoring
+      toPorts:
+        - ports:
+            - port: "8081"
+              protocol: TCP
+            - port: "8082"
+              protocol: TCP
+    # Kubelet health probes.
+    - fromEntities:
+        - host
+        - health
+      toPorts:
+        - ports:
+            - port: "2283"
+              protocol: TCP
+            - port: "8081"
+              protocol: TCP
+            - port: "8082"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app: immich-postgres
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: valkey
+            app.kubernetes.io/instance: immich
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: machine-learning
+            app.kubernetes.io/instance: immich
+      toPorts:
+        - ports:
+            - port: "3003"
+              protocol: TCP
+    # Reverse geocoding, version checks and OAuth/OIDC when configured.
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "80"
+              protocol: TCP
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: immich-machine-learning
+  namespace: immich
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: machine-learning
+      app.kubernetes.io/instance: immich
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: server
+            app.kubernetes.io/instance: immich
+      toPorts:
+        - ports:
+            - port: "3003"
+              protocol: TCP
+    # Kubelet health probes.
+    - fromEntities:
+        - host
+        - health
+      toPorts:
+        - ports:
+            - port: "3003"
+              protocol: TCP
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+    # Hugging Face model downloads.
+    - toEntities:
+        - world
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+# Only the Immich server may reach PostgreSQL.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: immich-postgres
+  namespace: immich
+spec:
+  endpointSelector:
+    matchLabels:
+      app: immich-postgres
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: server
+            app.kubernetes.io/instance: immich
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+---
+# Only the Immich server may reach Valkey.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: immich-valkey
+  namespace: immich
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: valkey
+      app.kubernetes.io/instance: immich
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: server
+            app.kubernetes.io/instance: immich
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP
+---
+# CiliumNetworkPolicy's egress:[] does not enable default-deny egress, so these
+# vanilla NetworkPolicies remove all outbound access from the datastores.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: immich-postgres-no-egress
+  namespace: immich
+spec:
+  podSelector:
+    matchLabels:
+      app: immich-postgres
+  policyTypes:
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: immich-valkey-no-egress
+  namespace: immich
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: valkey
+      app.kubernetes.io/instance: immich
+  policyTypes:
+    - Egress

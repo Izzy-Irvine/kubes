@@ -72,6 +72,15 @@ spec:
                     secretKeyRef:
                       name: immich-db
                       key: password
+                # Admin sign-up already used; close the first-admin and
+                # database-restore endpoints.
+                IMMICH_ALLOW_SETUP: "false"
+                # Enable Immich's recommended security headers (CSP etc.).
+                IMMICH_HELMET_FILE: "true"
+                # Structured logs, consumed by Loki.
+                IMMICH_LOG_FORMAT: json
+                # Trust X-Forwarded-* from the Gateway/Envoy pods (Cilium pod CIDR).
+                IMMICH_TRUSTED_PROXIES: 10.244.0.0/16
               resources:
                 requests:
                   cpu: 250m
