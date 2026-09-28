@@ -35,7 +35,7 @@ spec:
           args:
             - |
               set -euo pipefail
-              apk add --no-cache curl ca-certificates tar
+              apk add --no-cache curl ca-certificates tar unzip
 
               cd /tmp
               curl -fsSL -o immich-go.tgz \
@@ -54,12 +54,22 @@ spec:
                   continue
                 fi
                 part=$(printf 'part-%03d.zip' "$n")
-                rm -f "$part"
-                echo "==> part $n: downloading"
-                curl -fSL --retry 8 --retry-delay 15 --retry-all-errors \
-                  --cookie "$TAKEOUT_COOKIE" -A "Mozilla/5.0" -o "$part" "$url"
-                if [ "$(head -c 2 "$part")" != "PK" ]; then
-                  echo "ERROR: $part is not a zip (expired cookie or URL?)" >&2
+                # Takeout file URLs reject HTTP Range, so no resume: each attempt
+                # is a full download, verified end-to-end, retried on truncation.
+                ok=0
+                for attempt in 1 2 3; do
+                  rm -f "$part"
+                  echo "==> part $n: downloading (attempt $attempt)"
+                  if curl -fSL --retry 8 --retry-delay 15 --retry-all-errors \
+                       --cookie "$TAKEOUT_COOKIE" -A "Mozilla/5.0" -o "$part" "$url" \
+                     && unzip -t "$part" >/dev/null 2>&1; then
+                    ok=1
+                    break
+                  fi
+                  echo "==> part $n: attempt $attempt incomplete/unreadable, retrying" >&2
+                done
+                if [ "$ok" != 1 ]; then
+                  echo "ERROR: part $n failed after 3 attempts (expired cookie/URL?)" >&2
                   exit 1
                 fi
                 echo "==> part $n: uploading"
