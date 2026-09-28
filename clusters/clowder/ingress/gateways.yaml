@@ -108,6 +108,17 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-photos
+      protocol: HTTPS
+      port: 443
+      hostname: photos.izzy.kiwi
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: photos-izzy-kiwi-tls
+      allowedRoutes:
+        namespaces:
+          from: All
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -213,6 +224,18 @@ metadata:
 spec:
   secretName: wellington-panorama-2-tls
   dnsNames: [wellington-panorama-2.izzy.kiwi]
+  issuerRef:
+    kind: ClusterIssuer
+    name: dns-issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: photos-izzy-kiwi-tls
+  namespace: ingress
+spec:
+  secretName: photos-izzy-kiwi-tls
+  dnsNames: [photos.izzy.kiwi]
   issuerRef:
     kind: ClusterIssuer
     name: dns-issuer
