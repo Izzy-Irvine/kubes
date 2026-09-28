@@ -24,7 +24,7 @@ spec:
           image: ghcr.io/tomay0/odincards
           env:
             - name: POSTGRES_HOST
-              value: 192.168.100.250
+              value: 192.168.100.250 # dead server, has been deleted.
             - name: REDIS_URL
               value: redis://redis:6379/
           envFrom:
