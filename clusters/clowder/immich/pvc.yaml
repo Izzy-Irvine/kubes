@@ -11,7 +11,7 @@ spec:
   storageClassName: longhorn
   resources:
     requests:
-      storage: 400Gi
+      storage: 600Gi
 ---
 # Everything under /data except the originals: thumbnails, encoded video,
 # profile images, staged uploads and database backups.
@@ -26,7 +26,7 @@ spec:
   storageClassName: longhorn
   resources:
     requests:
-      storage: 50Gi
+      storage: 150Gi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
