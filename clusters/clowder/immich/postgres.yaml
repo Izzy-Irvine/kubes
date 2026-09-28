@@ -50,8 +50,10 @@ spec:
             - name: postgres
               containerPort: 5432
           volumeMounts:
+            # Mount one level above PGDATA: Longhorn's ext4 volume root
+            # contains lost+found, and initdb refuses a non-empty data dir.
             - name: data
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql
             - name: shm
               mountPath: /dev/shm
           readinessProbe:
