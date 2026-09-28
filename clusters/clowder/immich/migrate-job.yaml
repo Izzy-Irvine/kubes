@@ -54,8 +54,9 @@ spec:
                   continue
                 fi
                 part=$(printf 'part-%03d.zip' "$n")
+                rm -f "$part"
                 echo "==> part $n: downloading"
-                curl -fSL --retry 8 --retry-delay 15 --retry-all-errors -C - \
+                curl -fSL --retry 8 --retry-delay 15 --retry-all-errors \
                   --cookie "$TAKEOUT_COOKIE" -A "Mozilla/5.0" -o "$part" "$url"
                 if [ "$(head -c 2 "$part")" != "PK" ]; then
                   echo "ERROR: $part is not a zip (expired cookie or URL?)" >&2
