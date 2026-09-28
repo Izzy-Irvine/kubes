@@ -9,6 +9,16 @@ within seconds of a push to `main`, with a 5-10m interval as fallback. Do not
 There is no build, lint, or test suite. Verification is inspecting the cluster
 with `kubectl` / `flux`.
 
+## Reliability SLA
+
+The goal is **rapid automated recovery**, not true high availability. Short
+downtime during failures or upgrades is acceptable, provided the cluster
+recovers on its own quickly and loses almost no data. Prefer designs that
+self-heal (automatic restarts/rescheduling, intact persistent volumes,
+replication of data) over ones that merely avoid downtime (multi-replica HA,
+leader election, complex failover). When weighing options, favour the simpler
+one unless it meaningfully risks data loss or the ability to recover.
+
 ## Layout
 
 - `talos/` — Talos machine configs, generated with talhelper. `clusterconfig/*.yaml`
