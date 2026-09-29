@@ -1,16 +1,13 @@
-# One-off Google Takeout -> Immich migration.
+# One-off Google Takeout -> Immich migration (single-pass re-run).
 #
-# Both the download and the upload happen in-cluster. The Takeout was delivered
-# to Google Drive, and rclone copies it from there (resumable, unlike the direct
-# Takeout download links which reject HTTP Range).
+# Takeout was delivered to Google Drive; rclone stages ALL parts, then immich-go
+# runs once over every zip. This matters because Google Takeout can put a photo
+# and its .supplemental-metadata.json sidecar in different zip parts, so a
+# per-part run loses metadata/albums (and without --include-unmatched, skips
+# photos entirely).
 #
-# To keep the staging volume small, it processes one Takeout part at a time:
-#   rclone copy part -> immich-go upload -> delete part -> mark done -> next.
-# Progress markers live on the staging volume, so a pod restart skips parts
-# already processed.
-#
-# The Job is suspended until the `immich-migrate` Secret holds a real API key,
-# an rclone config for the Drive remote, and the Drive path; then flip `suspend`.
+# Uploads dedup against the server, so already-imported assets are not re-sent.
+# Suspended until the staging volume is expanded to 550Gi, then flip `suspend`.
 #
 # Delete this file (plus migrate-pvc.yaml and migrate-secret.k8s-sops.yaml) when
 # finished so Flux prunes the staging volume.
@@ -20,8 +17,8 @@ metadata:
   name: immich-migrate
   namespace: immich
 spec:
-  suspend: false
-  backoffLimit: 6
+  suspend: true
+  backoffLimit: 3
   template:
     metadata:
       labels:
@@ -38,7 +35,6 @@ spec:
               apk add --no-cache curl ca-certificates tar unzip
 
               cd /tmp
-              # Alpine's packaged rclone is old; use a current release.
               curl -fsSL -o rclone.zip \
                 "https://downloads.rclone.org/v1.75.1/rclone-v1.75.1-linux-amd64.zip"
               echo "982b5aa772841168f8e380f139e9e787b2a105403e32b94da8676a0e1c0a13ab  rclone.zip" | sha256sum -c -
@@ -48,8 +44,6 @@ spec:
               curl -fsSL -o immich-go.tgz \
                 "https://github.com/simulot/immich-go/releases/download/v0.32.0/immich-go_Linux_x86_64.tar.gz"
               echo "6e2ad86bafdadb9466d6515de7cb882726c0aea1a21d51164dff361d7d480a97  immich-go.tgz" | sha256sum -c -
-              # Install the binary outside /tmp: XDG_CACHE_HOME=/tmp makes
-              # immich-go use /tmp/immich-go as its cache dir.
               tar xzf immich-go.tgz -C /usr/local/bin immich-go
               chmod +x /usr/local/bin/immich-go
 
@@ -57,54 +51,41 @@ spec:
               export XDG_CACHE_HOME=/tmp
 
               cd /takeout
-              mkdir -p state
-              # GDRIVE_PATH points directly at the folder containing the
-              # takeout-*.zip parts, e.g. "gdrive:Takeout".
+              rm -f ./*.partial ./*.zip
+              rm -rf state
+
+              # Stage every part.
               rclone lsf --files-only "$GDRIVE_PATH" | grep -E '\.zip$' | sort | while IFS= read -r name; do
-                if [ -f "state/done-$name" ]; then
-                  echo "==> $name already done, skipping"
-                  continue
-                fi
-                ok=0
-                for attempt in 1 2 3; do
-                  echo "==> $name: rclone (attempt $attempt)"
-                  if rclone copy "$GDRIVE_PATH/$name" /takeout/ \
-                       --retries 10 --low-level-retries 20 --contimeout 60s --timeout 5m \
-                       --drive-chunk-size 128M --multi-thread-streams 4 --transfers 1 \
-                       --stats 15s --stats-one-line; then
-                    # Exact content check against the MD5 Drive stores.
-                    src_md5=$(rclone md5sum "$GDRIVE_PATH/$name" | awk '{print $1}')
-                    loc_md5=$(md5sum "/takeout/$name" | awk '{print $1}')
-                    echo "==> $name: md5 src=${src_md5:-none} local=$loc_md5"
-                    if [ -n "$src_md5" ] && [ "$src_md5" = "$loc_md5" ]; then
-                      ok=1
-                      break
-                    fi
-                    echo "==> $name: checksum mismatch, retrying" >&2
-                  else
-                    echo "==> $name: rclone copy failed, retrying" >&2
-                  fi
-                  rm -f "/takeout/$name"
-                  sleep 10
-                done
-                if [ "$ok" != 1 ]; then
-                  echo "ERROR: $name failed after 3 attempts" >&2
+                echo "==> staging $name"
+                rclone copy "$GDRIVE_PATH/$name" /takeout/ \
+                  --retries 10 --low-level-retries 20 --contimeout 60s --timeout 5m \
+                  --drive-chunk-size 128M --multi-thread-streams 4 --transfers 1 \
+                  --stats 30s --stats-one-line
+                src_md5=$(rclone md5sum "$GDRIVE_PATH/$name" | awk '{print $1}')
+                loc_md5=$(md5sum "/takeout/$name" | awk '{print $1}')
+                if [ -z "$src_md5" ] || [ "$src_md5" != "$loc_md5" ]; then
+                  echo "ERROR: MD5 mismatch for $name (src=$src_md5 local=$loc_md5)" >&2
                   exit 1
                 fi
-                echo "==> $name: uploading"
-                /usr/local/bin/immich-go upload from-google-photos \
-                  --server=http://immich-server:2283 \
-                  --api-key="$IMMICH_API_KEY" \
-                  --concurrent-tasks=4 \
-                  --client-timeout=60m \
-                  --pause-immich-jobs=true \
-                  --on-errors=continue \
-                  --tag="Migration/GooglePhotos" \
-                  "/takeout/$name"
-                rm -f "/takeout/$name"
-                touch "state/done-$name"
-                echo "==> $name: done"
+                echo "==> staged $name"
               done
+              ls -lh /takeout
+
+              # Single-pass import over all parts. --include-unmatched imports
+              # photos whose sidecar is absent/elsewhere; --include-untitled-albums
+              # keeps albums without album metadata.
+              echo "==> importing"
+              /usr/local/bin/immich-go upload from-google-photos \
+                --server=http://immich-server:2283 \
+                --api-key="$IMMICH_API_KEY" \
+                --concurrent-tasks=4 \
+                --client-timeout=60m \
+                --pause-immich-jobs=true \
+                --on-errors=continue \
+                --include-unmatched \
+                --include-untitled-albums \
+                --tag="Migration/GooglePhotos" \
+                /takeout/takeout-*.zip
               echo "==> migration complete"
           env:
             - name: IMMICH_API_KEY

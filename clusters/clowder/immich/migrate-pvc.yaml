@@ -1,6 +1,7 @@
-# Scratch space for the Google Takeout migration. 1-replica longhorn-ephemeral;
-# only one Takeout part is staged at a time (see migrate-job.yaml), so this
-# stays small. Delete once the migration is done.
+# Scratch space for the Google Takeout migration. Holds all ~504GiB of Takeout
+# parts at once so immich-go can run in a single pass (sidecars and media can
+# land in different zip parts). 1-replica longhorn-ephemeral. Delete once the
+# migration is done.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -12,4 +13,4 @@ spec:
   storageClassName: longhorn-ephemeral
   resources:
     requests:
-      storage: 100Gi
+      storage: 550Gi
