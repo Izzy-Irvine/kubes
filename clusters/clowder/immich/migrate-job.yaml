@@ -1,16 +1,16 @@
 # One-off Google Takeout -> Immich migration.
 #
-# Both the download and the upload happen in-cluster (no hairpin through a
-# workstation). The Job is suspended until the `immich-migrate` Secret holds a
-# real API key, browser Cookie header, and Takeout URLs; then flip `suspend`.
+# Both the download and the upload happen in-cluster. The Takeout was delivered
+# to Google Drive, and rclone copies it from there (resumable, unlike the direct
+# Takeout download links which reject HTTP Range).
 #
 # To keep the staging volume small, it processes one Takeout part at a time:
-#   download part -> immich-go upload -> delete part -> mark done -> next.
+#   rclone copy part -> immich-go upload -> delete part -> mark done -> next.
 # Progress markers live on the staging volume, so a pod restart skips parts
 # already processed.
 #
-# Takeout download URLs require your Google session; the Cookie header from
-# your logged-in browser is sent with each request.
+# The Job is suspended until the `immich-migrate` Secret holds a real API key,
+# an rclone config for the Drive remote, and the Drive path; then flip `suspend`.
 #
 # Delete this file (plus migrate-pvc.yaml and migrate-secret.k8s-sops.yaml) when
 # finished so Flux prunes the staging volume.
@@ -35,7 +35,7 @@ spec:
           args:
             - |
               set -euo pipefail
-              apk add --no-cache curl ca-certificates tar unzip
+              apk add --no-cache rclone curl ca-certificates tar unzip
 
               cd /tmp
               curl -fsSL -o immich-go.tgz \
@@ -43,36 +43,38 @@ spec:
               echo "6e2ad86bafdadb9466d6515de7cb882726c0aea1a21d51164dff361d7d480a97  immich-go.tgz" | sha256sum -c -
               tar xzf immich-go.tgz
 
+              export RCLONE_CONFIG=/config/rclone/rclone.conf
+              export XDG_CACHE_HOME=/tmp
+
               cd /takeout
               mkdir -p state
-              n=0
-              printf '%s\n' "$TAKEOUT_URLS" | while IFS= read -r url; do
-                if [ -z "$url" ]; then continue; fi
-                n=$((n + 1))
-                if [ -f "state/done-$n" ]; then
-                  echo "==> part $n already done, skipping"
+              # GDRIVE_PATH points directly at the folder containing the
+              # takeout-*.zip parts, e.g. "gdrive:Takeout".
+              rclone lsf --files-only "$GDRIVE_PATH" | grep -E '\.zip$' | sort | while IFS= read -r name; do
+                if [ -f "state/done-$name" ]; then
+                  echo "==> $name already done, skipping"
                   continue
                 fi
-                part=$(printf 'part-%03d.zip' "$n")
-                # Takeout file URLs reject HTTP Range, so no resume: each attempt
-                # is a full download, verified end-to-end, retried on truncation.
                 ok=0
                 for attempt in 1 2 3; do
-                  rm -f "$part"
-                  echo "==> part $n: downloading (attempt $attempt)"
-                  if curl -fSL --retry 8 --retry-delay 15 --retry-all-errors \
-                       --cookie "$TAKEOUT_COOKIE" -A "Mozilla/5.0" -o "$part" "$url" \
-                     && unzip -t "$part" >/dev/null 2>&1; then
+                  echo "==> $name: rclone (attempt $attempt)"
+                  if rclone copy "$GDRIVE_PATH/$name" /takeout/ \
+                       --retries 10 --low-level-retries 20 --contimeout 60s --timeout 5m \
+                       --drive-chunk-size 128M --multi-thread-streams 4 --transfers 1 \
+                       --stats 15s --stats-one-line \
+                     && unzip -t "/takeout/$name" >/dev/null 2>&1; then
                     ok=1
                     break
                   fi
-                  echo "==> part $n: attempt $attempt incomplete/unreadable, retrying" >&2
+                  echo "==> $name: attempt $attempt incomplete/unreadable, retrying" >&2
+                  rm -f "/takeout/$name"
+                  sleep 10
                 done
                 if [ "$ok" != 1 ]; then
-                  echo "ERROR: part $n failed after 3 attempts (expired cookie/URL?)" >&2
+                  echo "ERROR: $name failed after 3 attempts" >&2
                   exit 1
                 fi
-                echo "==> part $n: uploading"
+                echo "==> $name: uploading"
                 /tmp/immich-go upload from-google-photos \
                   --server=http://immich-server:2283 \
                   --api-key="$IMMICH_API_KEY" \
@@ -81,10 +83,10 @@ spec:
                   --pause-immich-jobs=true \
                   --on-errors=continue \
                   --tag="Migration/GooglePhotos" \
-                  "$part"
-                rm -f "$part"
-                touch "state/done-$n"
-                echo "==> part $n: done"
+                  "/takeout/$name"
+                rm -f "/takeout/$name"
+                touch "state/done-$name"
+                echo "==> $name: done"
               done
               echo "==> migration complete"
           env:
@@ -93,19 +95,17 @@ spec:
                 secretKeyRef:
                   name: immich-migrate
                   key: api-key
-            - name: TAKEOUT_COOKIE
+            - name: GDRIVE_PATH
               valueFrom:
                 secretKeyRef:
                   name: immich-migrate
-                  key: cookie
-            - name: TAKEOUT_URLS
-              valueFrom:
-                secretKeyRef:
-                  name: immich-migrate
-                  key: takeout-urls
+                  key: drive-path
           volumeMounts:
             - name: takeout
               mountPath: /takeout
+            - name: rclone-config
+              mountPath: /config/rclone
+              readOnly: true
           resources:
             requests:
               cpu: 250m
@@ -116,3 +116,9 @@ spec:
         - name: takeout
           persistentVolumeClaim:
             claimName: immich-takeout
+        - name: rclone-config
+          secret:
+            secretName: immich-migrate
+            items:
+              - key: rclone.conf
+                path: rclone.conf
