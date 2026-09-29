@@ -83,10 +83,10 @@ spec:
                 IMMICH_TRUSTED_PROXIES: 10.244.0.0/16
               resources:
                 requests:
-                  cpu: 250m
-                  memory: 1Gi
+                  cpu: 500m
+                  memory: 2Gi
                 limits:
-                  memory: 4Gi
+                  memory: 8Gi
     machine-learning:
       enabled: true
       persistence:
@@ -105,6 +105,6 @@ spec:
                   cpu: 250m
                   memory: 1Gi
                 limits:
-                  memory: 4Gi
+                  memory: 6Gi
     valkey:
       enabled: true
