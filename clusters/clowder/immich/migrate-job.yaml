@@ -41,7 +41,10 @@ spec:
               curl -fsSL -o immich-go.tgz \
                 "https://github.com/simulot/immich-go/releases/download/v0.32.0/immich-go_Linux_x86_64.tar.gz"
               echo "6e2ad86bafdadb9466d6515de7cb882726c0aea1a21d51164dff361d7d480a97  immich-go.tgz" | sha256sum -c -
-              tar xzf immich-go.tgz
+              # Install the binary outside /tmp: XDG_CACHE_HOME=/tmp makes
+              # immich-go use /tmp/immich-go as its cache dir.
+              tar xzf immich-go.tgz -C /usr/local/bin immich-go
+              chmod +x /usr/local/bin/immich-go
 
               export RCLONE_CONFIG=/config/rclone/rclone.conf
               export XDG_CACHE_HOME=/tmp
@@ -75,7 +78,7 @@ spec:
                   exit 1
                 fi
                 echo "==> $name: uploading"
-                /tmp/immich-go upload from-google-photos \
+                /usr/local/bin/immich-go upload from-google-photos \
                   --server=http://immich-server:2283 \
                   --api-key="$IMMICH_API_KEY" \
                   --concurrent-tasks=4 \
