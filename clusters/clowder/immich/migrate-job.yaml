@@ -35,9 +35,16 @@ spec:
           args:
             - |
               set -euo pipefail
-              apk add --no-cache rclone curl ca-certificates tar unzip
+              apk add --no-cache curl ca-certificates tar unzip
 
               cd /tmp
+              # Alpine's packaged rclone is old; use a current release.
+              curl -fsSL -o rclone.zip \
+                "https://downloads.rclone.org/v1.75.1/rclone-v1.75.1-linux-amd64.zip"
+              echo "982b5aa772841168f8e380f139e9e787b2a105403e32b94da8676a0e1c0a13ab  rclone.zip" | sha256sum -c -
+              unzip -q rclone.zip
+              install -m 0755 rclone-v1.75.1-linux-amd64/rclone /usr/local/bin/rclone
+
               curl -fsSL -o immich-go.tgz \
                 "https://github.com/simulot/immich-go/releases/download/v0.32.0/immich-go_Linux_x86_64.tar.gz"
               echo "6e2ad86bafdadb9466d6515de7cb882726c0aea1a21d51164dff361d7d480a97  immich-go.tgz" | sha256sum -c -
@@ -64,12 +71,19 @@ spec:
                   if rclone copy "$GDRIVE_PATH/$name" /takeout/ \
                        --retries 10 --low-level-retries 20 --contimeout 60s --timeout 5m \
                        --drive-chunk-size 128M --multi-thread-streams 4 --transfers 1 \
-                       --stats 15s --stats-one-line \
-                     && unzip -t "/takeout/$name" >/dev/null 2>&1; then
-                    ok=1
-                    break
+                       --stats 15s --stats-one-line; then
+                    # Exact content check against the MD5 Drive stores.
+                    src_md5=$(rclone md5sum "$GDRIVE_PATH/$name" | awk '{print $1}')
+                    loc_md5=$(md5sum "/takeout/$name" | awk '{print $1}')
+                    echo "==> $name: md5 src=${src_md5:-none} local=$loc_md5"
+                    if [ -n "$src_md5" ] && [ "$src_md5" = "$loc_md5" ]; then
+                      ok=1
+                      break
+                    fi
+                    echo "==> $name: checksum mismatch, retrying" >&2
+                  else
+                    echo "==> $name: rclone copy failed, retrying" >&2
                   fi
-                  echo "==> $name: attempt $attempt incomplete/unreadable, retrying" >&2
                   rm -f "/takeout/$name"
                   sleep 10
                 done
