@@ -17,7 +17,7 @@ metadata:
   name: immich-migrate
   namespace: immich
 spec:
-  suspend: true
+  suspend: false
   backoffLimit: 3
   template:
     metadata:
