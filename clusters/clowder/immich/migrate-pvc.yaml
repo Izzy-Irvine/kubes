@@ -1,7 +1,5 @@
-# Scratch space for the Google Takeout migration. Holds all ~504GiB of Takeout
-# parts at once so immich-go can run in a single pass (sidecars and media can
-# land in different zip parts). 1-replica longhorn-ephemeral. Delete once the
-# migration is done.
+# Takeout staging, bound to the static local PV on leo's ZFS pool.
+# Delete this file (and migrate-pv.yaml) once the migration is done.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -10,7 +8,8 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: longhorn-ephemeral
+  storageClassName: ""
+  volumeName: immich-takeout-leo
   resources:
     requests:
       storage: 550Gi

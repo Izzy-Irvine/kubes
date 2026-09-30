@@ -1,0 +1,23 @@
+# Static local PV on leo's ZFS pool for Takeout staging. A 504GiB staging volume
+# does not fit on the Longhorn nodes' 1TB disks.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-takeout-leo
+spec:
+  capacity:
+    storage: 1000Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  local:
+    path: /var/HDDs-2025/general-storage/immich-takeout
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - leo
