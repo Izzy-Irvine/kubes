@@ -29,14 +29,6 @@ spec:
               protocol: TCP
             - port: "8082"
               protocol: TCP
-    # One-off Google Takeout migration job (migrate-job.yaml).
-    - fromEndpoints:
-        - matchLabels:
-            app: immich-migrate
-      toPorts:
-        - ports:
-            - port: "2283"
-              protocol: TCP
     # Kubelet health probes.
     - fromEntities:
         - host
