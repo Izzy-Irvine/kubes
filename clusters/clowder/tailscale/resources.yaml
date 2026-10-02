@@ -33,7 +33,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: tailscale
-      version: 1.102.3
+      version: 1.102.4
   values:
     apiServerProxyConfig:
       mode: "true"
