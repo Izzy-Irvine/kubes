@@ -121,6 +121,10 @@ this skill). Add a row so future runs do not need to search again:
 Only add entries you have actually resolved and verified. Update the `notes` when a
 source changes or an app starts publishing elsewhere.
 
+**Commit and push the `changelogs.md` update to `main`** (e.g.
+`Renovate skill: cache changelog sources`) so the cache persists for future runs —
+leaving it uncommitted means the next run rediscovers everything.
+
 ### 4. Classify risk
 
 Use the changelog findings plus the workload inventory.
@@ -275,7 +279,8 @@ Summarize back to the user:
 - Merge result and PR link.
 - Rollout outcome: Kustomizations/HelmReleases ready, workloads healthy, PVCs bound.
 - Any rollback performed and its result.
-- Any new `changelogs.md` entries added.
+- Any new `changelogs.md` entries added, and confirmation they were committed and
+  pushed to `main`.
 - Any pre-existing failures from the baseline that remain (and are therefore not to
   be blamed on these updates).
 
