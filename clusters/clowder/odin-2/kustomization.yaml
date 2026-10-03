@@ -2,7 +2,7 @@ namespace: odin-2
 resources:
   - namespace.yaml
   - odin.k8s-sops.yaml
-#  - regcred.k8s-sops.yaml
+  - regcred.k8s-sops.yaml
   - ../../../bases/odin-2
 images:
   - name: ghcr.io/tomay0/odincards
