@@ -153,3 +153,20 @@ spec:
                 annotations:
                   summary: "New media errors on {{ $labels.device }} (raspberrypi)"
                   description: "smartctl media_errors increased in the last 6h."
+---
+# Tailnet-only access to Alertmanager: https://alertmanager.<tailnet>.ts.net
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alertmanager
+  namespace: monitoring
+spec:
+  ingressClassName: tailscale
+  defaultBackend:
+    service:
+      name: prometheus-alertmanager
+      port:
+        number: 9093
+  tls:
+    - hosts:
+        - alertmanager
