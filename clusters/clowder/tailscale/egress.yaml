@@ -1,0 +1,72 @@
+# Egress path for Longhorn backups to the raspberrypi NFS share over Tailscale.
+#
+# Longhorn mounts its NFS backup target from its own pods, which cannot route to
+# the tailnet. The Tailscale operator's egress proxy joins the tailnet as a
+# dedicated, least-privilege device (tag:longhorn-egress) and forwards TCP/2049
+# to the Pi. The NetworkPolicy below stops any pod outside longhorn-system from
+# using this gateway, and the tailnet ACL only lets tag:longhorn-egress reach
+# the Pi. See docs/pi-backup.md.
+---
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyClass
+metadata:
+  name: longhorn-egress
+spec:
+  statefulSet:
+    pod:
+      labels:
+        app.kubernetes.io/name: longhorn-egress
+---
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyGroup
+metadata:
+  name: longhorn-egress
+  namespace: tailscale
+spec:
+  type: egress
+  replicas: 2
+  hostnamePrefix: longhorn-egress
+  # tag:longhorn-egress must be owned by tag:k8s-operator in the tailnet
+  # policy so the operator can assign it, and the tag must be granted access
+  # to the Pi. Tags cannot be changed after the proxy devices are created.
+  tags:
+    - tag:longhorn-egress
+  proxyClass: longhorn-egress
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pi-nfs
+  namespace: tailscale
+  annotations:
+    tailscale.com/tailnet-fqdn: "raspberrypi.tail797fc.ts.net"
+    tailscale.com/proxy-group: "longhorn-egress"
+spec:
+  type: ExternalName
+  externalName: placeholder
+  ports:
+    - name: nfs
+      port: 2049
+      protocol: TCP
+---
+# Only Longhorn may use this egress gateway. The operator shares the namespace
+# and needs to reach the proxy's health-check port.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: longhorn-egress
+  namespace: tailscale
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: longhorn-egress
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: longhorn-system
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: tailscale

@@ -45,13 +45,14 @@ spec:
       # existing volumes, so the sum of requested replica sizes exceeds raw disk
       # size. Allow thin over-commit; actual usage stays well under the disks.
       storageOverProvisioningPercentage: 200
-      # Backups disabled: the izzzy storage account no longer exists.
-      # To be replaced with a new backup target at some point.
-      # backupTarget: azblob://clowder-longhorn-backups@core.windows.net/
-      # backupTargetCredentialSecret: azure-cred
+      # Backups go to the raspberrypi NFS share over Tailscale. Longhorn mounts
+      # this from its pods via the egress proxy in
+      # clusters/clowder/tailscale/egress.yaml; the Pi exports NFSv4.2 on
+      # tailscale0 only. See docs/pi-backup.md.
+      backupTarget: "nfs://pi-nfs.tailscale.svc.cluster.local:/srv/longhorn-backup?nfsOptions=nfsvers=4.2,actimeo=1,soft,timeo=300,retry=2"
       nodeDownPodDeletionPolicy: delete-deployment-pod
-    # defaultBackupStore:
-    #   pollInterval: 0
+    defaultBackupStore:
+      pollInterval: 300
     ingress:
       enabled: false
     metrics:
@@ -78,22 +79,21 @@ spec:
     - hosts:
         - longhorn
 ---
-# Backups disabled until a replacement backup target exists
-# apiVersion: longhorn.io/v1beta2
-# kind: RecurringJob
-# metadata:
-#   name: weekly-backup
-#   namespace: longhorn-system
-# spec:
-#   concurrency: 1
-#   cron: 0 16 * * 0 # Time is in UTC. This is roughly 4am NST
-#   groups:
-#   - default
-#   labels: {}
-#   name: weekly-backup
-#   parameters: {}
-#   retain: 7
-#   task: backup
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: weekly-backup
+  namespace: longhorn-system
+spec:
+  concurrency: 1
+  cron: 0 16 * * 0 # Time is in UTC. This is roughly 4am NST
+  groups:
+  - default
+  labels: {}
+  name: weekly-backup
+  parameters: {}
+  retain: 7
+  task: backup
 ---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
