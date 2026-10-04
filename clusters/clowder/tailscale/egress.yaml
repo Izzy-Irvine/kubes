@@ -49,9 +49,31 @@ spec:
       port: 2049
       protocol: TCP
 ---
-# Only Longhorn may use this egress gateway. The operator needs to reach the
-# proxy's health-check port; the other pods in the tailscale namespace (the
-# exit node and the ingress proxies) must not.
+# Metrics path for the Pi over the same egress proxy. node_exporter (9100) and
+# smartctl_exporter (9633) are bound to the Pi's tailnet interface only; the
+# cluster Prometheus scrapes them through this service. See docs/pi-backup.md.
+apiVersion: v1
+kind: Service
+metadata:
+  name: pi-metrics
+  namespace: tailscale
+  annotations:
+    tailscale.com/tailnet-fqdn: "raspberrypi.tail797fc.ts.net"
+    tailscale.com/proxy-group: "longhorn-egress"
+spec:
+  type: ExternalName
+  externalName: placeholder
+  ports:
+    - name: node-exporter
+      port: 9100
+      protocol: TCP
+    - name: smartctl-exporter
+      port: 9633
+      protocol: TCP
+---
+# Only Longhorn and the Prometheus server may use this egress gateway. The
+# operator needs to reach the proxy's health-check port; the other pods in the
+# tailscale namespace (the exit node and the ingress proxies) must not.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -68,6 +90,12 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: longhorn-system
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: tailscale

@@ -129,8 +129,9 @@ This tailnet uses the newer **`grants`** syntax. Open the policy file
     { "src": ["tag:k8s-operator"], "dst": ["tag:k8s"], "ip": ["*"] },
     { "src": ["tag:k8s"], "dst": ["tag:k8s"], "ip": ["*"] },
 
-    // Only the Longhorn egress proxy may reach the Pi, and only NFS.
-    { "src": ["tag:longhorn-egress"], "dst": ["tag:backup-pi"], "ip": ["tcp:2049"] },
+    // Only the egress proxy may reach the Pi: NFS for backups, and the two
+    // exporter ports the cluster scrapes.
+    { "src": ["tag:longhorn-egress"], "dst": ["tag:backup-pi"], "ip": ["tcp:2049", "tcp:9100", "tcp:9633"] },
 
     // Kubernetes API access through the operator (unchanged).
     {
@@ -452,6 +453,63 @@ instead of being swallowed.
 Then confirm the Longhorn UI shows a healthy **Backup Target**, take a manual
 backup, and check the file appears on the Pi under
 `/srv/longhorn-backup/backupstore/`.
+
+---
+
+## Monitoring (node_exporter + SMART)
+
+The Pi runs two exporters, both bound to the tailnet interface only, and the
+cluster's Prometheus scrapes them through the same egress proxy used for NFS.
+
+On the Pi:
+
+- **`prometheus-node-exporter`** — `ARGS` in
+  `/etc/default/prometheus-node-exporter` is
+  `--web.listen-address=100.89.252.121:9100 --collector.processes
+  --collector.interrupts --collector.tcpstat`. The stock Drop-in that depended
+  on the dead `wg-quick@cult-flat` interface is replaced by one with
+  `After=`/`Wants=tailscaled.service`.
+- **`smartmontools`** — `/etc/smartd.conf` monitors the disk explicitly
+  (`/dev/sda -d sat -a -n standby -m root -M exec …`); the packaged
+  `DEVICESCAN -d removable` never matched the USB-attached WD Red and smartd
+  exited with "No devices to monitor".
+- **`smartctl_exporter`** (v0.14.0, linux-arm64) — installed to
+  `/usr/local/bin/smartctl_exporter` with a systemd unit running
+  `--smartctl.device=/dev/sda;sat --smartctl.powermode-check=never
+  --web.listen-address=100.89.252.121:9633 --smartctl.interval=5m`. The `sat`
+  device type is required (the USB bridge fails auto-detect), and the power-mode
+  check is disabled because the bridge misreports STANDBY, which otherwise makes
+  smartctl bail with `exit(2)` and the exporter emit no per-device metrics.
+
+```bash
+systemctl is-active prometheus-node-exporter smartmontools smartctl_exporter
+sudo ss -lntp | grep -E '9100|9633'
+curl -s 100.89.252.121:9100/metrics | head
+curl -s 100.89.252.121:9633/metrics | grep smartctl_device_smart_status
+```
+
+On the cluster (in Git):
+
+- `clusters/clowder/tailscale/egress.yaml` — a `pi-metrics` egress `Service`
+  (ports 9100 + 9633) sharing the `longhorn-egress` proxy; the `NetworkPolicy`
+  also admits the Prometheus server pod.
+- `clusters/clowder/monitoring/prometheus.yaml` — `extraScrapeConfigs` static
+  jobs `raspberrypi-node` / `raspberrypi-smart`, plus
+  `serverFiles.alerting_rules.yml` (`SmartDeviceUnhealthy`,
+  `SmartTemperatureHigh`, `SmartMediaErrors`, `SmartctlExitStatusUnhealthy`, and
+  exporter-`up` down alerts). Alertmanager still uses its null receiver, so these
+  evaluate and display in the UIs but do not notify anywhere yet.
+
+Verify:
+
+```bash
+kubectl -n tailscale get svc pi-metrics   # TailscaleEgressSvcReady=True
+# in Prometheus/Grafana:
+#   up{job=~"raspberrypi-.*"} == 1
+```
+
+The disk is polled every 5m with the power-mode check disabled, so it is spun up
+on each poll (a WD Red is designed to be always-on).
 
 ---
 
