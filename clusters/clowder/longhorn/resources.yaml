@@ -49,7 +49,10 @@ spec:
       # this from its pods via the egress proxy in
       # clusters/clowder/tailscale/egress.yaml; the Pi exports NFSv4.2 on
       # tailscale0 only. See docs/pi-backup.md.
-      backupTarget: "nfs://pi-nfs.tailscale.svc.cluster.local:/srv/longhorn-backup?nfsOptions=nfsvers=4.2,actimeo=1,soft,timeo=300,retry=2"
+      backupTarget: "nfs://pi-nfs.tailscale.svc.cluster.local:/srv/longhorn-backup?nfsOptions=nfsvers=4.2,actimeo=1,hard,timeo=300,retry=2"
+      # Back up detached volumes too (e.g. apps scaled to zero); the weekly job
+      # would otherwise silently skip them.
+      allowRecurringJobWhileVolumeDetached: true
       nodeDownPodDeletionPolicy: delete-deployment-pod
     defaultBackupStore:
       pollInterval: 300

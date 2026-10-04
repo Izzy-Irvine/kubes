@@ -49,8 +49,9 @@ spec:
       port: 2049
       protocol: TCP
 ---
-# Only Longhorn may use this egress gateway. The operator shares the namespace
-# and needs to reach the proxy's health-check port.
+# Only Longhorn may use this egress gateway. The operator needs to reach the
+# proxy's health-check port; the other pods in the tailscale namespace (the
+# exit node and the ingress proxies) must not.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -70,3 +71,6 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: tailscale
+          podSelector:
+            matchLabels:
+              app: operator

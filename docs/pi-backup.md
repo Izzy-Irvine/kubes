@@ -34,44 +34,64 @@ the share:
 
 1. **Dedicated Tailscale tag.** The egress proxy is tagged
    `tag:longhorn-egress`, distinct from the other operator proxies
-   (`tag:k8s`). The tailnet ACL only lets `tag:longhorn-egress` reach the Pi on
-   2049. No other cluster device (including the ingress proxies and the
-   exit/subnet-router) can reach the Pi.
+   (`tag:k8s`). The tailnet policy lets only `tag:longhorn-egress` reach the Pi
+   on 2049; members may reach it only on `tcp:22` (SSH). Other cluster devices
+   (ingress proxies, exit/subnet-router) cannot reach it at all.
 2. **Kubernetes `NetworkPolicy`.** The proxy pods accept connections only from
-   the `longhorn-system` and `tailscale` namespaces. Other cluster workloads
-   are dropped by Cilium even though they can resolve the Service name.
-3. **Pi firewall.** `nfsd` is not bound to any specific interface (the kernel
-   has no such knob), so nftables drops the NFS/RPC ports (`2049`, `111`, and
-   the pinned `mountd` port `32767`) on anything other than `tailscale0`.
-4. **NFS export.** The export is restricted to the tailnet CGNAT range, uses
-   `root_squash`, and exposes only the backup directory.
-5. **Mount guard.** `nfs-server` refuses to start unless the encrypted dataset
-   is mounted, so a locked dataset can never be replaced by the plaintext
-   directory underneath it.
+   the `longhorn-system` namespace and from the operator pod. Other cluster
+   workloads — including the exit node and ingress proxies that share the
+   `tailscale` namespace — are dropped by Cilium even though they can resolve
+   the Service.
+3. **Pi firewall.** `nfsd`/`rpcbind`/`mountd` are not bound to a specific
+   interface, so nftables drops the NFS/RPC ports (`2049`, `111`, `32767`) on
+   anything other than `tailscale0`. `rpcbind`, `mountd` and `nfs-server` all
+   wait for that rule before they start.
+4. **NFS export.** The export uses `root_squash` and exposes only the backup
+   directory. The tailnet policy — not `root_squash` — is what stops other
+   devices from connecting.
+5. **Mount guard.** `nfs-server` only starts when the encrypted dataset is
+   mounted, and is bound to it (`BindsTo`) so it stops if the dataset is ever
+   unmounted. The plaintext directory underneath the mountpoint can never be
+   exported.
 6. **Encryption at rest.** The dataset is ZFS-encrypted (AES-256-GCM) with a
-   passphrase that is not stored on the Pi.
+   passphrase that is not stored on the Pi, and **swap is disabled** so the
+   passphrase and plaintext cannot be paged to the unencrypted SD card.
 
 Tailscale also encrypts the transport (WireGuard) and mutually authenticates
 both ends.
-
-> Because the tailnet currently uses the default allow-all policy, any *member*
-> device (your laptop, phone) can also reach the Pi. That is out of scope for
-> "nothing else **in the cluster**", but if you want to lock that down too, drop
-> the broad `autogroup:member` rule in the ACL below and grant members only the
-> ports they need.
 
 ## Prerequisites
 
 - Raspberry Pi running Raspberry Pi OS / Debian, on the tailnet.
 - Root (sudo) access.
-- Tailscale admin console access (for the tag and ACL).
+- Tailscale admin console access (for the policy).
+
+---
+
+## 0. Base OS: disable swap
+
+The Pi is not in a physically safe place, so nothing sensitive may land on the
+unencrypted SD card — including swap. Raspberry Pi OS enables a 512 MiB
+`dphys-swapfile` swap by default; turn it off:
+
+```bash
+sudo dphys-swapfile swapoff
+sudo systemctl disable --now dphys-swapfile
+sudo sed -i 's/^CONF_SWAPSIZE=.*/CONF_SWAPSIZE=0/' /etc/dphys-swapfile
+sudo swapoff -a
+```
+
+Verify `/proc/swaps` shows no entry. (The Pi has RAM to spare; if memory ever
+becomes tight, use encrypted `zram` rather than disk swap.)
 
 ---
 
 ## 1. Tag the Pi and the egress proxy
 
-The Pi is currently user-owned and untagged. Tagging it (and the egress proxy)
-is what makes an identity-based ACL possible.
+The Pi is tagged `tag:backup-pi` and the egress proxy is tagged
+`tag:longhorn-egress`. This is what makes the identity-based policy possible;
+the steps below document how it was done (the Pi is already tagged — 1c is kept
+for re-provisioning).
 
 ### 1a. Tailnet policy
 
@@ -97,10 +117,13 @@ This tailnet uses the newer **`grants`** syntax. Open the policy file
   },
 
   "grants": [
-    // Members keep full access to tailnet devices and approved subnet routes.
-    { "src": ["autogroup:member"], "dst": ["*"], "ip": ["*"] },
-    // ...including the internet through an exit node.
+    // Members keep access to cluster services and their own devices.
+    { "src": ["autogroup:member"], "dst": ["tag:k8s", "tag:k8s-operator", "autogroup:self"], "ip": ["*"] },
+    // ...the approved subnet route and the internet through an exit node.
+    { "src": ["autogroup:member"], "dst": ["192.168.100.0/24"], "ip": ["*"] },
     { "src": ["autogroup:member"], "dst": ["autogroup:internet"], "ip": ["*"] },
+    // ...and only SSH/ICMP to the Pi — never its NFS.
+    { "src": ["autogroup:member"], "dst": ["tag:backup-pi"], "ip": ["tcp:22", "icmp:*"] },
 
     // Operator <-> its tag:k8s proxies.
     { "src": ["tag:k8s-operator"], "dst": ["tag:k8s"], "ip": ["*"] },
@@ -142,11 +165,10 @@ This tailnet uses the newer **`grants`** syntax. Open the policy file
 }
 ```
 
-> Members still have `dst: ["*"]`, so your own devices can reach the Pi on any
-> port. If you also want your personal devices blocked from the Pi's NFS, narrow
-> the member grants to explicit destinations (`tag:k8s`, `tag:k8s-operator`,
-> `autogroup:self`, `192.168.100.0/24`, `autogroup:internet`) plus
-> `tag:backup-pi` on `tcp:22` only.
+> Members are deliberately limited to cluster services (`tag:k8s`), their own
+> devices, the `192.168.100.0/24` subnet, exit-node internet, and SSH/ICMP to
+> the Pi. They **cannot** reach the Pi's NFS — 2049 is reserved for
+> `tag:longhorn-egress`.
 
 ### 1b. Let the operator assign `tag:longhorn-egress`
 
@@ -258,15 +280,13 @@ kernel, and both are firewalled to `tailscale0` in step 4. The v3-only helpers
 ```bash
 sudo systemctl enable --now rpcbind.socket
 sudo systemctl mask --now rpc-statd.service rpc-statd-notify.service
-sudo systemctl enable --now nfs-server
-sudo exportfs -ra
+# Enable but do NOT start yet: the mount guard in step 5 must be installed
+# first, so nfs-server never exports the plaintext fallback directory.
+sudo systemctl enable nfs-server
 ```
 
-Confirm the kernel only serves v4:
-
-```bash
-sudo cat /proc/fs/nfsd/versions   # -> -2 -3 +4 +4.1 +4.2
-```
+`nfs-server` is started at the end of step 5 (after the mount guard is in
+place). Step 7 confirms only NFSv4 is served.
 
 ---
 
@@ -309,22 +329,54 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now nfs-tailscale-only.service
 ```
 
+`rpcbind` and `nfs-mountd` must also wait for the firewall, so port 111/32767
+cannot briefly listen on the LAN at boot before the rule loads:
+
+```bash
+sudo mkdir -p /etc/systemd/system/rpcbind.socket.d /etc/systemd/system/nfs-mountd.service.d
+for d in rpcbind.socket.d nfs-mountd.service.d; do
+  sudo tee /etc/systemd/system/$d/10-after-firewall.conf >/dev/null <<'EOF'
+[Unit]
+Requires=nfs-tailscale-only.service
+After=nfs-tailscale-only.service
+EOF
+done
+sudo systemctl daemon-reload
+```
+
 ---
 
-## 5. Mount guard
+## 5. Mount guard and stop-on-unmount
 
 When the encrypted dataset is locked, `/srv/longhorn-backup` reverts to a plain
 (empty) directory on the unencrypted SD card, and NFS would happily export it.
-This drop-in makes `nfs-server` refuse to start unless the real dataset is
-mounted:
+This drop-in refuses to start unless the dataset is mounted, **binds** the
+service to the ZFS mount so it stops if the dataset is ever unmounted, and makes
+NFS wait for the firewall. Install it **before starting NFS**:
 
 ```bash
 sudo tee /etc/systemd/system/nfs-server.service.d/10-require-longhorn-mount.conf >/dev/null <<'EOF'
+[Unit]
+RequiresMountsFor=/srv/longhorn-backup
+BindsTo=srv-longhorn\x2dbackup.mount
+After=srv-longhorn\x2dbackup.mount
+Requires=nfs-tailscale-only.service
+After=nfs-tailscale-only.service
+
 [Service]
 ExecStartPre=/usr/bin/bash -c 'mountpoint -q /srv/longhorn-backup || { echo "FATAL: /srv/longhorn-backup not mounted. Run: zfs load-key pool2025/longhorn-backup && zfs mount pool2025/longhorn-backup" >&2; exit 1; }'
 EOF
 sudo systemctl daemon-reload
+sudo systemctl enable --now nfs-server
+sudo exportfs -ra
+
+# Confirm only v4 is served
+sudo cat /proc/fs/nfsd/versions   # -> -2 -3 +4 +4.1 +4.2
 ```
+
+> `srv-longhorn\x2dbackup.mount` is the escaping of the `/srv/longhorn-backup`
+> mount unit name. `BindsTo` is what makes an unmount also stop NFS; plain
+> `RequiresMountsFor` only orders startup.
 
 ## 6. Reboot and unlock
 
@@ -369,11 +421,13 @@ Already in Git:
 - `clusters/clowder/tailscale/egress.yaml` — `ProxyClass` + `ProxyGroup`
   (`replicas: 2`, `tags: [tag:longhorn-egress]`), the `pi-nfs` `ExternalName`
   Service pointing at `raspberrypi.tail797fc.ts.net:2049`, and the
-  `NetworkPolicy` that lets only `longhorn-system` (and the operator) reach the
-  proxies.
+  `NetworkPolicy` that lets only the `longhorn-system` namespace and the
+  operator pod reach the proxies.
 - `clusters/clowder/longhorn/resources.yaml` — backup target
   `nfs://pi-nfs.tailscale.svc.cluster.local:/srv/longhorn-backup` with
-  `nfsOptions=nfsvers=4.2,...`, plus the weekly `RecurringJob`.
+  `nfsOptions=nfsvers=4.2,actimeo=1,hard,timeo=300,retry=2` (hard mount, so a
+  transient NFS failure stalls rather than risking a partial write), plus the
+  weekly `RecurringJob` and `allowRecurringJobWhileVolumeDetached: true`.
 
 After Flux reconciles:
 
@@ -382,12 +436,18 @@ kubectl wait svc/pi-nfs -n tailscale --for=condition=TailscaleEgressSvcReady=tru
 kubectl get proxygroup longhorn-egress -n tailscale -o yaml   # check status.devices
 ```
 
-Mount test from a throwaway pod:
+Mount + write test from a throwaway pod. It must be privileged (NFS mount needs
+`CAP_SYS_ADMIN`) and it fails fast, so a reported success actually means the
+mount and a write worked:
 
 ```bash
-kubectl -n longhorn-system run nfs-probe --rm -it --restart=Never \
-  --image=busybox --overrides='{"spec":{"containers":[{"name":"nfs-probe","image":"busybox","command":["sh","-c","mount -t nfs -o nfsvers=4.2 pi-nfs.tailscale.svc.cluster.local:/srv/longhorn-backup /mnt 2>&1 || true; ls -la /mnt; touch /mnt/.probe && echo OK"]}]}}'
+kubectl -n longhorn-system run nfs-probe --rm -i --restart=Never \
+  --image=longhornio/longhorn-manager:v1.7.2 \
+  --overrides='{"spec":{"containers":[{"name":"nfs-probe","image":"longhornio/longhorn-manager:v1.7.2","imagePullPolicy":"IfNotPresent","securityContext":{"privileged":true},"command":["sh","-c","set -e; mkdir -p /mnt/pi; mount -t nfs -o nfsvers=4.2,hard,timeo=300,retry=2 pi-nfs.tailscale.svc.cluster.local:/srv/longhorn-backup /mnt/pi; touch /mnt/pi/.probe && rm /mnt/pi/.probe; umount /mnt/pi; echo NFS_WRITE_OK"]}]}}'
 ```
+
+A successful run prints `NFS_WRITE_OK`; any mount/write failure exits non-zero
+instead of being swallowed.
 
 Then confirm the Longhorn UI shows a healthy **Backup Target**, take a manual
 backup, and check the file appears on the Pi under
