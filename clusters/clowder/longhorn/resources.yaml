@@ -32,7 +32,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: longhorn-repo
-      version: v1.9.2
+      version: v1.10.2
   values:
     persistence:
       defaultClassReplicaCount: 2
