@@ -50,7 +50,7 @@ spec:
       # clusters/clowder/tailscale/egress.yaml; the Pi exports NFSv4.2 on
       # tailscale0 only. See docs/pi-backup.md.
       backupTarget: "nfs://pi-nfs.tailscale.svc.cluster.local:/srv/longhorn-backup?nfsOptions=nfsvers=4.2,actimeo=1,hard,timeo=300,retry=2"
-      # Back up detached volumes too (e.g. apps scaled to zero); the weekly job
+      # Back up detached volumes too (e.g. apps scaled to zero); the daily job
       # would otherwise silently skip them.
       allowRecurringJobWhileVolumeDetached: true
       nodeDownPodDeletionPolicy: delete-deployment-pod
@@ -85,15 +85,15 @@ spec:
 apiVersion: longhorn.io/v1beta2
 kind: RecurringJob
 metadata:
-  name: weekly-backup
+  name: daily-backup
   namespace: longhorn-system
 spec:
   concurrency: 1
-  cron: 0 16 * * 0 # Time is in UTC. This is roughly 4am NST
+  cron: 0 16 * * * # Time is in UTC. This is roughly 4am NST
   groups:
   - default
   labels: {}
-  name: weekly-backup
+  name: daily-backup
   parameters: {}
   retain: 7
   task: backup

@@ -114,7 +114,7 @@ spec:
               value: "true"
             - name: UPDATE_ON_BOOT
               value: "true"
-            # Longhorn's weekly-backup recurring job covers this volume
+            # Longhorn's daily-backup recurring job covers this volume
             - name: BACKUP_ENABLED
               value: "false"
             - name: USEAUTH

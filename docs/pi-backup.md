@@ -1,3 +1,6 @@
+# WARNING! This is AI generated slop
+
+
 # Raspberry Pi backup server
 
 The Raspberry Pi (hostname `raspberrypi`, tailnet `raspberrypi.tail797fc.ts.net`,
@@ -63,12 +66,14 @@ both ends.
 ## Prerequisites
 
 - Raspberry Pi running Raspberry Pi OS / Debian, on the tailnet.
+- A **wired ethernet** connection on the backup VLAN (Wi-Fi is disabled — it is
+  far too slow for NFS; see step 0).
 - Root (sudo) access.
 - Tailscale admin console access (for the policy).
 
 ---
 
-## 0. Base OS: disable swap
+## 0. Base OS: disable swap and Wi-Fi
 
 The Pi is not in a physically safe place, so nothing sensitive may land on the
 unencrypted SD card — including swap. Raspberry Pi OS enables a 512 MiB
@@ -83,6 +88,34 @@ sudo swapoff -a
 
 Verify `/proc/swaps` shows no entry. (The Pi has RAM to spare; if memory ever
 becomes tight, use encrypted `zram` rather than disk swap.)
+
+### Wi-Fi off; wired only
+
+The Pi must be on **wired ethernet**, and Wi-Fi should be disabled. Over Wi-Fi
+the link ran at ~100 ms RTT and backups crawled at 1–7 MB/s; on the wire it is
+~1–2 ms and ~40 MB/s. Disabling the radio also saves power.
+
+Plug the ethernet into a port that serves DHCP, then bring it up and confirm it
+got an address and the default route:
+
+```bash
+sudo nmcli device connect eth0
+ip -br addr show eth0
+ip route
+```
+
+Then turn Wi-Fi off for good:
+
+```bash
+sudo nmcli connection modify snoo_blue_canoe connection.autoconnect no
+sudo nmcli radio wifi off
+grep -q '^dtoverlay=disable-wifi' /boot/firmware/config.txt \
+  || echo 'dtoverlay=disable-wifi' | sudo tee -a /boot/firmware/config.txt
+```
+
+`nmcli radio wifi off` takes effect immediately; `dtoverlay=disable-wifi`
+disables the radio in hardware and takes effect on the next reboot. (Add
+`dtoverlay=disable-bt` too if you also want Bluetooth off.)
 
 ---
 
@@ -428,7 +461,8 @@ Already in Git:
   `nfs://pi-nfs.tailscale.svc.cluster.local:/srv/longhorn-backup` with
   `nfsOptions=nfsvers=4.2,actimeo=1,hard,timeo=300,retry=2` (hard mount, so a
   transient NFS failure stalls rather than risking a partial write), plus the
-  weekly `RecurringJob` and `allowRecurringJobWhileVolumeDetached: true`.
+  daily `RecurringJob` (`daily-backup`, `0 16 * * *`, retain 7) and
+  `allowRecurringJobWhileVolumeDetached: true`.
 
 After Flux reconciles:
 
@@ -528,6 +562,9 @@ on each poll (a WD Red is designed to be always-on).
 - **Backups succeed from your laptop but not the cluster** — the cluster path is
   the egress proxy, not plain tailnet access; a laptop reaching the Pi proves
   nothing about the pod path.
+- **Backups run at MB/s** — the Pi is probably on Wi-Fi. Confirm it is wired and
+  the radio is off (step 0): wired is ~1–2 ms RTT and tens of MB/s, Wi-Fi was
+  ~100 ms and 1–7 MB/s.
 
 ## ZFS backup (TODO)
 
