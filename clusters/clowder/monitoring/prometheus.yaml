@@ -22,7 +22,9 @@ spec:
       persistentVolume:
         enabled: true
         size: 50Gi
-        storageClass: longhorn
+        # Metrics are disposable: keep them off the replicated longhorn volumes.
+        # longhorn-ephemeral is 1 replica with the no-backup recurring-job group.
+        storageClass: longhorn-ephemeral
       # Accept metrics from the Alloy collectors (and, later, from other
       # tailnet producers) via remote write.
       extraFlags:
