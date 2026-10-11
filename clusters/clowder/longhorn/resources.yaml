@@ -40,11 +40,6 @@ spec:
       replicas: 1
     defaultSettings:
       createDefaultDiskLabeledNodes: true
-      storageReservedPercentageForDefaultDisk: 5
-      # The 1TB data disks now carry the Immich library (2 replicas) plus the
-      # existing volumes, so the sum of requested replica sizes exceeds raw disk
-      # size. Allow thin over-commit; actual usage stays well under the disks.
-      storageOverProvisioningPercentage: 200
       # Back up detached volumes too (e.g. apps scaled to zero); the daily job
       # would otherwise silently skip them.
       allowRecurringJobWhileVolumeDetached: true
