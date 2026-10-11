@@ -2,7 +2,7 @@
 
 ---
 clusterName: clowder
-talosVersion: v1.9.5
+talosVersion: v1.9.6
 kubernetesVersion: v1.32.3
 endpoint: https://192.168.100.200:6443
 nodes:
@@ -16,6 +16,8 @@ nodes:
     nodeLabels:
       node.longhorn.io/create-default-disk: "true"
     installDisk: /dev/disk/by-id/ata-SanDisk_SD9SB8W-512G-1006_19241F800934
+    kernelModules:
+      - name: zfs
     networkInterfaces:
     - interface: eno1
       vip: 
@@ -48,6 +50,7 @@ nodes:
     # still gets a tty.
     kernelModules:
       - name: ch341
+      - name: zfs
     networkInterfaces:
     - interface: eno1
       vip: 
