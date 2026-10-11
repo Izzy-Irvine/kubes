@@ -76,6 +76,12 @@ nodes:
     ipAddress: 192.168.100.203
     controlPlane: true
     installDisk: /dev/sdb
+    nodeLabels:
+      node.longhorn.io/create-default-disk: "true"
+    machineDisks:
+      - device: /dev/disk/by-id/nvme-CT2000P3PSSD8_2403E88EDFA8
+        partitions:
+          - mountpoint: /var/lib/longhorn
     networkInterfaces:
     - interface: eno1
       vip: 
@@ -90,6 +96,13 @@ nodes:
           - destination: /var/HDDs-2025
             type: bind
             source: /var/HDDs-2025
+            options:
+              - bind
+              - rshared
+              - rw
+          - destination: /var/lib/longhorn
+            type: bind
+            source: /var/lib/longhorn
             options:
               - bind
               - rshared
