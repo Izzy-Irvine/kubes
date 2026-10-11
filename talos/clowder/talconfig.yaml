@@ -15,7 +15,7 @@ nodes:
           - mountpoint: /var/lib/longhorn
     nodeLabels:
       node.longhorn.io/create-default-disk: "true"
-    installDisk: /dev/sdb
+    installDisk: /dev/disk/by-id/ata-SanDisk_SD9SB8W-512G-1006_19241F800934
     networkInterfaces:
     - interface: eno1
       vip: 
@@ -35,7 +35,7 @@ nodes:
   - hostname: rusty
     ipAddress: 192.168.100.202
     controlPlane: true
-    installDisk: /dev/sdb
+    installDisk: /dev/disk/by-id/ata-CT500BX500SSD1_2330E861D55C
     nodeLabels:
       node.longhorn.io/create-default-disk: "true"
     machineDisks:
@@ -75,7 +75,7 @@ nodes:
   - hostname: leo
     ipAddress: 192.168.100.203
     controlPlane: true
-    installDisk: /dev/sdb
+    installDisk: /dev/disk/by-id/ata-Samsung_SSD_850_EVO_250GB_S21MNSAFC21651V
     nodeLabels:
       node.longhorn.io/create-default-disk: "true"
     machineDisks:
