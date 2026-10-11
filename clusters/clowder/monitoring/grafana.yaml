@@ -14,10 +14,15 @@ spec:
         name: grafana-community
       version: 13.2.7
   values:
-    # Recreate: the grafana PVC is RWO, so a rolling update deadlocks on the
-    # Longhorn multi-attach error when the new pod lands on another node.
+    # maxSurge 0 makes the rollout terminate the old pod before starting the
+    # new one. The grafana PVC is RWO, so a surge pod on another node otherwise
+    # deadlocks on the Longhorn multi-attach error. Recreate would do the same
+    # but its apply conflicts with the leftover rollingUpdate field.
     deploymentStrategy:
-      type: Recreate
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: 0
+        maxUnavailable: 1
     persistence:
       enabled: true
       size: 5Gi
