@@ -14,6 +14,10 @@ spec:
         name: grafana-community
       version: 13.2.7
   values:
+    # Recreate: the grafana PVC is RWO, so a rolling update deadlocks on the
+    # Longhorn multi-attach error when the new pod lands on another node.
+    deploymentStrategy:
+      type: Recreate
     persistence:
       enabled: true
       size: 5Gi
