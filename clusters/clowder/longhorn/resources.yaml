@@ -56,7 +56,7 @@ spec:
     # Since v1.8 the backup target is configured here (defaultBackupStore)
     # rather than under defaultSettings, which no longer accepts backupTarget.
     defaultBackupStore:
-      backupTarget: "nfs://pi-nfs.tailscale.svc.cluster.local:/srv/longhorn-backup?nfsOptions=nfsvers=4.2,actimeo=1,hard,timeo=300,retry=2"
+      backupTarget: "nfs://pi-nfs.tailscale.svc.cluster.local:/srv/longhorn-backup?nfsOptions=nfsvers=4.2,actimeo=1,soft,timeo=300,retry=2"
       pollInterval: 300
     ingress:
       enabled: false
