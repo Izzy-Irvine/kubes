@@ -23,3 +23,9 @@ Might need to remove '-i' if the node already exists
 ` export GITHUB_TOKEN=...`
 `flux bootstrap github --owner=Izzy-Irvine --repository=kubes --private=false --personal=true --path=clusters/clowder --read-write-key --interval 5m0s`
 Flux SOPS decryption might need to be added back to flux-system. Check gotk-sync.yaml changes
+
+## Warnings
+
+Always make sure all longhorn volumes are healthy before restarting each node and no volumes are currently rebuilding! 
+Replicas will be rebuilt after a node is down for 24 hours.
+Never take down more than one node that's running Longhorn

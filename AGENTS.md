@@ -19,6 +19,17 @@ replication of data) over ones that merely avoid downtime (multi-replica HA,
 leader election, complex failover). When weighing options, favour the simpler
 one unless it meaningfully risks data loss or the ability to recover.
 
+## Node restarts & Longhorn (read before any reboot/upgrade)
+
+Rolling node reboots are how this cluster loses data. Before rebooting or
+upgrading any node: **one node at a time, and wait until every Longhorn volume
+is `healthy` and nothing is rebuilding** before touching the next one. Never
+reboot while a volume is `degraded`/`faulted`/`unknown`, and before starting make
+sure disks can absorb the rebuilds (a full / not-schedulable disk starves
+rebuilds and keeps volumes degraded — the state in which the next reboot becomes
+dangerous). Never force a drain Longhorn has blocked. This is not theoretical —
+rebooting nodes during rebuilds corrupted volumes in the past.
+
 ## Layout
 
 - `talos/` — Talos machine configs, generated with talhelper. `clusterconfig/*.yaml`
