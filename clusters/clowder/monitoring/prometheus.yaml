@@ -291,6 +291,22 @@ spec:
                 annotations:
                   summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} stuck Pending for 30m"
                   description: "Often a volume attach/mount failure (e.g. a failed fsck after an unclean shutdown)."
+              - alert: VolumeNearlyFull
+                expr: kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes > 0.85
+                for: 15m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Volume nearly full: {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }}"
+                  description: "Filesystem is {{ $value | humanizePercentage }} full on node {{ $labels.node }}."
+              - alert: VolumeAlmostFull
+                expr: kubelet_volume_stats_used_bytes / kubelet_volume_stats_capacity_bytes > 0.95
+                for: 5m
+                labels:
+                  severity: critical
+                annotations:
+                  summary: "Volume almost full: {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }}"
+                  description: "Filesystem is {{ $value | humanizePercentage }} full on node {{ $labels.node }} - expand the PVC or free space now."
 ---
 # Tailnet-only access to Alertmanager: https://alertmanager.<tailnet>.ts.net
 apiVersion: networking.k8s.io/v1
