@@ -155,6 +155,142 @@ spec:
                 annotations:
                   summary: "New media errors on {{ $labels.device }} (raspberrypi)"
                   description: "smartctl media_errors increased in the last 6h."
+          # Longhorn storage health. Degraded/rebuilding volumes and
+          # non-schedulable disks are the warning signs that preceded real
+          # filesystem/DB corruption during node reboots — do not restart a
+          # node while any of these are firing.
+          - name: longhorn
+            rules:
+              - alert: LonghornVolumeFaulted
+                expr: longhorn_volume_robustness{state="faulted"} == 1
+                for: 5m
+                labels:
+                  severity: critical
+                annotations:
+                  summary: "Longhorn volume faulted: {{ $labels.pvc_namespace }}/{{ $labels.pvc }}"
+                  description: "Volume {{ $labels.volume }} on {{ $labels.node }} is faulted - data is at risk. Do not do anything else until inspected."
+              - alert: LonghornVolumeDegraded
+                expr: longhorn_volume_robustness{state="degraded"} == 1
+                for: 15m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Longhorn volume degraded: {{ $labels.pvc_namespace }}/{{ $labels.pvc }}"
+                  description: "Volume {{ $labels.volume }} has lost redundancy (replica rebuilding/down). Do NOT restart another node until it is healthy again."
+              - alert: LonghornVolumeUnknown
+                expr: longhorn_volume_robustness{state="unknown"} == 1
+                for: 15m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Longhorn volume robustness unknown: {{ $labels.pvc_namespace }}/{{ $labels.pvc }}"
+                  description: "Volume {{ $labels.volume }} on {{ $labels.node }} has an unknown robustness state."
+              - alert: LonghornReplicaError
+                expr: longhorn_replica_state{state="error"} == 1
+                for: 15m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Longhorn replica in error state on {{ $labels.node }}"
+                  description: "Replica {{ $labels.replica }} for volume {{ $labels.volume }} has been in error for 15m."
+              - alert: LonghornEngineError
+                expr: longhorn_engine_state{state="error"} == 1
+                for: 10m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Longhorn engine in error state on {{ $labels.node }}"
+                  description: "Engine for volume {{ $labels.volume }} has been in error for 10m."
+              - alert: LonghornRebuildInProgress
+                expr: longhorn_engine_rebuild_progress > 0
+                for: 10m
+                labels:
+                  severity: info
+                annotations:
+                  summary: "Longhorn replica rebuilding for {{ $labels.volume }}"
+                  description: "A replica rebuild has been running for 10m; storage is at reduced redundancy. Avoid node restarts."
+              - alert: LonghornNodeNotReady
+                expr: longhorn_node_status{condition="ready"} == 0
+                for: 5m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Longhorn node {{ $labels.node }} not ready"
+                  description: "Longhorn reports node {{ $labels.node }} as not ready."
+              - alert: LonghornDiskNotSchedulable
+                expr: longhorn_disk_status{condition="schedulable"} == 0
+                for: 10m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Longhorn disk {{ $labels.disk }} on {{ $labels.node }} not schedulable"
+                  description: "Disk is full/over-provisioned, so new replicas and rebuilds cannot be placed here. This is how volumes get stuck degraded."
+              - alert: LonghornDiskSpaceHigh
+                expr: longhorn_disk_usage_bytes / longhorn_disk_capacity_bytes > 0.85
+                for: 30m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Longhorn disk {{ $labels.disk }} on {{ $labels.node }} is >85% full"
+                  description: "Low free space risks failed rebuilds and DiskPressure."
+              - alert: LonghornDiskHealthFailing
+                expr: longhorn_disk_health == 0
+                for: 15m
+                labels:
+                  severity: critical
+                annotations:
+                  summary: "Longhorn disk {{ $labels.disk }} on {{ $labels.node }} reports failing health"
+                  description: "Longhorn's disk health check is failing - investigate the underlying drive."
+              - alert: LonghornBackupStale
+                expr: time() - longhorn_volume_last_backup_at > 3 * 24 * 3600
+                for: 1h
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "No recent Longhorn backup for {{ $labels.pvc_namespace }}/{{ $labels.pvc }}"
+                  description: "Last backup was over 3 days ago. Backups are the last line of defence against storage corruption."
+          # Kubernetes-level storage/cluster health.
+          - name: storage
+            rules:
+              - alert: KubeNodeNotReady
+                expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+                for: 10m
+                labels:
+                  severity: critical
+                annotations:
+                  summary: "Kubernetes node {{ $labels.node }} NotReady for 10m"
+                  description: "Workloads and Longhorn replicas on {{ $labels.node }} are unavailable."
+              - alert: KubeNodeDiskPressure
+                expr: kube_node_status_condition{condition="DiskPressure",status="true"} == 1
+                for: 15m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Node {{ $labels.node }} under DiskPressure"
+                  description: "The node is running low on disk; kubelet may evict pods."
+              - alert: PersistentVolumeFailed
+                expr: kube_persistentvolume_status_phase{phase="Failed"} == 1
+                for: 10m
+                labels:
+                  severity: critical
+                annotations:
+                  summary: "PersistentVolume {{ $labels.persistentvolume }} is Failed"
+              - alert: PersistentVolumeClaimLost
+                expr: kube_persistentvolumeclaim_status_phase{phase="Lost"} == 1
+                for: 10m
+                labels:
+                  severity: critical
+                annotations:
+                  summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} is Lost"
+                  description: "The PVC's bound volume is gone; the workload's data may be unavailable."
+              - alert: PodStuckPending
+                expr: kube_pod_status_phase{phase="Pending"} == 1
+                for: 30m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} stuck Pending for 30m"
+                  description: "Often a volume attach/mount failure (e.g. a failed fsck after an unclean shutdown)."
 ---
 # Tailnet-only access to Alertmanager: https://alertmanager.<tailnet>.ts.net
 apiVersion: networking.k8s.io/v1
