@@ -47,9 +47,11 @@ spec:
       # Wait 24h (86400s) before replacing a failed replica with a new one on
       # another node
       replicaReplenishmentWaitInterval: 86400
-      # Spread replicas across nodes: rusty is over its provisioned limit
-      # (not schedulable) while leo's 2TB disk is mostly empty. best-effort
-      # actively rebalances, which triggers some replica rebuilds.
+      # When a node (re)joins the cluster, spread a volume's own replicas
+      # evenly across nodes/zones again (cleans up duplicates left behind
+      # while a node was offline). This is NOT a cluster-wide load balancer:
+      # it does nothing unless a node becomes newly available, and it only
+      # balances each volume's replicas, not total replicas per node.
       replicaAutoBalance: best-effort
     # Backups go to the raspberrypi NFS share over Tailscale. Longhorn mounts
     # this from its pods via the egress proxy in
