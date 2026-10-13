@@ -47,6 +47,10 @@ spec:
       # Wait 24h (86400s) before replacing a failed replica with a new one on
       # another node
       replicaReplenishmentWaitInterval: 86400
+      # Spread replicas across nodes: rusty is over its provisioned limit
+      # (not schedulable) while leo's 2TB disk is mostly empty. best-effort
+      # actively rebalances, which triggers some replica rebuilds.
+      replicaAutoBalance: best-effort
     # Backups go to the raspberrypi NFS share over Tailscale. Longhorn mounts
     # this from its pods via the egress proxy in
     # clusters/clowder/tailscale/egress.yaml; the Pi exports NFSv4.2 on
