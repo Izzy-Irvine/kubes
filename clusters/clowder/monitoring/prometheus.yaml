@@ -178,7 +178,9 @@ spec:
                   summary: "Longhorn volume degraded: {{ $labels.pvc_namespace }}/{{ $labels.pvc }}"
                   description: "Volume {{ $labels.volume }} has lost redundancy (replica rebuilding/down). Do NOT restart another node until it is healthy again."
               - alert: LonghornVolumeUnknown
-                expr: longhorn_volume_robustness{state="unknown"} == 1
+                # Detached volumes always report robustness "unknown", so exclude
+                # them; only an attached volume with unknown robustness is noise-worthy.
+                expr: longhorn_volume_robustness{state="unknown"} == 1 unless on(volume) longhorn_volume_state{state="detached"} == 1
                 for: 15m
                 labels:
                   severity: warning
@@ -242,7 +244,10 @@ spec:
                   summary: "Longhorn disk {{ $labels.disk }} on {{ $labels.node }} reports failing health"
                   description: "Longhorn's disk health check is failing - investigate the underlying drive."
               - alert: LonghornBackupStale
-                expr: time() - longhorn_volume_last_backup_at > 3 * 24 * 3600
+                # last_backup_at is 0 for volumes that were never backed up (e.g.
+                # the longhorn-ephemeral no-backup group), which would otherwise
+                # always be stale by definition.
+                expr: time() - longhorn_volume_last_backup_at > 3 * 24 * 3600 and longhorn_volume_last_backup_at > 0
                 for: 1h
                 labels:
                   severity: warning
