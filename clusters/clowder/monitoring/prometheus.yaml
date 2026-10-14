@@ -56,6 +56,29 @@ spec:
         limits:
           cpu: 200m
           memory: 256Mi
+      # Route alerts to Discord. The webhook URL is not in git: it is read from
+      # the SOPS-encrypted alertmanager-discord-webhook secret, mounted below.
+      config:
+        global:
+          resolve_timeout: 5m
+        route:
+          receiver: discord
+          group_by: ["alertname", "namespace"]
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 12h
+        receivers:
+          - name: discord
+            discord_configs:
+              - webhook_url_file: /etc/alertmanager-discord/webhook_url
+                username: Alertmanager
+                send_resolved: true
+      extraSecretMounts:
+        - name: discord-webhook
+          mountPath: /etc/alertmanager-discord
+          subPath: ""
+          secretName: alertmanager-discord-webhook
+          readOnly: true
     # kube-state-metrics and node-exporter are deployed by the k8s-monitoring
     # chart; Alloy is the only scraper, so disable the bundled ones and the
     # default Kubernetes discovery scrape jobs.
