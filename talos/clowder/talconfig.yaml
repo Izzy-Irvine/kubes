@@ -2,7 +2,7 @@
 
 ---
 clusterName: clowder
-talosVersion: v1.11.6
+talosVersion: v1.12.12
 kubernetesVersion: v1.32.3
 endpoint: https://192.168.100.200:6443
 nodes:
@@ -24,16 +24,16 @@ nodes:
         ip: 192.168.100.200
     patches:
     - |-
-      - op: add
-        path: /machine/kubelet/extraMounts
-        value:
-          - destination: /var/lib/longhorn
-            type: bind
-            source: /var/lib/longhorn
-            options:
-              - bind
-              - rshared
-              - rw
+      machine:
+        kubelet:
+          extraMounts:
+            - destination: /var/lib/longhorn
+              type: bind
+              source: /var/lib/longhorn
+              options:
+                - bind
+                - rshared
+                - rw
   - hostname: rusty
     ipAddress: 192.168.100.202
     controlPlane: true
@@ -57,16 +57,16 @@ nodes:
         ip: 192.168.100.200
     patches:
     - |-
-      - op: add
-        path: /machine/kubelet/extraMounts
-        value:
-          - destination: /var/lib/longhorn
-            type: bind
-            source: /var/lib/longhorn
-            options:
-              - bind
-              - rshared
-              - rw
+      machine:
+        kubelet:
+          extraMounts:
+            - destination: /var/lib/longhorn
+              type: bind
+              source: /var/lib/longhorn
+              options:
+                - bind
+                - rshared
+                - rw
     # Stable name for the CH341, which the kernel always presents as ttyUSB0
     # only because nothing else is attached. Match the chip (no serial number is
     # exposed) so Home Assistant can reference /dev/zigbee.
@@ -93,23 +93,23 @@ nodes:
       - name: zfs
     patches:
     - |-
-      - op: add
-        path: /machine/kubelet/extraMounts
-        value:
-          - destination: /var/HDDs-2025
-            type: bind
-            source: /var/HDDs-2025
-            options:
-              - bind
-              - rshared
-              - rw
-          - destination: /var/lib/longhorn
-            type: bind
-            source: /var/lib/longhorn
-            options:
-              - bind
-              - rshared
-              - rw
+      machine:
+        kubelet:
+          extraMounts:
+            - destination: /var/HDDs-2025
+              type: bind
+              source: /var/HDDs-2025
+              options:
+                - bind
+                - rshared
+                - rw
+            - destination: /var/lib/longhorn
+              type: bind
+              source: /var/lib/longhorn
+              options:
+                - bind
+                - rshared
+                - rw
 allowSchedulingOnControlPlanes: true
 cniConfig:
   name: none # Calium will be installed later
@@ -126,20 +126,17 @@ controlPlane:
           - siderolabs/zfs
 patches:
   - |-
-    - op: add
-      path: /cluster/proxy/extraArgs
-      value: 
-        metrics-bind-address: 0.0.0.0:10249
-    - op: add
-      path: /cluster/controllerManager/extraArgs
-      value: 
-        bind-address: 0.0.0.0
-    - op: add
-      path: /cluster/scheduler/extraArgs
-      value: 
-        bind-address: 0.0.0.0
+    cluster:
+      proxy:
+        extraArgs:
+          metrics-bind-address: 0.0.0.0:10249
+      controllerManager:
+        extraArgs:
+          bind-address: 0.0.0.0
+      scheduler:
+        extraArgs:
+          bind-address: 0.0.0.0
   - |- # Needed for Cilium
-    - op: add
-      path: /cluster/proxy
-      value:
+    cluster:
+      proxy:
         disabled: true
