@@ -2,7 +2,7 @@
 
 ---
 clusterName: clowder
-talosVersion: v1.12.12
+talosVersion: v1.13.11
 kubernetesVersion: v1.32.3
 endpoint: https://192.168.100.200:6443
 nodes:
