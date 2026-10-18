@@ -40,6 +40,10 @@ spec:
       replicas: 1
     defaultSettings:
       createDefaultDiskLabeledNodes: true
+      # Thin-provisioned volumes; actual usage is ~37%. Longhorn's scheduling
+      # limit on rusty is otherwise slightly exceeded (scheduled 708GB vs
+      # limit 699GB), marking the disk non-schedulable and starving rebuilds.
+      storageOverProvisioningPercentage: 120
       # Back up detached volumes too (e.g. apps scaled to zero); the daily job
       # would otherwise silently skip them.
       allowRecurringJobWhileVolumeDetached: true
