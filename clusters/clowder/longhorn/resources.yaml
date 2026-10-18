@@ -44,9 +44,9 @@ spec:
       # limit on rusty is otherwise slightly exceeded (scheduled 708GB vs
       # limit 699GB), marking the disk non-schedulable and starving rebuilds.
       storageOverProvisioningPercentage: 120
-      # Live-upgrade one engine per node at a time after each manager upgrade.
-      # Set back to 0 once the engines are on v1.13.0.
-      concurrentAutomaticEngineUpgradePerNodeLimit: 1
+      # Automatic engine upgrades are disabled again now that all volumes are
+      # on v1.13.0.
+      concurrentAutomaticEngineUpgradePerNodeLimit: 0
       # Back up detached volumes too (e.g. apps scaled to zero); the daily job
       # would otherwise silently skip them.
       allowRecurringJobWhileVolumeDetached: true
