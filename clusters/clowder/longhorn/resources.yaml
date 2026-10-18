@@ -32,7 +32,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: longhorn-repo
-      version: v1.11.2
+      version: v1.12.1
   values:
     persistence:
       defaultClassReplicaCount: 2
@@ -44,6 +44,9 @@ spec:
       # limit on rusty is otherwise slightly exceeded (scheduled 708GB vs
       # limit 699GB), marking the disk non-schedulable and starving rebuilds.
       storageOverProvisioningPercentage: 120
+      # Live-upgrade one engine per node at a time after each manager upgrade.
+      # Set back to 0 once the engines are on v1.13.0.
+      concurrentAutomaticEngineUpgradePerNodeLimit: 1
       # Back up detached volumes too (e.g. apps scaled to zero); the daily job
       # would otherwise silently skip them.
       allowRecurringJobWhileVolumeDetached: true
@@ -73,6 +76,11 @@ spec:
         enabled: true
         additionalLabels:
           release: kube-prometheus-stack
+    networkPolicies:
+      # v1.12.1 enables internal policies but omits the V1 iSCSI initiator rule
+      # on TCP/3260 and the Prometheus scrape allowance on TCP/9500. 1.13.0
+      # fixes both; keep internal policies off for this one step.
+      restrictInternalTraffic: false
   # The Longhorn chart hardcodes staleReplicaTimeout: "30" in the
   # longhorn-storageclass ConfigMap, which the driver-deployer turns into the
   # default `longhorn` StorageClass. Override it to 24h so a replica whose node
