@@ -32,7 +32,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: longhorn-repo
-      version: v1.12.1
+      version: v1.13.0
   values:
     persistence:
       defaultClassReplicaCount: 2
@@ -77,10 +77,19 @@ spec:
         additionalLabels:
           release: kube-prometheus-stack
     networkPolicies:
-      # v1.12.1 enables internal policies but omits the V1 iSCSI initiator rule
-      # on TCP/3260 and the Prometheus scrape allowance on TCP/9500. 1.13.0
-      # fixes both; keep internal policies off for this one step.
-      restrictInternalTraffic: false
+      # 1.13.0's internal policy includes the V1 iSCSI initiator rule but still
+      # blocks cross-namespace metrics scraping unless the scraper is listed.
+      metricsScrapeSources:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: alloy-metrics
+    csi:
+      # We have no encrypted volumes or provisioner-side Secret parameters; the
+      # default grant is cluster-wide get on Secrets.
+      allowControllerSecretAccess: false
   # The Longhorn chart hardcodes staleReplicaTimeout: "30" in the
   # longhorn-storageclass ConfigMap, which the driver-deployer turns into the
   # default `longhorn` StorageClass. Override it to 24h so a replica whose node
