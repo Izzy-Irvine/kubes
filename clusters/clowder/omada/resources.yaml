@@ -8,6 +8,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: omada-data
   namespace: omada
+  labels:
+    longhorn-autoresize: "true"
 spec:
   accessModes:
     - ReadWriteOnce
@@ -20,6 +22,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: omada-logs
   namespace: omada
+  labels:
+    longhorn-autoresize: "true"
 spec:
   accessModes:
     - ReadWriteOnce

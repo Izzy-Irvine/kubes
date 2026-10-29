@@ -27,6 +27,8 @@ spec:
       enabled: true
       size: 5Gi
       storageClassName: longhorn
+      extraPvcLabels:
+        longhorn-autoresize: "true"
     # Access is controlled by the tailnet; no Grafana login required.
     #
     # WARNING: Grafana 13 deprecates `auth.anonymous.org_role: Admin` (it logs

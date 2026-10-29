@@ -3,6 +3,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: lobby
   namespace: beans
+  labels:
+    longhorn-autoresize: "true"
 spec:
   accessModes:
     - ReadWriteOncePod

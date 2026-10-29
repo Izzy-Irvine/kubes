@@ -43,6 +43,8 @@ spec:
     serviceAnnotations:
       "mc-router.itzg.me/externalServerName": "chungus-amoug-us.izzy.kiwi"
     persistence:
+      labels:
+        longhorn-autoresize: "true"
       dataDir:
         enabled: true
         Size: 20Gi
