@@ -7,7 +7,9 @@ metadata:
     reconcile.fluxcd.io/watch: Enabled
   annotations:
     # Created from Git once; afterwards the volume-autoresizer CronJob owns the
-    # size values and Flux must not overwrite them.
+    # size values and Flux must not overwrite them. If this object is deleted,
+    # Flux recreates it with these initial sizes, which can make already
+    # expanded PVCs fail to shrink.
     kustomize.toolkit.fluxcd.io/ssa: IfNotPresent
 data:
   PVC_BEANS_LOBBY_SIZE: "20Gi"
