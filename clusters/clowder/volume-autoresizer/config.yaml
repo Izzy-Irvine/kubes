@@ -1,0 +1,228 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: volume-autoresizer
+  namespace: volume-autoresizer
+data:
+  PROMETHEUS_URL: "http://prometheus-server.monitoring.svc.cluster.local/api/v1/query"
+  LABEL_SELECTOR: "longhorn-autoresize=true"
+  MAX_SIZE_GIB: "500"
+  THRESHOLD_PERCENT: "85"
+  TARGET_PERCENT: "80"
+  DRY_RUN: "false"
+  resize.sh: |
+    #!/usr/bin/env bash
+    set -uo pipefail
+
+    PROMETHEUS_URL="${PROMETHEUS_URL:-http://prometheus-server.monitoring.svc.cluster.local/api/v1/query}"
+    LABEL_SELECTOR="${LABEL_SELECTOR:-longhorn-autoresize=true}"
+    MAX_SIZE_GIB="${MAX_SIZE_GIB:-500}"
+    THRESHOLD_PERCENT="${THRESHOLD_PERCENT:-85}"
+    TARGET_PERCENT="${TARGET_PERCENT:-80}"
+    DRY_RUN="${DRY_RUN:-false}"
+    MAX_OVERHEAD_RATIO="${MAX_OVERHEAD_RATIO:-1.2}"
+
+    GIB=1073741824
+    FAILED=0
+
+    log() {
+        printf '%s %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*"
+    }
+
+    error() {
+        log "ERROR: $*" >&2
+        FAILED=1
+    }
+
+    quantity_to_bytes() {
+        local q="$1" num unit mult
+        num="${q%%[!0-9.]*}"
+        unit="${q#"$num"}"
+        if [[ -z "$num" ]]; then
+            error "unparseable quantity: $q"
+            return 1
+        fi
+        case "$unit" in
+            ""|"m") mult=1 ;;
+            k|K) mult=1000 ;;
+            M) mult=1000000 ;;
+            G) mult=1000000000 ;;
+            T) mult=1000000000000 ;;
+            Ki) mult=1024 ;;
+            Mi) mult=1048576 ;;
+            Gi) mult=1073741824 ;;
+            Ti) mult=1099511627776 ;;
+            *)
+                error "unsupported quantity unit '$unit' in $q"
+                return 1
+                ;;
+        esac
+        awk -v n="$num" -v m="$mult" 'BEGIN { printf "%.0f\n", n * m }'
+    }
+
+    ceil_gib() {
+        awk -v b="$1" -v g="$GIB" 'BEGIN { printf "%.0f\n", int((b + g - 1) / g) }'
+    }
+
+    prom_query() {
+        local query="$1"
+        curl -fsS --max-time 20 -G "$PROMETHEUS_URL" --data-urlencode "query=$query"
+    }
+
+    declare -A USED_BYTES=()
+    declare -A CAP_BYTES=()
+    declare -A SC_EXPANDABLE=()
+
+    collect_metric() {
+        local metric="$1" ns pvc value json
+        if ! json="$(prom_query "$metric")"; then
+            error "Prometheus query failed for $metric"
+            return 1
+        fi
+        while IFS=$'\t' read -r ns pvc value; do
+            [[ -n "$ns" && -n "$pvc" && -n "$value" ]] || continue
+            if [[ "$metric" == "kubelet_volume_stats_used_bytes" ]]; then
+                USED_BYTES["$ns/$pvc"]="$value"
+            else
+                CAP_BYTES["$ns/$pvc"]="$value"
+            fi
+        done < <(jq -r '.data.result[]? | [.metric.namespace, .metric.persistentvolumeclaim, .value[1]] | @tsv' <<<"$json")
+    }
+
+    expandable() {
+        local sc="$1" value
+        if [[ -z "$sc" ]]; then
+            return 1
+        fi
+        if [[ -z "${SC_EXPANDABLE[$sc]:-}" ]]; then
+            value="$(kubectl get storageclass "$sc" -o jsonpath='{.allowVolumeExpansion}' 2>/dev/null || true)"
+            SC_EXPANDABLE["$sc"]="${value:-false}"
+        fi
+        [[ "${SC_EXPANDABLE[$sc]}" == "true" ]]
+    }
+
+    collect_metric kubelet_volume_stats_used_bytes || exit 1
+    collect_metric kubelet_volume_stats_capacity_bytes || exit 1
+
+    if ! pvcs="$(kubectl get pvc -A -l "$LABEL_SELECTOR" -o json)"; then
+        log "ERROR: failed to list PVCs with label $LABEL_SELECTOR"
+        exit 1
+    fi
+
+    count=0
+    while IFS=$'\t' read -r ns name request status_capacity pending sc max_override; do
+        [[ -n "$ns" ]] || continue
+        count=$((count + 1))
+        key="$ns/$name"
+
+        used="${USED_BYTES[$key]:-}"
+        capacity="${CAP_BYTES[$key]:-}"
+        if [[ -z "$used" || -z "$capacity" ]]; then
+            log "$key: skipping, no filesystem metrics (volume detached or not mounted)"
+            continue
+        fi
+
+        pct="$(awk -v u="$used" -v c="$capacity" 'BEGIN {
+            if (c <= 0) { print "0.0"; exit }
+            printf "%.1f", 100 * u / c
+        }')"
+
+        if ! awk -v p="$pct" -v t="$THRESHOLD_PERCENT" 'BEGIN { exit !(p > t) }'; then
+            log "$key: ${pct}% used, below ${THRESHOLD_PERCENT}%, no change"
+            continue
+        fi
+
+        if ! request_bytes="$(quantity_to_bytes "$request")"; then
+            continue
+        fi
+
+        if [[ -n "$max_override" ]]; then
+            max_label="$max_override"
+            if ! max_bytes="$(quantity_to_bytes "$max_override")"; then
+                continue
+            fi
+        else
+            max_label="${MAX_SIZE_GIB}Gi"
+            max_bytes=$((MAX_SIZE_GIB * GIB))
+        fi
+
+        if (( request_bytes >= max_bytes )); then
+            log "$key: ${pct}% used but already at/above max size $max_label, skipping"
+            continue
+        fi
+
+        if [[ "$pending" != "0" ]]; then
+            log "$key: ${pct}% used but a filesystem resize is pending, skipping"
+            continue
+        fi
+
+        if [[ -n "$status_capacity" ]]; then
+            if ! status_bytes="$(quantity_to_bytes "$status_capacity")"; then
+                continue
+            fi
+            if (( status_bytes < request_bytes )); then
+                log "$key: ${pct}% used but controller expansion is still pending, skipping"
+                continue
+            fi
+        fi
+
+        if ! expandable "$sc"; then
+            log "$key: ${pct}% used but StorageClass '$sc' does not allow volume expansion, skipping"
+            continue
+        fi
+
+        overhead="$(awk -v r="$request_bytes" -v c="$capacity" -v m="$MAX_OVERHEAD_RATIO" 'BEGIN {
+            if (c <= 0) { print "1.0"; exit }
+            x = r / c
+            if (x < 1) x = 1
+            if (x > m) x = m
+            printf "%.4f", x
+        }')"
+
+        desired_bytes="$(awk -v u="$used" -v t="$TARGET_PERCENT" -v o="$overhead" 'BEGIN {
+            printf "%.0f\n", (u / (t / 100)) * o
+        }')"
+
+        desired_gib="$(ceil_gib "$desired_bytes")"
+        desired_bytes=$((desired_gib * GIB))
+
+        if (( desired_bytes > max_bytes )); then
+            desired_bytes="$max_bytes"
+            desired_gib=$((max_bytes / GIB))
+            if (( desired_gib < 1 )); then
+                desired_gib=1
+            fi
+            new_size="$max_label"
+            log "$key: ${pct}% used; capping at max size $max_label, usage may remain above target"
+        else
+            new_size="${desired_gib}Gi"
+        fi
+
+        if (( desired_bytes <= request_bytes )); then
+            log "$key: ${pct}% used but computed size $new_size is not larger than current $request, skipping"
+            continue
+        fi
+
+        if [[ "$DRY_RUN" == "true" ]]; then
+            log "$key: ${pct}% used; dry-run would expand $request -> $new_size"
+            continue
+        fi
+
+        patch="{\"spec\":{\"resources\":{\"requests\":{\"storage\":\"${new_size}\"}}}}"
+        if kubectl patch pvc "$name" -n "$ns" --type=merge -p "$patch" >/dev/null; then
+            log "$key: ${pct}% used; expanded $request -> $new_size"
+        else
+            error "$key: failed to expand $request -> $new_size"
+        fi
+    done < <(jq -r '.items[] | [
+        .metadata.namespace,
+        .metadata.name,
+        .spec.resources.requests.storage,
+        (.status.capacity.storage // ""),
+        (([.status.conditions[]? | select(.type == "FileSystemResizePending" and .status == "True")] | length) | tostring),
+        (.spec.storageClassName // ""),
+        (.metadata.annotations["longhorn-autoresize/max-size"] // "")
+    ] | @tsv' <<<"$pvcs")
+
+    log "processed $count labelled PVC(s)"
+    exit "$FAILED"
