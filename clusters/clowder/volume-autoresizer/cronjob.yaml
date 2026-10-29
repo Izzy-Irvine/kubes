@@ -62,6 +62,16 @@ spec:
                     configMapKeyRef:
                       name: volume-autoresizer
                       key: TARGET_PERCENT
+                - name: COOLDOWN_SECONDS
+                  valueFrom:
+                    configMapKeyRef:
+                      name: volume-autoresizer
+                      key: COOLDOWN_SECONDS
+                - name: MAX_OVERHEAD_RATIO
+                  valueFrom:
+                    configMapKeyRef:
+                      name: volume-autoresizer
+                      key: MAX_OVERHEAD_RATIO
                 - name: DRY_RUN
                   valueFrom:
                     configMapKeyRef:

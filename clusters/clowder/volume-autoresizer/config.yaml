@@ -9,6 +9,8 @@ data:
   MAX_SIZE_GIB: "500"
   THRESHOLD_PERCENT: "85"
   TARGET_PERCENT: "80"
+  COOLDOWN_SECONDS: "3600"
+  MAX_OVERHEAD_RATIO: "1.10"
   DRY_RUN: "false"
   resize.sh: |
     #!/usr/bin/env bash
@@ -19,8 +21,9 @@ data:
     MAX_SIZE_GIB="${MAX_SIZE_GIB:-500}"
     THRESHOLD_PERCENT="${THRESHOLD_PERCENT:-85}"
     TARGET_PERCENT="${TARGET_PERCENT:-80}"
+    COOLDOWN_SECONDS="${COOLDOWN_SECONDS:-3600}"
+    MAX_OVERHEAD_RATIO="${MAX_OVERHEAD_RATIO:-1.10}"
     DRY_RUN="${DRY_RUN:-false}"
-    MAX_OVERHEAD_RATIO="${MAX_OVERHEAD_RATIO:-1.2}"
 
     GIB=1073741824
     FAILED=0
@@ -33,6 +36,13 @@ data:
         log "ERROR: $*" >&2
         FAILED=1
     }
+
+    for var in MAX_SIZE_GIB THRESHOLD_PERCENT TARGET_PERCENT COOLDOWN_SECONDS; do
+        if ! [[ "${!var}" =~ ^[0-9]+$ ]]; then
+            log "ERROR: $var must be an integer, got '${!var}'" >&2
+            exit 1
+        fi
+    done
 
     quantity_to_bytes() {
         local q="$1" num unit mult
@@ -71,11 +81,12 @@ data:
 
     declare -A USED_BYTES=()
     declare -A CAP_BYTES=()
+    declare -A HEALTHY=()
     declare -A SC_EXPANDABLE=()
 
     collect_metric() {
         local metric="$1" ns pvc value json
-        if ! json="$(prom_query "$metric")"; then
+        if ! json="$(prom_query "max by (namespace, persistentvolumeclaim) ($metric)")"; then
             error "Prometheus query failed for $metric"
             return 1
         fi
@@ -89,13 +100,27 @@ data:
         done < <(jq -r '.data.result[]? | [.metric.namespace, .metric.persistentvolumeclaim, .value[1]] | @tsv' <<<"$json")
     }
 
+    collect_healthy() {
+        local ns pvc value json
+        if ! json="$(prom_query 'max by (pvc_namespace, pvc) (longhorn_volume_robustness{state="healthy"})')"; then
+            error "Prometheus query failed for longhorn_volume_robustness"
+            return 1
+        fi
+        while IFS=$'\t' read -r ns pvc value; do
+            [[ -n "$ns" && -n "$pvc" && -n "$value" ]] || continue
+            HEALTHY["$ns/$pvc"]="$value"
+        done < <(jq -r '.data.result[]? | [.metric.pvc_namespace, .metric.pvc, .value[1]] | @tsv' <<<"$json")
+    }
+
     expandable() {
         local sc="$1" value
         if [[ -z "$sc" ]]; then
             return 1
         fi
         if [[ -z "${SC_EXPANDABLE[$sc]:-}" ]]; then
-            value="$(kubectl get storageclass "$sc" -o jsonpath='{.allowVolumeExpansion}' 2>/dev/null || true)"
+            if ! value="$(kubectl get storageclass "$sc" -o jsonpath='{.allowVolumeExpansion}' 2>/dev/null)"; then
+                return 2
+            fi
             SC_EXPANDABLE["$sc"]="${value:-false}"
         fi
         [[ "${SC_EXPANDABLE[$sc]}" == "true" ]]
@@ -103,6 +128,7 @@ data:
 
     collect_metric kubelet_volume_stats_used_bytes || exit 1
     collect_metric kubelet_volume_stats_capacity_bytes || exit 1
+    collect_healthy || exit 1
 
     if ! pvcs="$(kubectl get pvc -A -l "$LABEL_SELECTOR" -o json)"; then
         log "ERROR: failed to list PVCs with label $LABEL_SELECTOR"
@@ -110,7 +136,8 @@ data:
     fi
 
     count=0
-    while IFS=$'\t' read -r ns name request status_capacity pending sc max_override; do
+    now="$(date +%s)"
+    while IFS=$'\x1f' read -r ns name request status_capacity pending sc max_override last_expanded; do
         [[ -n "$ns" ]] || continue
         count=$((count + 1))
         key="$ns/$name"
@@ -119,6 +146,11 @@ data:
         capacity="${CAP_BYTES[$key]:-}"
         if [[ -z "$used" || -z "$capacity" ]]; then
             log "$key: skipping, no filesystem metrics (volume detached or not mounted)"
+            continue
+        fi
+
+        if [[ "${HEALTHY[$key]:-0}" != "1" ]]; then
+            log "$key: skipping, Longhorn volume is not healthy"
             continue
         fi
 
@@ -132,13 +164,23 @@ data:
             continue
         fi
 
+        if [[ -n "$last_expanded" && "$last_expanded" =~ ^[0-9]+$ ]]; then
+            age=$((now - last_expanded))
+            if (( age < COOLDOWN_SECONDS )); then
+                log "$key: ${pct}% used but expanded ${age}s ago (cooldown ${COOLDOWN_SECONDS}s), skipping"
+                continue
+            fi
+        fi
+
         if ! request_bytes="$(quantity_to_bytes "$request")"; then
+            FAILED=1
             continue
         fi
 
         if [[ -n "$max_override" ]]; then
             max_label="$max_override"
             if ! max_bytes="$(quantity_to_bytes "$max_override")"; then
+                FAILED=1
                 continue
             fi
         else
@@ -158,6 +200,7 @@ data:
 
         if [[ -n "$status_capacity" ]]; then
             if ! status_bytes="$(quantity_to_bytes "$status_capacity")"; then
+                FAILED=1
                 continue
             fi
             if (( status_bytes < request_bytes )); then
@@ -166,7 +209,13 @@ data:
             fi
         fi
 
-        if ! expandable "$sc"; then
+        expandable "$sc"
+        sc_status=$?
+        if (( sc_status == 2 )); then
+            error "$key: failed to read StorageClass '$sc'"
+            continue
+        fi
+        if (( sc_status != 0 )); then
             log "$key: ${pct}% used but StorageClass '$sc' does not allow volume expansion, skipping"
             continue
         fi
@@ -188,7 +237,10 @@ data:
             printf "%.0f\n", (u / (t / 100)) * o
         }')"
 
-        desired_gib="$(ceil_gib "$desired_bytes")"
+        if ! desired_gib="$(ceil_gib "$desired_bytes")"; then
+            FAILED=1
+            continue
+        fi
         desired_bytes=$((desired_gib * GIB))
 
         if (( desired_bytes > max_bytes )); then
@@ -213,7 +265,19 @@ data:
             continue
         fi
 
-        patch="{\"spec\":{\"resources\":{\"requests\":{\"storage\":\"${new_size}\"}}}}"
+        if ! patch="$(jq -n --arg size "$new_size" --arg ts "$now" '{
+            metadata: {
+                annotations: {
+                    "longhorn-autoresizer/last-expanded-epoch": $ts,
+                    "longhorn-autoresizer/last-expanded-size": $size
+                }
+            },
+            spec: {resources: {requests: {storage: $size}}}
+        }')"; then
+            error "$key: failed to build patch for $new_size"
+            continue
+        fi
+
         if kubectl patch pvc "$name" -n "$ns" --type=merge -p "$patch" >/dev/null; then
             log "$key: ${pct}% used; expanded $request -> $new_size"
         else
@@ -226,8 +290,9 @@ data:
         (.status.capacity.storage // ""),
         (([.status.conditions[]? | select(.type == "FileSystemResizePending" and .status == "True")] | length) | tostring),
         (.spec.storageClassName // ""),
-        (.metadata.annotations["longhorn-autoresize/max-size"] // "")
-    ] | @tsv' <<<"$pvcs")
+        (.metadata.annotations["longhorn-autoresize/max-size"] // ""),
+        (.metadata.annotations["longhorn-autoresizer/last-expanded-epoch"] // "")
+    ] | map(tostring) | join("\u001f")' <<<"$pvcs")
 
     log "processed $count labelled PVC(s)"
     exit "$FAILED"

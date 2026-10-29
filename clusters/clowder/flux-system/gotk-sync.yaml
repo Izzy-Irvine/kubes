@@ -24,10 +24,15 @@ spec:
   prune: true
   # The volume-autoresizer CronJob owns the storage request on labelled PVCs.
   # Without this rule Flux tries to shrink expanded PVCs back to the size in
-  # Git and the reconciliation fails.
+  # Git and the reconciliation fails. Do not remove the label from an already
+  # expanded PVC without also updating its Git size. Note that `flux bootstrap`
+  # regenerates this file, so re-add this rule (and the decryption block) if
+  # the bootstrap is ever rerun.
   ignore:
     - paths:
         - /spec/resources/requests/storage
+        - /metadata/annotations/longhorn-autoresizer~1last-expanded-epoch
+        - /metadata/annotations/longhorn-autoresizer~1last-expanded-size
       target:
         kind: PersistentVolumeClaim
         labelSelector: longhorn-autoresize=true
