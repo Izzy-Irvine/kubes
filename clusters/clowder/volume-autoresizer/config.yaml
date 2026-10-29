@@ -51,6 +51,10 @@ data:
         log "ERROR: TARGET_PERCENT must be >0 and below THRESHOLD_PERCENT" >&2
         exit 1
     fi
+    if ! awk -v m="$MAX_OVERHEAD_RATIO" 'BEGIN { exit !(m > 0) }'; then
+        log "ERROR: MAX_OVERHEAD_RATIO must be a positive number, got '$MAX_OVERHEAD_RATIO'" >&2
+        exit 1
+    fi
 
     quantity_to_bytes() {
         local q="$1" num unit mult
@@ -100,6 +104,10 @@ data:
             error "Prometheus query failed for $metric"
             return 1
         fi
+        if ! jq -e '.status == "success" and (.data.result | type == "array")' >/dev/null 2>&1 <<<"$json"; then
+            error "Prometheus returned an invalid response for $metric: $(jq -r '.error // "unknown error"' 2>/dev/null <<<"$json")"
+            return 1
+        fi
         while IFS=$'\x1f' read -r ns pvc value; do
             [[ -n "$ns" && -n "$pvc" && -n "$value" ]] || continue
             if [[ "$metric" == "kubelet_volume_stats_used_bytes" ]]; then
@@ -112,8 +120,12 @@ data:
 
     collect_healthy() {
         local ns pvc value json
-        if ! json="$(prom_query 'max by (pvc_namespace, pvc) (longhorn_volume_robustness{state="healthy"})')"; then
+        if ! json="$(prom_query 'min by (pvc_namespace, pvc) (longhorn_volume_robustness{state="healthy"})')"; then
             error "Prometheus query failed for longhorn_volume_robustness"
+            return 1
+        fi
+        if ! jq -e '.status == "success" and (.data.result | type == "array")' >/dev/null 2>&1 <<<"$json"; then
+            error "Prometheus returned an invalid response for longhorn_volume_robustness: $(jq -r '.error // "unknown error"' 2>/dev/null <<<"$json")"
             return 1
         fi
         while IFS=$'\x1f' read -r ns pvc value; do
@@ -164,6 +176,43 @@ data:
         count=$((count + 1))
         key="$ns/$name"
 
+        if [[ -z "$var" ]]; then
+            log "$key: skipping, missing longhorn-autoresize/var annotation"
+            continue
+        fi
+
+        if ! request_bytes="$(quantity_to_bytes "$request")"; then
+            FAILED=1
+            continue
+        fi
+
+        config_missing=0
+        config_size="${SIZES[$var]:-}"
+        if [[ -n "$config_size" ]]; then
+            if ! config_bytes="$(quantity_to_bytes "$config_size")"; then
+                FAILED=1
+                continue
+            fi
+        else
+            config_missing=1
+            config_bytes="$request_bytes"
+        fi
+
+        if (( config_missing == 1 || config_bytes < request_bytes )); then
+            UPDATES["$var"]="$request"
+            if (( config_missing == 1 )); then
+                log "$key: seeding $var=$request from live PVC request"
+            else
+                log "$key: raising $var=$request to match live PVC request (was $config_size)"
+            fi
+        fi
+
+        if (( config_bytes > request_bytes )); then
+            current_bytes="$config_bytes"
+        else
+            current_bytes="$request_bytes"
+        fi
+
         used="${USED_BYTES[$key]:-}"
         capacity="${CAP_BYTES[$key]:-}"
         if [[ -z "$used" || -z "$capacity" ]]; then
@@ -176,11 +225,6 @@ data:
             continue
         fi
 
-        if [[ -z "$var" ]]; then
-            log "$key: skipping, missing longhorn-autoresize/var annotation"
-            continue
-        fi
-
         pct="$(awk -v u="$used" -v c="$capacity" 'BEGIN {
             if (c <= 0) { print "0.0"; exit }
             printf "%.1f", 100 * u / c
@@ -189,27 +233,6 @@ data:
         if ! awk -v p="$pct" -v t="$THRESHOLD_PERCENT" 'BEGIN { exit !(p > t) }'; then
             log "$key: ${pct}% used, below ${THRESHOLD_PERCENT}%, no change"
             continue
-        fi
-
-        if ! request_bytes="$(quantity_to_bytes "$request")"; then
-            FAILED=1
-            continue
-        fi
-
-        config_size="${SIZES[$var]:-}"
-        if [[ -n "$config_size" ]]; then
-            if ! config_bytes="$(quantity_to_bytes "$config_size")"; then
-                FAILED=1
-                continue
-            fi
-        else
-            config_bytes="$request_bytes"
-        fi
-
-        if (( config_bytes > request_bytes )); then
-            current_bytes="$config_bytes"
-        else
-            current_bytes="$request_bytes"
         fi
 
         if [[ -n "$max_override" ]]; then
@@ -280,7 +303,7 @@ data:
         fi
 
         UPDATES["$var"]="$new_size"
-        log "$key: ${pct}% used; would set $var=$new_size (PVC request $request, ConfigMap ${config_size:-unset})"
+        log "$key: ${pct}% used; requesting $var=$new_size (PVC request $request, ConfigMap ${config_size:-unset})"
     done < <(jq -r '.items[] | [
         .metadata.namespace,
         .metadata.name,

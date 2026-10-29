@@ -23,8 +23,8 @@ spec:
   path: ./clusters/clowder
   prune: true
   # The volume-autoresizer CronJob writes desired sizes to this ConfigMap.
-  # Flux substitutes them into the PVCs and Helm values, so Git, Flux and the
-  # live objects always agree. Any other manifest containing shell-style ${...}
+  # Flux substitutes them into the PVCs and Helm values, so Flux never tries to
+  # shrink an expanded PVC. Any other manifest containing shell-style ${...}
   # (for example scripts in ConfigMaps) must set
   # kustomize.toolkit.fluxcd.io/substitute: disabled. Note that `flux bootstrap`
   # regenerates this file, so re-add this block (and the decryption block) if
