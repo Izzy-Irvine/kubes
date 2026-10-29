@@ -16,16 +16,16 @@ spec:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: volume-autoresizer-test-fill-v3
+  name: volume-autoresizer-test-fill-v4
   namespace: volume-autoresizer
   labels:
-    app: volume-autoresizer-test-fill-v3
+    app: volume-autoresizer-test-fill-v4
 spec:
   backoffLimit: 1
   template:
     metadata:
       labels:
-        app: volume-autoresizer-test-fill-v3
+        app: volume-autoresizer-test-fill-v4
     spec:
       restartPolicy: Never
       containers:
@@ -34,7 +34,7 @@ spec:
           command:
             - /bin/sh
             - -c
-            - i=0; while [ $i -lt 46 ]; do dd if=/dev/zero of=/data/fill bs=1M count=100 conv=fsync || exit 1; i=$((i+1)); done; sleep 86400
+            - rm -f /data/fill; i=0; while [ $i -lt 46 ]; do dd if=/dev/zero of=/data/fill.$i bs=1M count=100 conv=fsync || exit 1; i=$((i+1)); done; sleep 86400
           resources:
             requests:
               cpu: 10m
