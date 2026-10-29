@@ -12,4 +12,4 @@ spec:
     - ReadWriteOncePod
   resources:
     requests:
-      storage: 20Gi
+      storage: ${PVC_BEANS_LOBBY_SIZE:=20Gi}
