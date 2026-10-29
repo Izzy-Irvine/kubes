@@ -22,6 +22,15 @@ spec:
   interval: 10m0s
   path: ./clusters/clowder
   prune: true
+  # The volume-autoresizer CronJob owns the storage request on labelled PVCs.
+  # Without this rule Flux tries to shrink expanded PVCs back to the size in
+  # Git and the reconciliation fails.
+  ignore:
+    - paths:
+        - /spec/resources/requests/storage
+      target:
+        kind: PersistentVolumeClaim
+        labelSelector: longhorn-autoresize=true
   sourceRef:
     kind: GitRepository
     name: flux-system
