@@ -1,0 +1,154 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: immich-compare-hash
+  namespace: immich
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: immich-compare-hash
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: hash
+          image: alpine:3.20
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              apk add --no-cache python3 ca-certificates curl unzip >/dev/null
+              curl -fsSL -o /tmp/rclone.zip "https://downloads.rclone.org/v1.75.1/rclone-v1.75.1-linux-amd64.zip"
+              echo "982b5aa772841168f8e380f139e9e787b2a105403e32b94da8676a0e1c0a13ab  /tmp/rclone.zip" | sha256sum -c -
+              unzip -q /tmp/rclone.zip -d /tmp
+              install -m 0755 /tmp/rclone-v1.75.1-linux-amd64/rclone /usr/local/bin/rclone
+              cp /config/rclone/rclone.conf /tmp/rclone.conf
+              export RCLONE_CONFIG=/tmp/rclone.conf
+              rclone serve http "$GDRIVE_PATH" --addr 127.0.0.1:8080 --read-only --log-level ERROR &
+              for i in $(seq 1 30); do
+                if curl -fsS -o /dev/null "http://127.0.0.1:8080/" 2>/dev/null; then break; fi
+                sleep 2
+              done
+              python3 - <<'PY'
+              import os, io, sys, json, time, hashlib, zipfile, subprocess, urllib.request, urllib.parse
+              from datetime import datetime, timezone
+
+              base = os.environ["GDRIVE_PATH"]
+              ls = json.loads(subprocess.run(["rclone", "lsjson", base], capture_output=True, check=True).stdout)
+              sizes = {e["Name"]: e["Size"] for e in ls}
+
+              class RangeFile(io.RawIOBase):
+                  def __init__(self, url, size):
+                      self.url = url
+                      self.size = size
+                      self.pos = 0
+                  def readable(self):
+                      return True
+                  def seekable(self):
+                      return True
+                  def tell(self):
+                      return self.pos
+                  def seek(self, offset, whence=0):
+                      if whence == 0:
+                          self.pos = offset
+                      elif whence == 1:
+                          self.pos += offset
+                      elif whence == 2:
+                          self.pos = self.size + offset
+                      return self.pos
+                  def readinto(self, b):
+                      n = len(b)
+                      if self.pos >= self.size:
+                          return 0
+                      end = min(self.pos + n, self.size) - 1
+                      last = None
+                      for attempt in range(5):
+                          try:
+                              req = urllib.request.Request(self.url, headers={"Range": "bytes=%d-%d" % (self.pos, end)})
+                              with urllib.request.urlopen(req, timeout=120) as r:
+                                  data = r.read()
+                              break
+                          except Exception as e:
+                              last = e
+                              time.sleep(2 * (attempt + 1))
+                      else:
+                          raise last
+                      b[:len(data)] = data
+                      self.pos += len(data)
+                      return len(data)
+
+              zf_cache = {}
+              def get_zip(z):
+                  if z not in zf_cache:
+                      url = "http://127.0.0.1:8080/" + urllib.parse.quote(z)
+                      zf_cache[z] = zipfile.ZipFile(RangeFile(url, sizes[z]))
+                  return zf_cache[z]
+
+              def taken_date(z, path):
+                  for suffix in (".json", ".supplemental-metadata.json"):
+                      try:
+                          raw = get_zip(z).read(path + suffix)
+                      except KeyError:
+                          continue
+                      try:
+                          d = json.loads(raw)
+                          ts = (d.get("photoTakenTime") or d.get("creationTime") or {}).get("timestamp")
+                          if ts:
+                              return datetime.fromtimestamp(int(ts), tz=timezone.utc).strftime("%Y-%m-%d")
+                          return ""
+                      except Exception:
+                          return ""
+                  return ""
+
+              rows = [l.rstrip("\n").split("\t") for l in open("/candidates/candidates.tsv") if l.strip()]
+              total = len(rows)
+              for i, row in enumerate(rows, 1):
+                  label, name, z, path = row
+                  try:
+                      data = get_zip(z).read(path)
+                      sha1 = hashlib.sha1(data).hexdigest()
+                      date = taken_date(z, path)
+                  except Exception as e:
+                      print("ERR\t%s\t%s\t%s" % (label, name, e), file=sys.stderr)
+                      continue
+                  print("%s\t%s\t%s\t%s\t%d" % (label, name, sha1, date, len(data)))
+                  if i % 50 == 0:
+                      print("progress %d/%d" % (i, total), file=sys.stderr)
+              PY
+          env:
+            - name: GDRIVE_PATH
+              valueFrom:
+                secretKeyRef:
+                  name: immich-migrate
+                  key: drive-path
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: rclone-config
+              mountPath: /config/rclone
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+            - name: candidates
+              mountPath: /candidates
+              readOnly: true
+      volumes:
+        - name: rclone-config
+          secret:
+            secretName: immich-migrate
+            items:
+              - key: rclone.conf
+                path: rclone.conf
+        - name: tmp
+          emptyDir: {}
+        - name: candidates
+          configMap:
+            name: immich-compare-candidates
+            items:
+              - key: candidates.tsv
+                path: candidates.tsv
