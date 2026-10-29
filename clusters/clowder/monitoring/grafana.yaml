@@ -25,10 +25,12 @@ spec:
         maxUnavailable: 1
     persistence:
       enabled: true
-      size: 5Gi
+      size: ${PVC_GRAFANA_SIZE:=5Gi}
       storageClassName: longhorn
       extraPvcLabels:
         longhorn-autoresize: "true"
+      annotations:
+        longhorn-autoresize/var: PVC_GRAFANA_SIZE
     # Access is controlled by the tailnet; no Grafana login required.
     #
     # WARNING: Grafana 13 deprecates `auth.anonymous.org_role: Admin` (it logs

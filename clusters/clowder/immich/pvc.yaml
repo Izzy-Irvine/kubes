@@ -7,13 +7,15 @@ metadata:
   namespace: immich
   labels:
     longhorn-autoresize: "true"
+  annotations:
+    longhorn-autoresize/var: PVC_IMMICH_MEDIA_SIZE
 spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: longhorn
   resources:
     requests:
-      storage: 600Gi
+      storage: ${PVC_IMMICH_MEDIA_SIZE:=600Gi}
 ---
 # Everything under /data except the originals: thumbnails, encoded video,
 # profile images, staged uploads and database backups.
@@ -24,13 +26,15 @@ metadata:
   namespace: immich
   labels:
     longhorn-autoresize: "true"
+  annotations:
+    longhorn-autoresize/var: PVC_IMMICH_DATA_SIZE
 spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: longhorn
   resources:
     requests:
-      storage: 150Gi
+      storage: ${PVC_IMMICH_DATA_SIZE:=150Gi}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -39,13 +43,15 @@ metadata:
   namespace: immich
   labels:
     longhorn-autoresize: "true"
+  annotations:
+    longhorn-autoresize/var: PVC_IMMICH_POSTGRES_SIZE
 spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: longhorn
   resources:
     requests:
-      storage: 20Gi
+      storage: ${PVC_IMMICH_POSTGRES_SIZE:=20Gi}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

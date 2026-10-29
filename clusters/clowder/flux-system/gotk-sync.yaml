@@ -22,20 +22,16 @@ spec:
   interval: 10m0s
   path: ./clusters/clowder
   prune: true
-  # The volume-autoresizer CronJob owns the storage request on labelled PVCs.
-  # Without this rule Flux tries to shrink expanded PVCs back to the size in
-  # Git and the reconciliation fails. Do not remove the label from an already
-  # expanded PVC without also updating its Git size. Note that `flux bootstrap`
-  # regenerates this file, so re-add this rule (and the decryption block) if
-  # the bootstrap is ever rerun.
-  ignore:
-    - paths:
-        - /spec/resources/requests/storage
-        - /metadata/annotations/longhorn-autoresizer~1last-expanded-epoch
-        - /metadata/annotations/longhorn-autoresizer~1last-expanded-size
-      target:
-        kind: PersistentVolumeClaim
-        labelSelector: longhorn-autoresize=true
+  # The volume-autoresizer CronJob writes desired sizes to this ConfigMap.
+  # Flux substitutes them into the PVCs and Helm values, so Git, Flux and the
+  # live objects always agree. Note that `flux bootstrap` regenerates this
+  # file, so re-add this block (and the decryption block) if bootstrap is rerun.
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: volume-autoresizer-sizes
+        optional: true
+    substituteStrategy: Always
   sourceRef:
     kind: GitRepository
     name: flux-system

@@ -11,7 +11,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["persistentvolumeclaims"]
-    verbs: ["get", "list", "patch"]
+    verbs: ["get", "list"]
   - apiGroups: ["storage.k8s.io"]
     resources: ["storageclasses"]
     verbs: ["get", "list"]
@@ -24,6 +24,31 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: volume-autoresizer
+subjects:
+  - kind: ServiceAccount
+    name: volume-autoresizer
+    namespace: volume-autoresizer
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: volume-autoresizer-sizes
+  namespace: flux-system
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["volume-autoresizer-sizes"]
+    verbs: ["get", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: volume-autoresizer-sizes
+  namespace: flux-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: volume-autoresizer-sizes
 subjects:
   - kind: ServiceAccount
     name: volume-autoresizer

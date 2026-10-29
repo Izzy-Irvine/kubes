@@ -5,9 +5,11 @@ metadata:
   namespace: beans
   labels:
     longhorn-autoresize: "true"
+  annotations:
+    longhorn-autoresize/var: PVC_BEANS_LOBBY_SIZE
 spec:
   accessModes:
     - ReadWriteOncePod
   resources:
     requests:
-      storage: 20Gi
+      storage: ${PVC_BEANS_LOBBY_SIZE:=20Gi}

@@ -3,15 +3,18 @@ kind: ConfigMap
 metadata:
   name: volume-autoresizer
   namespace: volume-autoresizer
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
 data:
   PROMETHEUS_URL: "http://prometheus-server.monitoring.svc.cluster.local/api/v1/query"
   LABEL_SELECTOR: "longhorn-autoresize=true"
   MAX_SIZE_GIB: "500"
   THRESHOLD_PERCENT: "85"
   TARGET_PERCENT: "80"
-  COOLDOWN_SECONDS: "3600"
   MAX_OVERHEAD_RATIO: "1.10"
   DRY_RUN: "false"
+  SIZES_CONFIGMAP_NAMESPACE: "flux-system"
+  SIZES_CONFIGMAP_NAME: "volume-autoresizer-sizes"
   resize.sh: |
     #!/usr/bin/env bash
     set -uo pipefail
@@ -21,9 +24,10 @@ data:
     MAX_SIZE_GIB="${MAX_SIZE_GIB:-500}"
     THRESHOLD_PERCENT="${THRESHOLD_PERCENT:-85}"
     TARGET_PERCENT="${TARGET_PERCENT:-80}"
-    COOLDOWN_SECONDS="${COOLDOWN_SECONDS:-3600}"
     MAX_OVERHEAD_RATIO="${MAX_OVERHEAD_RATIO:-1.10}"
     DRY_RUN="${DRY_RUN:-false}"
+    SIZES_CONFIGMAP_NAMESPACE="${SIZES_CONFIGMAP_NAMESPACE:-flux-system}"
+    SIZES_CONFIGMAP_NAME="${SIZES_CONFIGMAP_NAME:-volume-autoresizer-sizes}"
 
     GIB=1073741824
     FAILED=0
@@ -37,12 +41,16 @@ data:
         FAILED=1
     }
 
-    for var in MAX_SIZE_GIB THRESHOLD_PERCENT TARGET_PERCENT COOLDOWN_SECONDS; do
+    for var in MAX_SIZE_GIB THRESHOLD_PERCENT TARGET_PERCENT; do
         if ! [[ "${!var}" =~ ^[0-9]+$ ]]; then
             log "ERROR: $var must be an integer, got '${!var}'" >&2
             exit 1
         fi
     done
+    if (( TARGET_PERCENT <= 0 || TARGET_PERCENT >= THRESHOLD_PERCENT )); then
+        log "ERROR: TARGET_PERCENT must be >0 and below THRESHOLD_PERCENT" >&2
+        exit 1
+    fi
 
     quantity_to_bytes() {
         local q="$1" num unit mult
@@ -53,7 +61,7 @@ data:
             return 1
         fi
         case "$unit" in
-            ""|"m") mult=1 ;;
+            "") mult=1 ;;
             k|K) mult=1000 ;;
             M) mult=1000000 ;;
             G) mult=1000000000 ;;
@@ -82,6 +90,8 @@ data:
     declare -A USED_BYTES=()
     declare -A CAP_BYTES=()
     declare -A HEALTHY=()
+    declare -A SIZES=()
+    declare -A UPDATES=()
     declare -A SC_EXPANDABLE=()
 
     collect_metric() {
@@ -90,14 +100,14 @@ data:
             error "Prometheus query failed for $metric"
             return 1
         fi
-        while IFS=$'\t' read -r ns pvc value; do
+        while IFS=$'\x1f' read -r ns pvc value; do
             [[ -n "$ns" && -n "$pvc" && -n "$value" ]] || continue
             if [[ "$metric" == "kubelet_volume_stats_used_bytes" ]]; then
                 USED_BYTES["$ns/$pvc"]="$value"
             else
                 CAP_BYTES["$ns/$pvc"]="$value"
             fi
-        done < <(jq -r '.data.result[]? | [.metric.namespace, .metric.persistentvolumeclaim, .value[1]] | @tsv' <<<"$json")
+        done < <(jq -r '.data.result[]? | [.metric.namespace, .metric.persistentvolumeclaim, .value[1]] | map(tostring) | join("\u001f")' <<<"$json")
     }
 
     collect_healthy() {
@@ -106,10 +116,22 @@ data:
             error "Prometheus query failed for longhorn_volume_robustness"
             return 1
         fi
-        while IFS=$'\t' read -r ns pvc value; do
+        while IFS=$'\x1f' read -r ns pvc value; do
             [[ -n "$ns" && -n "$pvc" && -n "$value" ]] || continue
             HEALTHY["$ns/$pvc"]="$value"
-        done < <(jq -r '.data.result[]? | [.metric.pvc_namespace, .metric.pvc, .value[1]] | @tsv' <<<"$json")
+        done < <(jq -r '.data.result[]? | [.metric.pvc_namespace, .metric.pvc, .value[1]] | map(tostring) | join("\u001f")' <<<"$json")
+    }
+
+    collect_sizes() {
+        local key value json
+        if ! json="$(kubectl get configmap -n "$SIZES_CONFIGMAP_NAMESPACE" "$SIZES_CONFIGMAP_NAME" -o json)"; then
+            error "failed to read ConfigMap $SIZES_CONFIGMAP_NAMESPACE/$SIZES_CONFIGMAP_NAME"
+            return 1
+        fi
+        while IFS=$'\x1f' read -r key value; do
+            [[ -n "$key" ]] || continue
+            SIZES["$key"]="$value"
+        done < <(jq -r '(.data // {}) | to_entries[] | [.key, .value] | map(tostring) | join("\u001f")' <<<"$json")
     }
 
     expandable() {
@@ -129,6 +151,7 @@ data:
     collect_metric kubelet_volume_stats_used_bytes || exit 1
     collect_metric kubelet_volume_stats_capacity_bytes || exit 1
     collect_healthy || exit 1
+    collect_sizes || exit 1
 
     if ! pvcs="$(kubectl get pvc -A -l "$LABEL_SELECTOR" -o json)"; then
         log "ERROR: failed to list PVCs with label $LABEL_SELECTOR"
@@ -136,8 +159,7 @@ data:
     fi
 
     count=0
-    now="$(date +%s)"
-    while IFS=$'\x1f' read -r ns name request status_capacity pending sc max_override last_expanded; do
+    while IFS=$'\x1f' read -r ns name request sc max_override var; do
         [[ -n "$ns" ]] || continue
         count=$((count + 1))
         key="$ns/$name"
@@ -154,6 +176,11 @@ data:
             continue
         fi
 
+        if [[ -z "$var" ]]; then
+            log "$key: skipping, missing longhorn-autoresize/var annotation"
+            continue
+        fi
+
         pct="$(awk -v u="$used" -v c="$capacity" 'BEGIN {
             if (c <= 0) { print "0.0"; exit }
             printf "%.1f", 100 * u / c
@@ -164,17 +191,25 @@ data:
             continue
         fi
 
-        if [[ -n "$last_expanded" && "$last_expanded" =~ ^[0-9]+$ ]]; then
-            age=$((now - last_expanded))
-            if (( age < COOLDOWN_SECONDS )); then
-                log "$key: ${pct}% used but expanded ${age}s ago (cooldown ${COOLDOWN_SECONDS}s), skipping"
-                continue
-            fi
-        fi
-
         if ! request_bytes="$(quantity_to_bytes "$request")"; then
             FAILED=1
             continue
+        fi
+
+        config_size="${SIZES[$var]:-}"
+        if [[ -n "$config_size" ]]; then
+            if ! config_bytes="$(quantity_to_bytes "$config_size")"; then
+                FAILED=1
+                continue
+            fi
+        else
+            config_bytes="$request_bytes"
+        fi
+
+        if (( config_bytes > request_bytes )); then
+            current_bytes="$config_bytes"
+        else
+            current_bytes="$request_bytes"
         fi
 
         if [[ -n "$max_override" ]]; then
@@ -188,25 +223,9 @@ data:
             max_bytes=$((MAX_SIZE_GIB * GIB))
         fi
 
-        if (( request_bytes >= max_bytes )); then
+        if (( current_bytes >= max_bytes )); then
             log "$key: ${pct}% used but already at/above max size $max_label, skipping"
             continue
-        fi
-
-        if [[ "$pending" != "0" ]]; then
-            log "$key: ${pct}% used but a filesystem resize is pending, skipping"
-            continue
-        fi
-
-        if [[ -n "$status_capacity" ]]; then
-            if ! status_bytes="$(quantity_to_bytes "$status_capacity")"; then
-                FAILED=1
-                continue
-            fi
-            if (( status_bytes < request_bytes )); then
-                log "$key: ${pct}% used but controller expansion is still pending, skipping"
-                continue
-            fi
         fi
 
         expandable "$sc"
@@ -220,12 +239,12 @@ data:
             continue
         fi
 
-        if awk -v r="$request_bytes" -v c="$capacity" -v m="$MAX_OVERHEAD_RATIO" 'BEGIN { exit !((r / c) > m) }'; then
-            log "$key: ${pct}% used but filesystem capacity $capacity has not caught up with request $request, skipping"
+        if awk -v r="$current_bytes" -v c="$capacity" -v m="$MAX_OVERHEAD_RATIO" 'BEGIN { exit !((r / c) > m) }'; then
+            log "$key: ${pct}% used but filesystem capacity has not caught up with target $var=$config_size, skipping"
             continue
         fi
 
-        overhead="$(awk -v r="$request_bytes" -v c="$capacity" -v m="$MAX_OVERHEAD_RATIO" 'BEGIN {
+        overhead="$(awk -v r="$current_bytes" -v c="$capacity" -v m="$MAX_OVERHEAD_RATIO" 'BEGIN {
             if (c <= 0) { print "1.0"; exit }
             x = r / c
             if (x < 1) x = 1
@@ -255,44 +274,56 @@ data:
             new_size="${desired_gib}Gi"
         fi
 
-        if (( desired_bytes <= request_bytes )); then
-            log "$key: ${pct}% used but computed size $new_size is not larger than current $request, skipping"
+        if (( desired_bytes <= current_bytes )); then
+            log "$key: ${pct}% used but target $var=$config_size ($request requested) is already large enough, skipping"
             continue
         fi
 
-        if [[ "$DRY_RUN" == "true" ]]; then
-            log "$key: ${pct}% used; dry-run would expand $request -> $new_size"
-            continue
-        fi
-
-        if ! patch="$(jq -n --arg size "$new_size" --arg ts "$now" '{
-            metadata: {
-                annotations: {
-                    "longhorn-autoresizer/last-expanded-epoch": $ts,
-                    "longhorn-autoresizer/last-expanded-size": $size
-                }
-            },
-            spec: {resources: {requests: {storage: $size}}}
-        }')"; then
-            error "$key: failed to build patch for $new_size"
-            continue
-        fi
-
-        if kubectl patch pvc "$name" -n "$ns" --type=merge -p "$patch" >/dev/null; then
-            log "$key: ${pct}% used; expanded $request -> $new_size"
-        else
-            error "$key: failed to expand $request -> $new_size"
-        fi
+        UPDATES["$var"]="$new_size"
+        log "$key: ${pct}% used; would set $var=$new_size (PVC request $request, ConfigMap ${config_size:-unset})"
     done < <(jq -r '.items[] | [
         .metadata.namespace,
         .metadata.name,
         .spec.resources.requests.storage,
-        (.status.capacity.storage // ""),
-        (([.status.conditions[]? | select(.type == "FileSystemResizePending" and .status == "True")] | length) | tostring),
         (.spec.storageClassName // ""),
         (.metadata.annotations["longhorn-autoresize/max-size"] // ""),
-        (.metadata.annotations["longhorn-autoresizer/last-expanded-epoch"] // "")
+        (.metadata.annotations["longhorn-autoresize/var"] // "")
     ] | map(tostring) | join("\u001f")' <<<"$pvcs")
 
     log "processed $count labelled PVC(s)"
+
+    if (( ${#UPDATES[@]} == 0 )); then
+        log "no size changes requested"
+        exit "$FAILED"
+    fi
+
+    if [[ "$DRY_RUN" == "true" ]]; then
+        for var in "${!UPDATES[@]}"; do
+            log "dry-run: would set $var=${UPDATES[$var]}"
+        done
+        exit "$FAILED"
+    fi
+
+    updates_json='{}'
+    for var in "${!UPDATES[@]}"; do
+        if ! updates_json="$(jq -c --arg key "$var" --arg value "${UPDATES[$var]}" '. + {($key): $value}' <<<"$updates_json")"; then
+            error "failed to build ConfigMap patch"
+            exit 1
+        fi
+    done
+
+    if ! patch="$(jq -n --argjson data "$updates_json" '{data: $data}')"; then
+        error "failed to build ConfigMap patch"
+        exit 1
+    fi
+
+    if kubectl patch configmap -n "$SIZES_CONFIGMAP_NAMESPACE" "$SIZES_CONFIGMAP_NAME" --type=merge -p "$patch" >/dev/null; then
+        for var in "${!UPDATES[@]}"; do
+            log "set $var=${UPDATES[$var]}"
+        done
+        log "updated ConfigMap $SIZES_CONFIGMAP_NAMESPACE/$SIZES_CONFIGMAP_NAME; Flux will apply the new sizes"
+    else
+        error "failed to update ConfigMap $SIZES_CONFIGMAP_NAMESPACE/$SIZES_CONFIGMAP_NAME"
+    fi
+
     exit "$FAILED"

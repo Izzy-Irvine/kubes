@@ -10,12 +10,14 @@ metadata:
   namespace: omada
   labels:
     longhorn-autoresize: "true"
+  annotations:
+    longhorn-autoresize/var: PVC_OMADA_DATA_SIZE
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 2Gi
+      storage: ${PVC_OMADA_DATA_SIZE:=2Gi}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -24,12 +26,14 @@ metadata:
   namespace: omada
   labels:
     longhorn-autoresize: "true"
+  annotations:
+    longhorn-autoresize/var: PVC_OMADA_LOGS_SIZE
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: ${PVC_OMADA_LOGS_SIZE:=1Gi}
 ---
 # Migrated from omada/docker-compose.yml. Rootless mode per the upstream k8s
 # manifest so no privileged entrypoint is needed.
