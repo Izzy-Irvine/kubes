@@ -1,0 +1,91 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: immich-compare
+  namespace: immich
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: immich-compare
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        kubernetes.io/hostname: leo
+      containers:
+        - name: compare
+          image: alpine:3.20
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              apk add --no-cache fuse3 python3 ca-certificates curl unzip >/dev/null
+              curl -fsSL -o /tmp/rclone.zip "https://downloads.rclone.org/v1.75.1/rclone-v1.75.1-linux-amd64.zip"
+              echo "982b5aa772841168f8e380f139e9e787b2a105403e32b94da8676a0e1c0a13ab  /tmp/rclone.zip" | sha256sum -c -
+              unzip -q /tmp/rclone.zip -d /tmp
+              install -m 0755 /tmp/rclone-v1.75.1-linux-amd64/rclone /usr/local/bin/rclone
+              cp /config/rclone/rclone.conf /tmp/rclone.conf
+              export RCLONE_CONFIG=/tmp/rclone.conf
+              mkdir -p /mnt/drive
+              rclone mount "$GDRIVE_PATH" /mnt/drive --read-only --vfs-cache-mode off --dir-cache-time 5m --log-level ERROR &
+              for i in $(seq 1 60); do
+                if ls /mnt/drive/*.zip >/dev/null 2>&1; then break; fi
+                sleep 2
+              done
+              if ! ls /mnt/drive/*.zip >/dev/null 2>&1; then echo "MOUNT FAILED"; exit 1; fi
+              python3 - <<'PY'
+              import os, zipfile, glob
+              IMG = set("jpg jpeg png heic heif webp gif bmp tif tiff dng arw cr2 rw2 raf nef orf srw".split())
+              VID = set("mp4 mov 3gp mkv webm m4v avi".split())
+              for z in sorted(glob.glob("/mnt/drive/*.zip")):
+                  zn = os.path.basename(z)
+                  with zipfile.ZipFile(z) as zf:
+                      for n in zf.namelist():
+                          base = os.path.basename(n)
+                          if "." not in base:
+                              continue
+                          ext = base.lower().rsplit(".", 1)[-1]
+                          if ext in IMG:
+                              print("IMG\t%s\t%s" % (zn, n))
+                          elif ext in VID:
+                              print("VID\t%s\t%s" % (zn, n))
+              PY
+              rc=$?
+              fusermount3 -u /mnt/drive || true
+              exit $rc
+          env:
+            - name: GDRIVE_PATH
+              valueFrom:
+                secretKeyRef:
+                  name: immich-migrate
+                  key: drive-path
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+          volumeMounts:
+            - name: rclone-config
+              mountPath: /config/rclone
+              readOnly: true
+            - name: fuse
+              mountPath: /dev/fuse
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: rclone-config
+          secret:
+            secretName: immich-migrate
+            items:
+              - key: rclone.conf
+                path: rclone.conf
+        - name: fuse
+          hostPath:
+            path: /dev/fuse
+            type: CharDevice
+        - name: tmp
+          emptyDir: {}
