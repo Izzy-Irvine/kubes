@@ -171,6 +171,11 @@ data:
             continue
         fi
 
+        if awk -v r="$request_bytes" -v c="$capacity" -v m="$MAX_OVERHEAD_RATIO" 'BEGIN { exit !((r / c) > m) }'; then
+            log "$key: ${pct}% used but filesystem capacity $capacity has not caught up with request $request, skipping"
+            continue
+        fi
+
         overhead="$(awk -v r="$request_bytes" -v c="$capacity" -v m="$MAX_OVERHEAD_RATIO" 'BEGIN {
             if (c <= 0) { print "1.0"; exit }
             x = r / c
