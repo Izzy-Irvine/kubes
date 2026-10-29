@@ -25,7 +25,7 @@ spec:
         maxUnavailable: 1
     persistence:
       enabled: true
-      size: ${PVC_GRAFANA_SIZE:=5Gi}
+      size: 5Gi
       storageClassName: longhorn
       extraPvcLabels:
         longhorn-autoresize: "true"
