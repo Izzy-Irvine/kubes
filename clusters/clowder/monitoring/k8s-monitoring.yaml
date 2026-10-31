@@ -16,7 +16,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: grafana
-      version: 4.5.3
+      version: 4.5.5
   values:
     cluster:
       name: clowder

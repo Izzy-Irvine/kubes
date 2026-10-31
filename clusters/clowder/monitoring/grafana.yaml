@@ -12,7 +12,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: grafana-community
-      version: 13.5.0
+      version: 13.7.0
   values:
     # maxSurge 0 makes the rollout terminate the old pod before starting the
     # new one. The grafana PVC is RWO, so a surge pod on another node otherwise
