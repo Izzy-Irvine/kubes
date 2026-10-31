@@ -5,17 +5,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: immich-media
   namespace: immich
-  labels:
-    longhorn-autoresize: "true"
-  annotations:
-    longhorn-autoresize/var: PVC_IMMICH_MEDIA_SIZE
 spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: longhorn
   resources:
     requests:
-      storage: ${PVC_IMMICH_MEDIA_SIZE:=600Gi}
+      storage: 600Gi
 ---
 # Everything under /data except the originals: thumbnails, encoded video,
 # profile images, staged uploads and database backups.
@@ -24,34 +20,26 @@ kind: PersistentVolumeClaim
 metadata:
   name: immich-data
   namespace: immich
-  labels:
-    longhorn-autoresize: "true"
-  annotations:
-    longhorn-autoresize/var: PVC_IMMICH_DATA_SIZE
 spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: longhorn
   resources:
     requests:
-      storage: ${PVC_IMMICH_DATA_SIZE:=150Gi}
+      storage: 150Gi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: immich-postgres
   namespace: immich
-  labels:
-    longhorn-autoresize: "true"
-  annotations:
-    longhorn-autoresize/var: PVC_IMMICH_POSTGRES_SIZE
 spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: longhorn
   resources:
     requests:
-      storage: ${PVC_IMMICH_POSTGRES_SIZE:=20Gi}
+      storage: 20Gi
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

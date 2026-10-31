@@ -3,13 +3,9 @@ kind: PersistentVolumeClaim
 metadata:
   name: lobby
   namespace: beans
-  labels:
-    longhorn-autoresize: "true"
-  annotations:
-    longhorn-autoresize/var: PVC_BEANS_LOBBY_SIZE
 spec:
   accessModes:
     - ReadWriteOncePod
   resources:
     requests:
-      storage: ${PVC_BEANS_LOBBY_SIZE:=20Gi}
+      storage: 20Gi
