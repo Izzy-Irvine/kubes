@@ -1,7 +1,11 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? import <nixpkgs> {
+    config.allowUnfreePredicate = pkg: builtins.elem (builtins.parseDrvName pkg.name).name [ "terraform" ];
+  }
+}:
 pkgs.mkShell {
     packages = with pkgs; [
         talosctl
+        terraform
         argocd
         age
         sops

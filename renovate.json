@@ -17,6 +17,11 @@
   },
   "packageRules": [
     {
+      "description": "GitHub Actions are handled by Dependabot",
+      "matchManagers": ["github-actions"],
+      "enabled": false
+    },
+    {
       "description": "Don't touch Flux bootstrap-generated manifests",
       "matchFileNames": ["clusters/clowder/flux-system/**"],
       "enabled": false

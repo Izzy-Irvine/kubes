@@ -1,3 +1,9 @@
 \.decrypted~*
 .DS_Store
 \migration-data
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
