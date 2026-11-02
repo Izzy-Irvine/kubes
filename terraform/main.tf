@@ -32,6 +32,12 @@ module "backend" {
   source = "./modules/backend"
 }
 
+resource "aws_iam_openid_connect_provider" "clowder" {
+  url = "https://oidc.izzy.kiwi"
+
+  client_id_list = ["sts.amazonaws.com"]
+}
+
 output "state_bucket_name" {
   value = module.backend.state_bucket_name
 }
