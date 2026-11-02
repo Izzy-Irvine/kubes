@@ -140,7 +140,7 @@ patches:
     cluster:
       proxy:
         disabled: true
-  - |- # OIDC: stage [VIP, public] on all control planes before applying this [public, VIP] state; see docs/oidc.md.
+  - |- # Needed for external OIDC
     cluster:
       apiServer:
         extraArgs:
