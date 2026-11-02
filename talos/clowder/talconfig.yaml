@@ -140,3 +140,11 @@ patches:
     cluster:
       proxy:
         disabled: true
+  - |- # OIDC: stage [VIP, public] on all control planes before applying this [public, VIP] state; see docs/oidc.md.
+    cluster:
+      apiServer:
+        extraArgs:
+          service-account-issuer:
+            - https://oidc.izzy.kiwi
+            - https://192.168.100.200:6443
+          service-account-jwks-uri: https://oidc.izzy.kiwi/openid/v1/jwks
