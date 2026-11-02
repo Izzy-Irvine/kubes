@@ -284,8 +284,38 @@ Summarize back to the user:
 - Any pre-existing failures from the baseline that remain (and are therefore not to
   be blamed on these updates).
 
+### 11. Check for Talos / Kubernetes upgrades (final, report only)
+
+Once the Renovate PRs are handled, check whether the platform itself (Talos OS and
+Kubernetes) has an upgrade available. **Do not upgrade anything** — only report it
+and stop. Upgrades here are a separate, deliberate task the user chooses to run.
+
+1. **Pinned versions in git** — read `talos/clowder/talconfig.yaml`:
+   `talosVersion` and `kubernetesVersion`.
+2. **Latest upstream Talos**:
+   ```sh
+   gh release list --repo siderolabs/talos --limit 20
+   ```
+   Take the newest stable `vX.Y.Z` (ignore `-alpha`/`-beta`/`-rc`). Talos upgrades
+   must not skip minor versions, so the realistic next step is at most one minor
+   above what is pinned.
+3. **Kubernetes version supported by that Talos release** — read the release notes
+   (`gh release view vX.Y.Z --repo siderolabs/talos`) or the support matrix in the
+   Talos docs, and compare with the pinned `kubernetesVersion`.
+4. **Upgrade commands (for the user's reference only — never run them here)**:
+   - Talos nodes: `talosctl upgrade --nodes <ip> --image ghcr.io/siderolabs/installer:<version>`
+   - Kubernetes: `talosctl upgrade-k8s --to <version>` (`--dry-run` previews the plan)
+   Correct order is Talos first, then Kubernetes; the pinned versions in
+   `talconfig.yaml` must be bumped and the config regenerated
+   (`talhelper genconfig -s talsecret.sops.yaml`) as part of the upgrade.
+
+Report the findings — pinned vs latest Talos and Kubernetes, whether an upgrade is
+available, and the recommended path — then stop. Do not perform the upgrade.
+
 ## Hard rules
 
+- Never perform a Talos or Kubernetes upgrade as part of this workflow — only report
+  that one is available (step 11).
 - Never risk losing Longhorn or user-facing/game-server PVC data. If an upgrade
   might, stop and ask.
 - Never edit `clusters/clowder/flux-system/gotk-*.yaml` or any `*.sops.*` file by hand.
