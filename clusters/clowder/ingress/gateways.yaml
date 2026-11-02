@@ -119,6 +119,23 @@ spec:
       allowedRoutes:
         namespaces:
           from: All
+    - name: https-oidc
+      protocol: HTTPS
+      port: 443
+      hostname: oidc.izzy.kiwi
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: oidc-izzy-kiwi-tls
+      allowedRoutes:
+        kinds:
+          - group: gateway.networking.k8s.io
+            kind: HTTPRoute
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: oidc
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -236,6 +253,18 @@ metadata:
 spec:
   secretName: photos-izzy-kiwi-tls
   dnsNames: [photos.izzy.kiwi]
+  issuerRef:
+    kind: ClusterIssuer
+    name: dns-issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: oidc-izzy-kiwi-tls
+  namespace: ingress
+spec:
+  secretName: oidc-izzy-kiwi-tls
+  dnsNames: [oidc.izzy.kiwi]
   issuerRef:
     kind: ClusterIssuer
     name: dns-issuer

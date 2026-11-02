@@ -1,0 +1,185 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: oidc
+  namespace: oidc
+automountServiceAccountToken: false
+---
+# If this JWKS goes out of date (service-account signing key rotated or cluster
+# rebuilt), refresh it from the live cluster:
+#
+#   kubectl get --raw /openid/v1/jwks | jq -S .
+#
+# Replace the `jwks` value below with that output and apply this manifest.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oidc-site
+  namespace: oidc
+data:
+  openid-configuration: |
+    {
+      "issuer": "https://oidc.izzy.kiwi",
+      "jwks_uri": "https://oidc.izzy.kiwi/openid/v1/jwks",
+      "response_types_supported": ["id_token"],
+      "subject_types_supported": ["public"],
+      "id_token_signing_alg_values_supported": ["RS256"]
+    }
+  jwks: |
+    {
+      "keys": [
+        {
+          "use": "sig",
+          "kty": "RSA",
+          "kid": "8TndhKu642adF42ulJ2Hx3jlbwfZMVuLh3-b0z5aNmo",
+          "alg": "RS256",
+          "n": "1sEkpdJsFcoM0Gs-cSflldmzIcbtudLG2KCk8lRkRKzLATXrxA2udiZaGS-eqgC-oG8R9g8_I7w91GLIXBKhaNsJiFJdQ63cGalEzPWX219qRQY3lrK_SeZRJkjyit6E2STMthcC2qpfGX_SNwKSjbHGeE9rbx9jBT5Y4oMR0wF-8CGBjBA6RuPMxKt62P9iedJ7v_V9lO_63cGx-VHCNeYqK4smQfPlcG71QUClttZqeIcYp6IZep00SqUB8V6G-hyR6ZQIkDlADtl2v8nD9hSVq9OUBz4n0u2-6L0dyqxEBh45a22mPJHYyzQ0By5j-LcY-MRy2qsoSB7D9Y3iGsmBKjQM_fXLTw6bxnaYIbOCieYuGNOs65qnqv19IL7erElM6CwVfEv-B_5NWtFztsFJjVHBLvSKH5rGN71IbyDBVZLw6ihsrioLo-7zUCkiIGcE0IYzeFSV0uBZEW4VzXke1xoktu6uZo5W2fB9yxxaD3SOcNpUzqwtV0kI33AfMczoEwdxj4a6DDTzlcReyFJ6F6vUf8NRSIL1ZfTWErkavZVeqfxc-jNupiyVYFvD5umZKHH3JeTrT756B4GoEbRTTCo5m6MNu20WPs7s_eZIl7_Yp5FKw4bGzOpFqK7i0njoVTpikP8rzmAFvKgZhgf5Y5UaQPr1XhE_efrUS1E",
+          "e": "AQAB"
+        }
+      ]
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oidc-nginx
+  namespace: oidc
+data:
+  default.conf: |
+    server {
+        listen 8080;
+        server_name _;
+        root /usr/share/nginx/html;
+
+        location = /.well-known/openid-configuration {
+            default_type application/json;
+            try_files $uri =404;
+        }
+
+        location = /openid/v1/jwks {
+            default_type application/json;
+            try_files $uri =404;
+        }
+
+        location / {
+            return 404;
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oidc
+  namespace: oidc
+  labels:
+    app.kubernetes.io/name: oidc
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: oidc
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: oidc
+    spec:
+      serviceAccountName: oidc
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: oidc
+      containers:
+        - name: nginx
+          image: nginxinc/nginx-unprivileged:1.31-alpine@sha256:b5047b9b76845eac124358373c6852377c52e4b05834a47647e955dd91cb8f1e
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          readinessProbe:
+            httpGet:
+              path: /openid/v1/jwks
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /openid/v1/jwks
+              port: http
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 32Mi
+          volumeMounts:
+            - name: site
+              mountPath: /usr/share/nginx/html
+              readOnly: true
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /var/cache/nginx
+      volumes:
+        - name: site
+          configMap:
+            name: oidc-site
+            items:
+              - key: openid-configuration
+                path: .well-known/openid-configuration
+              - key: jwks
+                path: openid/v1/jwks
+        - name: nginx-conf
+          configMap:
+            name: oidc-nginx
+        - name: tmp
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oidc
+  namespace: oidc
+spec:
+  selector:
+    app.kubernetes.io/name: oidc
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: oidc
+  namespace: oidc
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: oidc
