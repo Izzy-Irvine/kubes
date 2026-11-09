@@ -48,6 +48,9 @@ spec:
             # of stored in the admin UI.
             - name: UI_CONFIG_DISABLED
               value: "true"
+            # Shown in the UI (no email is sent in this setup).
+            - name: APP_NAME
+              value: is-izzy
             # Users are identified by username. Every account carries a
             # synthetic, non-deliverable email so apps that require an `email`
             # claim work; Pocket ID never sends mail in this setup.
