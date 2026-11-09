@@ -1,0 +1,16 @@
+---
+# SQLite database and uploads live in /app/data. Longhorn RWO is a local block
+# device, not a network share, so it is safe for SQLite. Never use an RWX/NFS
+# volume here: SQLite over a network filesystem can corrupt the database.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pocket-id-data
+  namespace: pocket-id
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 2Gi

@@ -136,6 +136,23 @@ spec:
           selector:
             matchLabels:
               kubernetes.io/metadata.name: oidc
+    - name: https-auth
+      protocol: HTTPS
+      port: 443
+      hostname: auth.izzy.kiwi
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: auth-izzy-kiwi-tls
+      allowedRoutes:
+        kinds:
+          - group: gateway.networking.k8s.io
+            kind: HTTPRoute
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: pocket-id
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -265,6 +282,18 @@ metadata:
 spec:
   secretName: oidc-izzy-kiwi-tls
   dnsNames: [oidc.izzy.kiwi]
+  issuerRef:
+    kind: ClusterIssuer
+    name: dns-issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: auth-izzy-kiwi-tls
+  namespace: ingress
+spec:
+  secretName: auth-izzy-kiwi-tls
+  dnsNames: [auth.izzy.kiwi]
   issuerRef:
     kind: ClusterIssuer
     name: dns-issuer

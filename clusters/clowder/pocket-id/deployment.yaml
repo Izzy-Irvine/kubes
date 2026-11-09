@@ -1,0 +1,117 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pocket-id
+  namespace: pocket-id
+  labels:
+    app.kubernetes.io/name: pocket-id
+spec:
+  replicas: 1
+  # SQLite needs a single writer; Recreate avoids two pods mounting the RWO
+  # volume at once during a rollout.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pocket-id
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pocket-id
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: pocket-id
+          # `-distroless` runs as non-root by default and works with a
+          # read-only root filesystem. Pin the exact version and digest;
+          # Renovate updates them.
+          image: ghcr.io/pocket-id/pocket-id:v2.19.2-distroless@sha256:a21166a4eb513d2ffcbf815398480998d996a9e719cfba029395517658626f9e
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: APP_URL
+              value: https://auth.izzy.kiwi
+            # Requests arrive through Cilium's Gateway dataplane (host-network
+            # cilium-envoy on the nodes) or the Gateway LB IP.
+            - name: TRUST_PROXY
+              value: 192.168.100.201,192.168.100.202,192.168.100.203,192.168.100.210
+            # Keep Application Configuration declarative (this manifest) instead
+            # of stored in the admin UI.
+            - name: UI_CONFIG_DISABLED
+              value: "true"
+            # Users are identified by username. Every account carries a
+            # synthetic, non-deliverable email so apps that require an `email`
+            # claim work; Pocket ID never sends mail in this setup.
+            - name: REQUIRE_USER_EMAIL
+              value: "true"
+            - name: EMAILS_VERIFIED
+              value: "true"
+            # Admins assign the synthetic address. Users must not be able to
+            # change it and have an arbitrary address asserted as verified.
+            - name: ALLOW_OWN_ACCOUNT_EDIT
+              value: "false"
+            - name: ALLOW_USER_SIGNUPS
+              value: disabled
+            - name: ALLOW_INSECURE_CALLBACK_URLS
+              value: "false"
+            - name: ANALYTICS_DISABLED
+              value: "true"
+            - name: VERSION_CHECK_DISABLED
+              value: "true"
+            # No external lookups; client logos can still be uploaded manually.
+            - name: ICON_LIBRARY_URL
+              value: disabled
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pocket-id-secrets
+                  key: ENCRYPTION_KEY
+          ports:
+            - name: http
+              containerPort: 1411
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          readinessProbe:
+            exec:
+              command: ["/app/pocket-id", "healthcheck"]
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["/app/pocket-id", "healthcheck"]
+            periodSeconds: 30
+          startupProbe:
+            exec:
+              command: ["/app/pocket-id", "healthcheck"]
+            failureThreshold: 30
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pocket-id-data
+        - name: tmp
+          emptyDir: {}

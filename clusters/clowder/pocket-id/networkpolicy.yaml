@@ -1,0 +1,42 @@
+---
+# Cilium/Gateway note: Gateway traffic arrives with Envoy's reserved "ingress"
+# identity, which a vanilla NetworkPolicy cannot match.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: pocket-id
+  namespace: pocket-id
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: pocket-id
+  enableDefaultDeny:
+    ingress: true
+    egress: true
+  ingress:
+    # Browser traffic via the Gateway, kubelet probes, and app pods doing
+    # server-side OIDC token/userinfo exchanges.
+    - fromEntities:
+        - ingress
+        - host
+        - remote-node
+        - health
+        - cluster
+      toPorts:
+        - ports:
+            - port: "1411"
+              protocol: TCP
+  egress:
+    # DNS only. Version checks, analytics and the icon library are disabled.
+    # If a client later uses back-channel logout, add that client's host/port
+    # here or the logout callback will be blocked.
+    - toEndpoints:
+        - matchLabels:
+            io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
