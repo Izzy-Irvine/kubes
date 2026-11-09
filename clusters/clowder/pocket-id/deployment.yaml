@@ -40,10 +40,10 @@ spec:
           env:
             - name: APP_URL
               value: https://auth.izzy.kiwi
-            # Requests arrive through Cilium's Gateway dataplane (host-network
-            # cilium-envoy on the nodes) or the Gateway LB IP.
+            # The Gateway dataplane runs as a pod in the cluster pod CIDR, so
+            # that pod is the source address Pocket ID sees.
             - name: TRUST_PROXY
-              value: 192.168.100.201,192.168.100.202,192.168.100.203,192.168.100.210
+              value: 10.244.0.0/16
             # Keep Application Configuration declarative (this manifest) instead
             # of stored in the admin UI.
             - name: UI_CONFIG_DISABLED
