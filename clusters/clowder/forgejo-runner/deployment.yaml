@@ -30,11 +30,16 @@ spec:
           # Renovate does not manage this image; bump it deliberately.
           image: data.forgejo.org/forgejo/runner:13
           imagePullPolicy: IfNotPresent
+          # The daemon exits if dind is not listening yet; wait for it first.
           command:
-            - forgejo-runner
-            - daemon
-            - --config
-            - /etc/forgejo-runner/config.yml
+            - sh
+            - -c
+            - |
+              until nc -w 1 127.0.0.1 2375 </dev/null 2>/dev/null; do
+                echo "waiting for dind"
+                sleep 1
+              done
+              exec forgejo-runner daemon --config /etc/forgejo-runner/config.yml
           ports:
             - name: cache
               containerPort: 3000
