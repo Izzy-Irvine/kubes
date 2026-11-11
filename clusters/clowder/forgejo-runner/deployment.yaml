@@ -1,0 +1,117 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tuhaha-runner
+  namespace: forgejo-runner
+  labels:
+    app.kubernetes.io/name: tuhaha-runner
+spec:
+  replicas: 1
+  # One runner per registration. Recreate avoids two daemons fighting over the
+  # same registration during a rollout.
+  strategy:
+    type: Recreate
+    rollingUpdate: null
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tuhaha-runner
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tuhaha-runner
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: runner
+          # Renovate does not manage this image; bump it deliberately.
+          image: data.forgejo.org/forgejo/runner:13
+          imagePullPolicy: IfNotPresent
+          command:
+            - forgejo-runner
+            - daemon
+            - --config
+            - /etc/forgejo-runner/config.yml
+          ports:
+            - name: cache
+              containerPort: 3000
+          volumeMounts:
+            - name: config
+              mountPath: /etc/forgejo-runner
+              readOnly: true
+            - name: cache
+              mountPath: /cache
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+          livenessProbe:
+            exec:
+              command: ["forgejo-runner", "--version"]
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            exec:
+              command: ["forgejo-runner", "--version"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+        - name: dind
+          # Docker-in-Docker executes the workflow job containers.
+          image: docker:28.3-dind
+          imagePullPolicy: IfNotPresent
+          args:
+            - --host=tcp://0.0.0.0:2375
+            - --tls=false
+          env:
+            - name: DOCKER_TLS_CERTDIR
+              value: ""
+          securityContext:
+            privileged: true
+            seccompProfile:
+              type: Unconfined
+          volumeMounts:
+            - name: dind-data
+              mountPath: /var/lib/docker
+          resources:
+            requests:
+              cpu: 4
+              memory: 6Gi
+            limits:
+              cpu: 8
+              memory: 12Gi
+      volumes:
+        - name: config
+          secret:
+            secretName: tuhaha-runner-config
+            items:
+              - key: config.yml
+                path: config.yml
+        - name: cache
+          emptyDir:
+            sizeLimit: 5Gi
+        - name: dind-data
+          emptyDir:
+            sizeLimit: 100Gi
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values: ["leo"]
