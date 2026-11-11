@@ -24,14 +24,6 @@ spec:
           protocol: UDP
         - port: 53
           protocol: TCP
-    # The in-pod actions cache is exposed through a same-namespace Service.
-    - to:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: tuhaha-runner
-      ports:
-        - port: 3000
-          protocol: TCP
     # Internet only: no cluster pods/services, LAN, metadata or CGNAT.
     - to:
         - ipBlock:
@@ -43,9 +35,8 @@ spec:
               - 169.254.0.0/16
               - 172.16.0.0/12
               - 192.168.0.0/16
+      # SSH is deliberately absent: outbound SSH will go via a Tailscale proxy.
       ports:
-        - port: 22
-          protocol: TCP
         - port: 80
           protocol: TCP
         - port: 443

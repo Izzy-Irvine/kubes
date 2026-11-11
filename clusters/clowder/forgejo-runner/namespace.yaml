@@ -3,11 +3,9 @@ kind: Namespace
 metadata:
   name: forgejo-runner
   labels:
-    # The Docker-in-Docker sidecar is privileged; the cluster default is
-    # baseline, so opt this trusted namespace into privileged enforcement.
-    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/enforce: baseline
     pod-security.kubernetes.io/enforce-version: latest
-    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/audit: baseline
     pod-security.kubernetes.io/audit-version: latest
-    pod-security.kubernetes.io/warn: privileged
+    pod-security.kubernetes.io/warn: baseline
     pod-security.kubernetes.io/warn-version: latest

@@ -7,8 +7,7 @@ metadata:
     app.kubernetes.io/name: tuhaha-runner
 spec:
   replicas: 1
-  # One runner per registration. Recreate avoids two daemons fighting over the
-  # same registration during a rollout.
+  # One runner per registration.
   strategy:
     type: Recreate
     rollingUpdate: null
@@ -22,40 +21,33 @@ spec:
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
-      securityContext:
-        fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: runner
-          # Renovate does not manage this image; bump it deliberately.
-          image: data.forgejo.org/forgejo/runner:13
+          # The image also runs the jobs (host executor), so it includes
+          # forgejo-runner, Nix, OpenTofu and the other CI tools.
+          image: ghcr.io/izzy-irvine/tuhaha-ci:latest
           imagePullPolicy: IfNotPresent
-          # The daemon exits if dind is not listening yet; wait for it first.
           command:
-            - sh
-            - -c
-            - |
-              until nc -w 1 127.0.0.1 2375 </dev/null 2>/dev/null; do
-                echo "waiting for dind"
-                sleep 1
-              done
-              exec forgejo-runner daemon --config /etc/forgejo-runner/config.yml
-          ports:
-            - name: cache
-              containerPort: 3000
+            - forgejo-runner
+            - daemon
+            - --config
+            - /etc/forgejo-runner/config.yml
+          env:
+            - name: HOME
+              value: /root
           volumeMounts:
             - name: config
               mountPath: /etc/forgejo-runner
               readOnly: true
             - name: cache
               mountPath: /cache
+            - name: workspace
+              mountPath: /workspace
+          # Nix needs root to populate /nix/store in this container. The pod is
+          # unprivileged and confined by baseline Pod Security.
           securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
-            runAsNonRoot: true
+            runAsUser: 0
             allowPrivilegeEscalation: false
-            capabilities:
-              drop: ["ALL"]
             seccompProfile:
               type: RuntimeDefault
           livenessProbe:
@@ -70,34 +62,13 @@ spec:
             periodSeconds: 10
           resources:
             requests:
-              cpu: 250m
-              memory: 256Mi
+              cpu: "2"
+              memory: 4Gi
+              ephemeral-storage: 10Gi
             limits:
-              memory: 1Gi
-        - name: dind
-          # Docker-in-Docker executes the workflow job containers.
-          image: docker:28.3-dind
-          imagePullPolicy: IfNotPresent
-          args:
-            - --host=tcp://0.0.0.0:2375
-            - --tls=false
-          env:
-            - name: DOCKER_TLS_CERTDIR
-              value: ""
-          securityContext:
-            privileged: true
-            seccompProfile:
-              type: Unconfined
-          volumeMounts:
-            - name: dind-data
-              mountPath: /var/lib/docker
-          resources:
-            requests:
-              cpu: 4
-              memory: 6Gi
-            limits:
-              cpu: 8
+              cpu: "8"
               memory: 12Gi
+              ephemeral-storage: 60Gi
       volumes:
         - name: config
           secret:
@@ -108,15 +79,6 @@ spec:
         - name: cache
           emptyDir:
             sizeLimit: 5Gi
-        - name: dind-data
+        - name: workspace
           emptyDir:
-            sizeLimit: 100Gi
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              preference:
-                matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: In
-                    values: ["leo"]
+            sizeLimit: 50Gi

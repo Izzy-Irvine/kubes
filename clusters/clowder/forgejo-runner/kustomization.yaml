@@ -4,6 +4,5 @@ namespace: forgejo-runner
 resources:
   - namespace.yaml
   - config.k8s-sops.yaml
-  - service.yaml
   - deployment.yaml
   - networkpolicy.yaml
