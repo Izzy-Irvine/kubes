@@ -1,10 +1,12 @@
-# tuhaha-ci: the job image used by the Codeberg Forgejo Actions runner.
-# Contains Nix (for the infra NixOS config), OpenTofu, Docker CLI (dind),
-# OpenSSH (nixos-rebuild --target-host), and Node (for JS actions).
+# tuhaha-ci: the runner and job image for the Codeberg Forgejo Actions runner.
+# Jobs run with the runner's host executor, so this image provides the Forgejo
+# runner itself plus Nix, OpenTofu, OpenSSH, git and Node.
 #
 #   docker buildx build --push \
 #     -t ghcr.io/izzy-irvine/tuhaha-ci:latest \
 #     Dockerfiles/tuhaha-ci
+FROM data.forgejo.org/forgejo/runner:13 AS runner
+
 FROM nixos/nix:2.31.2
 
 USER root
@@ -20,25 +22,25 @@ RUN nix-env -iA \
       nixpkgs.gitMinimal \
       nixpkgs.jq \
       nixpkgs.nodejs_24 \
-      nixpkgs.docker-client \
       nixpkgs.openssh \
-      nixpkgs.openstackclient \
       nixpkgs.opentofu \
-      nixpkgs.unzip \
       nixpkgs.zstd \
       nixpkgs.gnutar \
       nixpkgs.gzip \
     && nix store gc
 
+# The host executor runs jobs in this container, so the daemon ships here too.
+COPY --from=runner /bin/forgejo-runner /usr/local/bin/forgejo-runner
+
+ENV PATH="/usr/local/bin:${PATH}"
+
 # Fail the build early if a tool is missing.
 RUN nix --version \
     && tofu version \
+    && forgejo-runner --version \
     && node --version \
-    && docker --version \
     && ssh -V \
-    && openstack --version \
     && jq --version \
-    && zstd --version \
-    && unzip -v | head -1
+    && zstd --version
 
 WORKDIR /workspace
