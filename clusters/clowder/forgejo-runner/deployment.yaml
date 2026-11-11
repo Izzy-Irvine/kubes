@@ -25,7 +25,10 @@ spec:
         - name: runner
           # The image also runs the jobs (host executor), so it includes
           # forgejo-runner, Nix, OpenTofu and the other CI tools.
-          image: ghcr.io/izzy-irvine/tuhaha-ci:latest
+          # Pin the immutable tag produced by the Docker images workflow; bump
+          # it in the same commit after rebuilding tuhaha-ci so Flux rolls the
+          # pod. `latest` + IfNotPresent would silently keep running old code.
+          image: ghcr.io/izzy-irvine/tuhaha-ci:sha-7945479445d598f0340ef81619b69a4f0927d642
           imagePullPolicy: IfNotPresent
           command:
             - forgejo-runner
@@ -45,6 +48,9 @@ spec:
               mountPath: /workspace
           # Nix needs root to populate /nix/store in this container. The pod is
           # unprivileged and confined by baseline Pod Security.
+          # NOTE: host-executor jobs share this container, so they can read the
+          # mounted runner config (including its Codeberg token). Only run
+          # repositories you trust on this runner.
           securityContext:
             runAsUser: 0
             allowPrivilegeEscalation: false
