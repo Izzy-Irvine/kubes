@@ -18,7 +18,7 @@ USER runner
 # 1GB!! 1GB!! Do I need this???
 RUN curl -L -O https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz \
     && unzip Godot_v4.3-stable_export_templates.tpz \
-    && mv templates/* /home/runner/.local/share/godot/export_templates/4.3.stable \ 
+    && mv templates/* /home/runner/.local/share/godot/export_templates/4.3.stable \
     && rm Godot_v4.3-stable_export_templates.tpz \
     && rmdir templates/ \
     && chown -R runner /home/runner/.local/share/godot 

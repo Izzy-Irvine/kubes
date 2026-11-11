@@ -1,0 +1,56 @@
+# tuhaha-ci: the job image used by the Codeberg Forgejo Actions runner.
+# Contains Nix (for the infra NixOS config), Terraform, Docker CLI (dind),
+# OpenSSH (nixos-rebuild --target-host), and Node (for JS actions).
+#
+#   docker buildx build --push \
+#     -t ghcr.io/izzy-irvine/tuhaha-ci:latest \
+#     Dockerfiles/tuhaha-ci
+FROM nixos/nix:2.31.2
+
+USER root
+
+# The base image already sets sandbox = false. Enable flakes for future jobs.
+RUN printf '%s\n' 'experimental-features = nix-command flakes' >> /etc/nix/nix.conf
+
+# Use the base image's pinned nixpkgs channel, so this is reproducible per tag.
+RUN nix-env -iA \
+      nixpkgs.bash \
+      nixpkgs.coreutils \
+      nixpkgs.curl \
+      nixpkgs.gitMinimal \
+      nixpkgs.jq \
+      nixpkgs.nodejs_24 \
+      nixpkgs.docker-client \
+      nixpkgs.openssh \
+      nixpkgs.openstackclient \
+      nixpkgs.unzip \
+      nixpkgs.zstd \
+      nixpkgs.gnutar \
+      nixpkgs.gzip \
+    && nix store gc
+
+# Pin Terraform to the version used by the kubes GitHub workflow.
+ARG TERRAFORM_VERSION=1.17.1
+RUN mkdir -p /usr/local/bin \
+    && cd /tmp \
+    && curl -fsSLO "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
+    && curl -fsSLO "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_SHA256SUMS" \
+    && grep " terraform_${TERRAFORM_VERSION}_linux_amd64.zip$" "terraform_${TERRAFORM_VERSION}_SHA256SUMS" | sha256sum -c - \
+    && unzip -q "terraform_${TERRAFORM_VERSION}_linux_amd64.zip" -d /usr/local/bin \
+    && chmod 0755 /usr/local/bin/terraform \
+    && rm -f "terraform_${TERRAFORM_VERSION}_linux_amd64.zip" "terraform_${TERRAFORM_VERSION}_SHA256SUMS"
+
+ENV PATH="/usr/local/bin:${PATH}"
+
+# Fail the build early if a tool is missing.
+RUN nix --version \
+    && terraform version \
+    && node --version \
+    && docker --version \
+    && ssh -V \
+    && openstack --version \
+    && jq --version \
+    && zstd --version \
+    && unzip -v | head -1
+
+WORKDIR /workspace

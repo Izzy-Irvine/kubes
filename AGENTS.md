@@ -40,7 +40,8 @@ rebooting nodes during rebuilds corrupted volumes in the past.
   the kustomize build; app dirs that overlay a base add their own `kustomization.yaml`
   pulling in `../../../bases/<app>` and patching image tags, replicas, and hostnames.
   Add new apps as a new directory here.
-- `Dockerfiles/` — Containerfiles for images used by manifests; built outside this repo.
+- `Dockerfiles/` — Containerfiles for images used by manifests; built and pushed to
+  GHCR by `.github/workflows/docker-images.yml` on changes under `Dockerfiles/`.
 - `scripts/` — helpers, e.g. `scripts/copy-off-pvc/run.sh` to pull PVC contents locally.
 
 ## Secrets (SOPS + age)

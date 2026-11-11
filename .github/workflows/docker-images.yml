@@ -1,0 +1,63 @@
+name: Docker images
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "Dockerfiles/**"
+      - ".github/workflows/docker-images.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: docker-images
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: eden-proxy
+            context: Dockerfiles/eden-proxy
+            image: ghcr.io/izzy-irvine/eden-proxy
+          - name: godot-pipeline
+            context: Dockerfiles/godot-pipeline
+            image: ghcr.io/izzy-irvine/gha-runner
+          - name: tuhaha-ci
+            context: Dockerfiles/tuhaha-ci
+            image: ghcr.io/izzy-irvine/tuhaha-ci
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Log in to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.context }}/Containerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ matrix.image }}:latest
+            ${{ matrix.image }}:sha-${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
