@@ -24,6 +24,21 @@ spec:
           protocol: UDP
         - port: 53
           protocol: TCP
+    # Catalyst Cloud control plane: Identity plus the service APIs Terraform uses.
+    - to:
+        - ipBlock:
+            cidr: 202.78.247.202/32
+      ports:
+        - port: 5000
+          protocol: TCP
+        - port: 8774
+          protocol: TCP
+        - port: 8776
+          protocol: TCP
+        - port: 9292
+          protocol: TCP
+        - port: 9696
+          protocol: TCP
     # Internet only: no cluster pods/services, LAN, metadata or CGNAT.
     - to:
         - ipBlock:
