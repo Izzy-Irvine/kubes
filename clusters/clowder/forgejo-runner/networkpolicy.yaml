@@ -50,9 +50,5 @@ spec:
               - 169.254.0.0/16
               - 172.16.0.0/12
               - 192.168.0.0/16
-      # SSH is deliberately absent: outbound SSH will go via a Tailscale proxy.
-      ports:
-        - port: 80
-          protocol: TCP
-        - port: 443
-          protocol: TCP
+      # All ports/protocols are allowed to public addresses; the `except`
+      # list still blocks cluster, LAN, link-local and CGNAT traffic.
