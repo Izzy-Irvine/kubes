@@ -12,7 +12,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: prometheus-community
-      version: 29.40.3
+      version: 29.45.0
   values:
     server:
       replicaCount: 1
